@@ -4,13 +4,17 @@
     {
         private readonly int _memoryCellCount;
         private readonly int _memoryVectorLength;
-        private readonly double[,] _memory;
+        private readonly double[][] _memory;
 
         public NTMMemory(int memoryCellCount, int memoryVectorLength)
         {
             _memoryCellCount = memoryCellCount;
             _memoryVectorLength = memoryVectorLength;
-            _memory = new double[memoryCellCount, memoryVectorLength];
+            _memory = new double[memoryCellCount][];
+            for (int i = 0; i < _memoryCellCount; i++) 
+            {
+                _memory[i] = new double[_memoryVectorLength];
+            }
         }
 
         //CONVEX COMBINATION
@@ -22,7 +26,7 @@
             {
                 for (int j = 0; j < _memoryVectorLength; j++)
                 {
-                    readVector[j] = weightVector[i] * _memory[i,j];
+                    readVector[j] = weightVector[i] * _memory[i][j];
                 }
             }
 
@@ -41,7 +45,7 @@
             {
                 for (int j = 0; j < _memoryVectorLength; j++)
                 {
-                    _memory[i, j] = _memory[i, j] * (1 - (eraseVector[j] * weightVector[i]));
+                    _memory[i][j] = _memory[i][j] * (1 - (eraseVector[j] * weightVector[i]));
                 }
             }
         }
@@ -52,9 +56,14 @@
             {
                 for (int j = 0; j < _memoryVectorLength; j++)
                 {
-                    _memory[i, j] = _memory[i, j] + (weightVector[i] * addVector[j]);
+                    _memory[i][j] = _memory[i][j] + (weightVector[i] * addVector[j]);
                 }
             }
+        }
+
+        public double[] GetCellByIndex(int i)
+        {
+            return _memory[i];
         }
     }
 }

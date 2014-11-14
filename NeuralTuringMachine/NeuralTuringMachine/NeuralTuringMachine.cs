@@ -28,12 +28,12 @@ namespace NeuralTuringMachine
 
             for (int i = 0; i < readHeadCount; i++)
             {
-                _readHeads.Add(new ReadHead(memoryVectorLength, i, inputCount));
+                _readHeads.Add(new ReadHead(memoryCellCount, memoryVectorLength, i, inputCount));
             }
 
             for (int i = 0; i < writeHeadCount; i++)
             {
-                _writeHeads.Add(new WriteHead(memoryVectorLength, i, writeHeadOffset));
+                _writeHeads.Add(new WriteHead(memoryCellCount, memoryVectorLength, i, writeHeadOffset));
             }
 
             int outputNeuronsCount = outputCount + _readHeads.Sum(head => head.OutputNeuronCount) + _writeHeads.Sum(head => head.OutputNeuronCount);
