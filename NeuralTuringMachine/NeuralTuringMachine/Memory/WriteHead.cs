@@ -13,7 +13,7 @@ namespace NeuralTuringMachine.Memory
         public override int OutputNeuronCount { get { return _outputNeuronCount; } }
         public override int OutputOffset { get { return _outputOffset; } }
 
-        public WriteHead(int memoryLength, int memoryCellSize, int id, int writeHeadsOffset) : base(memoryLength, memoryCellSize, id)
+        public WriteHead(int memoryLength, int memoryCellSize, int id, int writeHeadsOffset, int maxConvShift) : base(memoryLength, memoryCellSize, id, maxConvShift)
         {
             //ADD, ERASE, KEY vectors
             _outputNeuronCount = (MemoryCellSize * 3) + AddressingNeuronsCount;

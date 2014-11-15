@@ -8,7 +8,7 @@
         public override int OutputNeuronCount { get { return _outputNeuronCount; } }
         public override int OutputOffset { get { return _outputOffset; } }
 
-        public ReadHead(int memoryLength, int memoryCellSize, int id, int readHeadOffset) : base(memoryLength, memoryCellSize, id)
+        public ReadHead(int memoryLength, int memoryCellSize, int id, int readHeadOffset, int maxConvolutialShift) : base(memoryLength, memoryCellSize, id, maxConvolutialShift)
         {
             _outputNeuronCount = MemoryCellSize + AddressingNeuronsCount;
             _outputOffset = readHeadOffset + (id * _outputNeuronCount);

@@ -9,18 +9,29 @@ namespace NeuralTuringMachine
     public class NeuralTuringMachine
     {
         private readonly int _outputCount;
+        private readonly int _maxConvolutialShift;
         //INPUT IS IN ORDER "Input" "ReadHead1" "ReadHead2" ... "ReadHeadN"
         //OUTPUT IS IN ORDER "Output" "ReadHead1" "ReadHead2" ... "ReadHeadN" "WriteHead1" "WriteHead2" ... "WriteHeadN"
-        //HEAD ADDRESSING DATA IS IN ORDER "KeyVector" "beta" "g" "s" "gama"
+        //HEAD ADDRESSING DATA IS IN ORDER "KeyVector" "beta" "g" "s-vector" "gama"
         private readonly ActivationNetwork _controller;
         private readonly NTMMemory _memory;
         private readonly List<ReadHead> _readHeads;
         private readonly List<WriteHead> _writeHeads;
         private readonly int _inputsCount;
 
-        public NeuralTuringMachine(int inputCount, int outputCount, int readHeadCount, int writeHeadCount, int hiddenNeuronsCount, int hiddenLayersCount, int memoryCellCount, int memoryVectorLength)
+        public NeuralTuringMachine(
+            int inputCount,
+            int outputCount, 
+            int readHeadCount, 
+            int writeHeadCount, 
+            int hiddenNeuronsCount, 
+            int hiddenLayersCount, 
+            int memoryCellCount, 
+            int memoryVectorLength,
+            int maxConvolutialShift)
         {
             _outputCount = outputCount;
+            _maxConvolutialShift = maxConvolutialShift;
             _readHeads = new List<ReadHead>(readHeadCount);
             _writeHeads = new List<WriteHead>(writeHeadCount);
 
@@ -28,12 +39,12 @@ namespace NeuralTuringMachine
 
             for (int i = 0; i < readHeadCount; i++)
             {
-                _readHeads.Add(new ReadHead(memoryCellCount, memoryVectorLength, i, inputCount));
+                _readHeads.Add(new ReadHead(memoryCellCount, memoryVectorLength, i, inputCount, _maxConvolutialShift));
             }
 
             for (int i = 0; i < writeHeadCount; i++)
             {
-                _writeHeads.Add(new WriteHead(memoryCellCount, memoryVectorLength, i, writeHeadOffset));
+                _writeHeads.Add(new WriteHead(memoryCellCount, memoryVectorLength, i, writeHeadOffset, _maxConvolutialShift));
             }
 
             int outputNeuronsCount = outputCount + _readHeads.Sum(head => head.OutputNeuronCount) + _writeHeads.Sum(head => head.OutputNeuronCount);

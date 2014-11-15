@@ -8,35 +8,38 @@ namespace NeuralTuringMachine.Memory
         public abstract int OutputNeuronCount { get; }
         public abstract int OutputOffset { get; }
 
-        protected const int AddressingNeuronsCount = 4;
+        protected int AddressingNeuronsCount;
         private readonly int _memoryLength;
         protected int MemoryCellSize;
-        protected AddressingData actualAddressingData;
+        protected AddressingData ActualAddressingData;
         protected double[] LastWeights;
         private readonly int _id;
+        private readonly int _maxConvolutialShift;
 
         private readonly ISimilarity _similarity;
 
-        protected Head(int memoryLength, int memoryCellSize, int id)
+        protected Head(int memoryLength, int memoryCellSize, int id, int maxConvolutialShift)
         {
+            AddressingNeuronsCount = 4 + (maxConvolutialShift*2);
             _similarity = new CosineSimilarity();
             _memoryLength = memoryLength;
             MemoryCellSize = memoryCellSize;
             LastWeights = new double[memoryLength];
             _id = id;
+            _maxConvolutialShift = maxConvolutialShift;
         }
 
-        public int ID
+        public int Id
         {
             get { return _id; }
         }
 
         protected double[] GetWeightVector(NTMMemory memory)
         {
-            double[] contentAddressingVector = GetContentAddressingVector(actualAddressingData.KeyVector, actualAddressingData.KeyStrengthBeta, memory);
-            FocusByLocation(contentAddressingVector, actualAddressingData.InterpolationGate, LastWeights);
-            double[] convolutedAddressingVector = DoConvolutialShift(contentAddressingVector, actualAddressingData.ShiftWeighting);
-            double[] sharpenedVector = SharpenVector(convolutedAddressingVector, actualAddressingData.Sharpening);
+            double[] contentAddressingVector = GetContentAddressingVector(ActualAddressingData.KeyVector, ActualAddressingData.KeyStrengthBeta, memory);
+            FocusByLocation(contentAddressingVector, ActualAddressingData.InterpolationGate, LastWeights);
+            double[] convolutedAddressingVector = DoConvolutialShift(contentAddressingVector, ActualAddressingData.ShiftWeighting);
+            double[] sharpenedVector = SharpenVector(convolutedAddressingVector, ActualAddressingData.Sharpening);
             return sharpenedVector;
         }
 
@@ -65,14 +68,14 @@ namespace NeuralTuringMachine.Memory
             return addressingVector;
         }
 
-        private double[] DoConvolutialShift(double[] addressingVector, double shiftWeighting)
+        private double[] DoConvolutialShift(double[] addressingVector, double[] shiftWeighting)
         {
             double[] convolutional = new double[_memoryLength];
             for (int i = 0; i < _memoryLength; i++)
             {
-                for (int j = 0; j < _memoryLength; j++)
+                for (int j = -_maxConvolutialShift; j <= _maxConvolutialShift; j++)
                 {
-                    convolutional[i] += addressingVector[j] * shiftWeighting * ((i - j)%_memoryLength);
+                    convolutional[i] += addressingVector[(i+j)%_memoryLength] * shiftWeighting[j + _maxConvolutialShift];
                 }
             }
 
@@ -127,7 +130,7 @@ namespace NeuralTuringMachine.Memory
 
         public void UpdateAddressingData(double[] output)
         {
-            actualAddressingData = new AddressingData(output, OutputOffset, OutputNeuronCount);
+            ActualAddressingData = new AddressingData(output, OutputOffset, OutputNeuronCount, _maxConvolutialShift);
         }
     }
 }

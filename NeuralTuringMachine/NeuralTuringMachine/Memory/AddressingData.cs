@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace NeuralTuringMachine.Memory
 {
@@ -8,17 +7,35 @@ namespace NeuralTuringMachine.Memory
         private readonly double[] _keyVector;
         private readonly double _beta;
         private readonly double _g;
-        private readonly double _s;
+        private readonly double[] _s;
         private readonly double _gama;
 
-        public AddressingData(double[] output, int outputOffset, int keyVectorLength)
+        public AddressingData(double[] output, int outputOffset, int keyVectorLength, int maxConvShift)
         {
+            var convShiftLen = (maxConvShift * 2) + 1;
             _keyVector = new double[keyVectorLength];
+            _s = new double[convShiftLen];
             Array.Copy(output, outputOffset, _keyVector, 0, keyVectorLength);
             _beta = output[keyVectorLength + outputOffset];
             _g = output[keyVectorLength + outputOffset + 1];
-            _s = output[keyVectorLength + outputOffset + 2];
-            _gama = output[keyVectorLength + outputOffset + 3];
+            Array.Copy(output, outputOffset + keyVectorLength + 2, _s, 0, convShiftLen);
+            _gama = output[keyVectorLength + outputOffset + convShiftLen + 3];
+
+            NormalizeConvolutionVector();
+        }
+
+        private void NormalizeConvolutionVector()
+        {
+            double sumOfSquares = 0;
+            foreach (double t in _s)
+            {
+                sumOfSquares += Math.Pow(t, 2);
+            }
+            sumOfSquares = Math.Pow(sumOfSquares, 0.5);
+            for (int i = 0; i < _s.Length; i++)
+            {
+                _s[i] = _s[i]/sumOfSquares;
+            }
         }
 
         public double[] KeyVector
@@ -36,7 +53,7 @@ namespace NeuralTuringMachine.Memory
             get { return _g; }
         }
 
-        public double ShiftWeighting
+        public double[] ShiftWeighting
         {
             get { return _s; }
         }
@@ -45,8 +62,8 @@ namespace NeuralTuringMachine.Memory
         {
             get
             {
-                Debug.Assert(_gama >= 1);
-                return _gama;
+                // SHARPENING MUST BE LARGER THAN ONE - SHARPENING SMALLER THAN ONE MEANS BLURRING
+                return _gama + 1;
             }
         }
     }
