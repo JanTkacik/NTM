@@ -62,12 +62,12 @@ namespace NeuralTuringMachine
 
         public double[] Compute(double[] input)
         {
+            UpdateMemory();
+
             double[] ntmInput = GetInput(input);
 
             double[] output = _controller.Compute(ntmInput);
-
-            UpdateMemory();
-
+            
             var ntmOutput = GetOutput(output);
 
             return ntmOutput;
