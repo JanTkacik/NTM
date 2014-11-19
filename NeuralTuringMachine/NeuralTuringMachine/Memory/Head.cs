@@ -34,7 +34,7 @@ namespace NeuralTuringMachine.Memory
             get { return _id; }
         }
 
-        protected double[] GetWeightVector(NTMMemory memory)
+        protected double[] GetWeightVector(NtmMemory memory)
         {
             double[] contentAddressingVector = GetContentAddressingVector(ActualAddressingData.KeyVector, ActualAddressingData.KeyStrengthBeta, memory);
             FocusByLocation(contentAddressingVector, ActualAddressingData.InterpolationGate, LastWeights);
@@ -46,23 +46,17 @@ namespace NeuralTuringMachine.Memory
         private double[] SharpenVector(double[] convolutedAddress, double sharpening)
         {
             double[] addressingVector = new double[_memoryLength];
-            double sharpenI = 0;
-            double sharpenOther = 0;
+
+            double sharpenAll = 0;
 
             for (int i = 0; i < _memoryLength; i++)
             {
-                for (int j = 0; j < _memoryLength; j++)
-                {
-                    if (i != j)
-                    {
-                        sharpenOther += Math.Pow(convolutedAddress[j], sharpening);
-                    }
-                    else
-                    {
-                        sharpenI += Math.Pow(convolutedAddress[j], sharpening);
-                    }
-                }
-                addressingVector[i] = sharpenI / sharpenOther;
+                sharpenAll = Math.Pow(convolutedAddress[i], sharpening);
+            }
+
+            for (int i = 0; i < _memoryLength; i++)
+            {
+                addressingVector[i] = Math.Pow(convolutedAddress[i], sharpening) / sharpenAll;
             }
 
             return addressingVector;
@@ -75,7 +69,14 @@ namespace NeuralTuringMachine.Memory
             {
                 for (int j = -_maxConvolutialShift; j <= _maxConvolutialShift; j++)
                 {
-                    convolutional[i] += addressingVector[(i+j)%_memoryLength] * shiftWeighting[j + _maxConvolutialShift];
+                    if ((i + j) >= 0)
+                    {
+                        convolutional[i] += addressingVector[(i + j) % _memoryLength] * shiftWeighting[j + _maxConvolutialShift];
+                    }
+                    else
+                    {
+                        convolutional[i] += addressingVector[i + j + _memoryLength] * shiftWeighting[j + _maxConvolutialShift];
+                    }
                 }
             }
 
@@ -90,35 +91,27 @@ namespace NeuralTuringMachine.Memory
             }
         }
 
-        private double[] GetContentAddressingVector(double[] keyVector, double keyStrengthBeta, NTMMemory memory)
+        private double[] GetContentAddressingVector(double[] keyVector, double keyStrengthBeta, NtmMemory memory)
         {
             double[] addressingVector = new double[_memoryLength];
 
             double[] similarityVector = GetSimilarityVector(keyVector, keyStrengthBeta, memory);
 
-            double similarityI = 0;
-            double similarityOther = 0;
+            double similarityAll = 0;
+            for (int i = 0; i < _memoryLength; i++)
+            {
+                similarityAll += similarityVector[i];
+            }
 
             for (int i = 0; i < _memoryLength; i++)
             {
-                for (int j = 0; j < _memoryLength; j++)
-                {
-                    if (i != j)
-                    {
-                        similarityOther += similarityVector[j];
-                    }
-                    else
-                    {
-                        similarityI = similarityVector[j];
-                    }
-                }
-                addressingVector[i] = similarityI/similarityOther;
+                addressingVector[i] = similarityVector[i] / similarityAll;
             }
 
             return addressingVector;
         }
 
-        private double[] GetSimilarityVector(double[] keyVector, double keyStrengthBeta, NTMMemory memory)
+        private double[] GetSimilarityVector(double[] keyVector, double keyStrengthBeta, NtmMemory memory)
         {
             double[] similarityVector = new double[_memoryLength];
             for (int i = 0; i < _memoryLength; i++)
@@ -130,7 +123,7 @@ namespace NeuralTuringMachine.Memory
 
         public void UpdateAddressingData(double[] output)
         {
-            ActualAddressingData = new AddressingData(output, OutputOffset, OutputNeuronCount, _maxConvolutialShift);
+            ActualAddressingData = new AddressingData(output, OutputOffset, MemoryCellSize, _maxConvolutialShift);
         }
     }
 }

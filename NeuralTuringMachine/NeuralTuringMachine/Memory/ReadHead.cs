@@ -14,7 +14,7 @@
             _outputOffset = readHeadOffset + (id * _outputNeuronCount);
         }
 
-        public double[] GetVectorFromMemory(NTMMemory memory)
+        public double[] GetVectorFromMemory(NtmMemory memory)
         {
             double[] weightVector = GetWeightVector(memory);
             return memory.Read(weightVector);

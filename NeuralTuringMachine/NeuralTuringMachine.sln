@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{69011C
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTMConsoleTestClient", "NTMConsoleTestClient\NTMConsoleTestClient.csproj", "{F9AA3FB2-4221-487D-A4E1-6CD4451172BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{A07A9F3C-1D44-426E-834F-FDC55F09BB82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A07A9F3C-1D44-426E-834F-FDC55F09BB82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A07A9F3C-1D44-426E-834F-FDC55F09BB82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9AA3FB2-4221-487D-A4E1-6CD4451172BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9AA3FB2-4221-487D-A4E1-6CD4451172BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9AA3FB2-4221-487D-A4E1-6CD4451172BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9AA3FB2-4221-487D-A4E1-6CD4451172BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

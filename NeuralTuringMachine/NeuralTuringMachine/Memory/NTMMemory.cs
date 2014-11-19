@@ -1,12 +1,12 @@
 ﻿namespace NeuralTuringMachine.Memory
 {
-    class NTMMemory
+    class NtmMemory
     {
         private readonly int _memoryCellCount;
         private readonly int _memoryVectorLength;
         private readonly double[][] _memory;
 
-        public NTMMemory(int memoryCellCount, int memoryVectorLength)
+        public NtmMemory(int memoryCellCount, int memoryVectorLength)
         {
             _memoryCellCount = memoryCellCount;
             _memoryVectorLength = memoryVectorLength;
@@ -14,6 +14,17 @@
             for (int i = 0; i < _memoryCellCount; i++) 
             {
                 _memory[i] = new double[_memoryVectorLength];
+            }
+        }
+
+        private NtmMemory(int memoryCellCount, int memoryVectorLength, double[][] memory) : this(memoryCellCount, memoryVectorLength)
+        {
+            for (int i = 0; i < _memoryCellCount; i++)
+            {
+                for (int j = 0; j < _memoryVectorLength; j++)
+                {
+                    _memory[i][j] = memory[i][j];
+                }
             }
         }
 
@@ -64,6 +75,11 @@
         public double[] GetCellByIndex(int i)
         {
             return _memory[i];
+        }
+
+        public NtmMemory Clone()
+        {
+            return new NtmMemory(_memoryCellCount, _memoryVectorLength, _memory);
         }
     }
 }

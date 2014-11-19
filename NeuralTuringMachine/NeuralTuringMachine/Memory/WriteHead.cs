@@ -33,7 +33,7 @@ namespace NeuralTuringMachine.Memory
             Array.Copy(output, _outputOffset + (MemoryCellSize * 2) + AddressingNeuronsCount, _addVector, 0, MemoryCellSize);
         }
 
-        public void UpdateMemory(NTMMemory memory)
+        public void UpdateMemory(NtmMemory memory)
         {
             double[] weightVector = GetWeightVector(memory);
             memory.Write(weightVector, _eraseVector, _addVector);
