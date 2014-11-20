@@ -53,14 +53,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controller\ControllerInput.cs" />
+    <Compile Include="Controller\ControllerOutput.cs" />
+    <Compile Include="GeneticsOptimalization\ControllerInputChromosome.cs" />
+    <Compile Include="GeneticsOptimalization\IdealInputFitnessFunction.cs" />
     <Compile Include="Learning\BPTTTeacher.cs" />
     <Compile Include="Memory\AddressingData.cs" />
-    <Compile Include="Memory\Head.cs" />
+    <Compile Include="Memory\Head\Head.cs" />
     <Compile Include="NeuralTuringMachine.cs" />
     <Compile Include="Memory\NTMMemory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Memory\ReadHead.cs" />
-    <Compile Include="Memory\WriteHead.cs" />
+    <Compile Include="Memory\Head\ReadHead.cs" />
+    <Compile Include="Memory\Head\WriteHead.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

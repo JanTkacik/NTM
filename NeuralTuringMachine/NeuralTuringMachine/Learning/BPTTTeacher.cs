@@ -1,6 +1,10 @@
 ﻿using System;
-using System.Linq;
+using AForge;
+using AForge.Genetic;
+using AForge.Math.Random;
 using AForge.Neuro.Learning;
+using NeuralTuringMachine.Controller;
+using NeuralTuringMachine.GeneticsOptimalization;
 
 namespace NeuralTuringMachine.Learning
 {
@@ -11,7 +15,7 @@ namespace NeuralTuringMachine.Learning
         private readonly double _momentum;
         private NeuralTuringMachine[] _bpttMachines;
         private double[][] _ntmOutputs;
-      
+
         public BpttTeacher(NeuralTuringMachine machine, double learningRate = 0.001, double momentum = 0)
         {
             _originalMachine = machine;
@@ -29,6 +33,8 @@ namespace NeuralTuringMachine.Learning
             {
                 _bpttMachines[i] = _originalMachine.Clone();
             }
+
+            double[][] _idealOutputs = new double[inputCount][];
 
             //Forward propagation
             for (int i = 0; i < inputCount; i++)
@@ -54,7 +60,7 @@ namespace NeuralTuringMachine.Learning
                         Momentum = _momentum
                     };
 
-                double[] input = _bpttMachines[i].GetInputForController(inputs[i], i > 0 ? _bpttMachines[i - 1].Controller.Output : null);
+                ControllerInput input = _bpttMachines[i].GetInputForController(inputs[i], i > 0 ? _bpttMachines[i - 1].LastControllerOutput : null);
 
                 double[] controllerOutput = _bpttMachines[i].Controller.Output;
                 int outputLength = controllerOutput.Length;
@@ -70,17 +76,50 @@ namespace NeuralTuringMachine.Learning
                 }
                 else
                 {
-                    //FIND OUT WHAT SHOULD BE READ
-                    //FIND OUT WHAT SHOULD BE OUTPUT OF READ HEAD 
-                    //FIND OUT WHAT SHOULD BE OUTPUT OF WRITE HEAD
+                    double[] idealInput = FindIdealInput(inputs[i + 1], _idealOutputs[i + 1], _bpttMachines[i + 1]);
+                    double[] readHeadIdealOutput = FindReadHeadIdealOutput();
+                    double[] writeHeadIdealOutput = FindWriteHeadIdealOutput();
+                    //FIND OUT WHAT SHOULD BE OUTPUT OF READ HEAD       - genetic
+                    //FIND OUT WHAT SHOULD BE OUTPUT OF WRITE HEAD      - genetic
                 }
 
-                bpTeacher.Run(input, output);
+                _idealOutputs[i] = output;
+
+                bpTeacher.Run(input.Input, output);
             }
 
             //Average the networks
-            
-            
+
+
+        }
+
+        private double[] FindWriteHeadIdealOutput()
+        {
+            return null;
+        }
+
+        private double[] FindReadHeadIdealOutput()
+        {
+            return null;
+        }
+
+        public double[] FindIdealInput(double[] input, double[] idealOutput, NeuralTuringMachine ntm)
+        {
+            int chromosomeLength = ntm.Controller.InputsCount - ntm.InputCount;
+            Population population =
+                new Population(
+                    100,
+                    new ControllerInputChromosome(new UniformGenerator(new Range(0, 1)), new UniformGenerator(new Range(0, 1)), new UniformGenerator(new Range(0, 1)), chromosomeLength), 
+                    new IdealInputFitnessFunction(input, idealOutput, ntm.Controller),
+                    new RouletteWheelSelection());
+
+            for (int i = 0; i < 1000; i++)
+            {
+                population.RunEpoch();
+            }
+
+            ControllerInputChromosome bestChromosome = (ControllerInputChromosome)population.BestChromosome;
+            return bestChromosome.Value;
         }
     }
 }

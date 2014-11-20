@@ -1,12 +1,11 @@
 ﻿using System;
 using AForge.Math.Metrics;
 
-namespace NeuralTuringMachine.Memory
+namespace NeuralTuringMachine.Memory.Head
 {
     abstract class Head
     {
         public abstract int OutputNeuronCount { get; }
-        public abstract int OutputOffset { get; }
 
         protected int AddressingNeuronsCount;
         private readonly int _memoryLength;
@@ -121,9 +120,9 @@ namespace NeuralTuringMachine.Memory
             return similarityVector;
         }
 
-        public void UpdateAddressingData(double[] output)
+        public void UpdateAddressingData(double[] headOutput)
         {
-            ActualAddressingData = new AddressingData(output, OutputOffset, MemoryCellSize, _maxConvolutialShift);
+            ActualAddressingData = new AddressingData(headOutput, MemoryCellSize, _maxConvolutialShift);
         }
     }
 }

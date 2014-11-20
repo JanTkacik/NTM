@@ -70,7 +70,7 @@ namespace NTMConsoleTestClient
             outputs[8] = new double[] {0, 1, 1};
             outputs[9] = new double[] {1, 0, 0};
 
-            teacher.RunEpoch(inputs, outputs);
+            teacher.Run(inputs, outputs);
         }
     }
 }

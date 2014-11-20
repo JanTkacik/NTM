@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AForge.Neuro;
+using NeuralTuringMachine.Controller;
 using NeuralTuringMachine.Memory;
+using NeuralTuringMachine.Memory.Head;
 
 namespace NeuralTuringMachine
 {
@@ -18,6 +20,8 @@ namespace NeuralTuringMachine
         private readonly int _memoryCellCount;
         private readonly int _memoryVectorLength;
         private readonly int _maxConvolutialShift;
+        private int _readHeadLength;
+        private int _writeHeadLength;
         //INPUT IS IN ORDER "Input" "ReadHead1" "ReadHead2" ... "ReadHeadN"
         //OUTPUT IS IN ORDER "Output" "ReadHead1" "ReadHead2" ... "ReadHeadN" "WriteHead1" "WriteHead2" ... "WriteHeadN"
         //HEAD ADDRESSING DATA IS IN ORDER "KeyVector" "beta" "g" "s-vector" "gama"
@@ -25,7 +29,22 @@ namespace NeuralTuringMachine
         private readonly NtmMemory _memory;
         private readonly List<ReadHead> _readHeads;
         private readonly List<WriteHead> _writeHeads;
-        private readonly int _inputsCount;
+        private readonly int _controllerInputCount;
+
+        public ControllerOutput LastControllerOutput { get; private set; }
+
+        public ActivationNetwork Controller
+        {
+            get
+            {
+                return (ActivationNetwork)_controller;
+            }
+        }
+
+        public int InputCount
+        {
+            get { return _inputCount; }
+        }
 
         //TODO REFACTOR
         public NeuralTuringMachine(
@@ -54,9 +73,9 @@ namespace NeuralTuringMachine
             InitializeReadHeads();
             InitializeWriteHeads();
             List<int> neuronsCounts = GetNeuronsCount();
-            _inputsCount = inputCount + (readHeadCount * memoryVectorLength);
+            _controllerInputCount = inputCount + (readHeadCount * memoryVectorLength);
 
-            _controller = new ActivationNetwork(new SigmoidFunction(), _inputsCount, neuronsCounts.ToArray());
+            _controller = new ActivationNetwork(new SigmoidFunction(), _controllerInputCount, neuronsCounts.ToArray());
             _memory = new NtmMemory(memoryCellCount, memoryVectorLength);
         }
 
@@ -87,17 +106,12 @@ namespace NeuralTuringMachine
             
             InitializeReadHeads();
             InitializeWriteHeads();
-            _inputsCount = inputCount + (readHeadCount * memoryVectorLength);
+            _controllerInputCount = inputCount + (readHeadCount * memoryVectorLength);
 
             _controller = controller;
             _memory = memory;
         }
-
-        public ActivationNetwork Controller
-        {
-            get { return (ActivationNetwork)_controller; }
-        }
-
+        
         private List<int> GetNeuronsCount()
         {
             int outputNeuronsCount = _outputCount + _readHeads.Sum(head => head.OutputNeuronCount) +
@@ -114,10 +128,15 @@ namespace NeuralTuringMachine
         private void InitializeWriteHeads()
         {
             int writeHeadOffset = _outputCount + _readHeads.Sum(head => head.OutputNeuronCount);
-
+            
             for (int i = 0; i < _writeHeadCount; i++)
             {
-                _writeHeads.Add(new WriteHead(_memoryCellCount, _memoryVectorLength, i, writeHeadOffset, _maxConvolutialShift));
+                WriteHead writeHead = new WriteHead(_memoryCellCount, _memoryVectorLength, i, _maxConvolutialShift);
+                _writeHeads.Add(writeHead);
+                if (i == 0)
+                {
+                    _writeHeadLength = writeHead.OutputNeuronCount;
+                }
             }
         }
 
@@ -125,75 +144,67 @@ namespace NeuralTuringMachine
         {
             for (int i = 0; i < _readHeadCount; i++)
             {
-                _readHeads.Add(new ReadHead(_memoryCellCount, _memoryVectorLength, i, _outputCount, _maxConvolutialShift));
+                ReadHead readHead = new ReadHead(_memoryCellCount, _memoryVectorLength, i, _maxConvolutialShift);
+                _readHeads.Add(readHead);
+                if (i == 0)
+                {
+                    _readHeadLength = readHead.OutputNeuronCount;
+                }
             }
         }
 
         public double[] Compute(double[] input)
         {
-            UpdateMemory(_controller.Output);
+            UpdateMemory(LastControllerOutput);
 
-            double[] ntmInput = GetInputForController(input, _controller.Output);
+            ControllerInput ntmInput = GetInputForController(input, LastControllerOutput);
 
-            double[] output = _controller.Compute(ntmInput);
-            
-            var ntmOutput = GetOutput(output);
+            LastControllerOutput = new ControllerOutput(_controller.Compute(ntmInput.Input), _outputCount, _readHeadCount, _readHeadLength, _writeHeadCount, _writeHeadLength);
 
-            return ntmOutput;
+            return LastControllerOutput.DataOutput;
         }
 
         //USAGE FOR BPTT
         internal double[] Compute(double[] input, NeuralTuringMachine previousMachine)
         {
-            double[] previousControllerOutput = previousMachine._controller.Output;
-            UpdateMemory(previousControllerOutput);
+            UpdateMemory(previousMachine.LastControllerOutput);
 
-            double[] ntmInput = GetInputForController(input, previousControllerOutput);
+            ControllerInput ntmInput = GetInputForController(input, previousMachine.LastControllerOutput);
 
-            double[] output = _controller.Compute(ntmInput);
+            LastControllerOutput = new ControllerOutput(_controller.Compute(ntmInput.Input), _outputCount, _readHeadCount, _readHeadLength, _writeHeadCount, _writeHeadLength);
 
-            var ntmOutput = GetOutput(output);
-
-            return ntmOutput;
+            return LastControllerOutput.DataOutput;
         }
 
-        private void UpdateMemory(double[] controllerOutput)
+        private void UpdateMemory(ControllerOutput controllerOutput)
         {
             if (controllerOutput != null)
             {
-                foreach (WriteHead writeHead in _writeHeads)
+                for (int i = 0; i < _writeHeads.Count; i++)
                 {
-                    writeHead.UpdateAddressingData(controllerOutput);
-                    writeHead.UpdateEraseVector(controllerOutput);
-                    writeHead.UpdateAddVector(controllerOutput);
+                    WriteHead writeHead = _writeHeads[i];
+                    writeHead.UpdateAddressingData(controllerOutput.WriteHeadsOutputs[i]);
+                    writeHead.UpdateEraseVector(controllerOutput.WriteHeadsOutputs[i]);
+                    writeHead.UpdateAddVector(controllerOutput.WriteHeadsOutputs[i]);
                     writeHead.UpdateMemory(_memory);
                 }
             }
         }
 
-        private double[] GetOutput(double[] output)
+        public ControllerInput GetInputForController(double[] input, ControllerOutput controllerOutput)
         {
-            double[] ntmOutput = new double[_outputCount];
-            Array.Copy(output, ntmOutput, _outputCount);
-            return ntmOutput;
-        }
-
-        public double[] GetInputForController(double[] input, double[] controllerOutput)
-        {
-            double[] ntmInput = new double[_inputsCount];
-            Array.Copy(input, ntmInput, input.Length);
-            int actualOffset = input.Length;
             if (controllerOutput != null)
             {
-                foreach (ReadHead readHead in _readHeads)
+                double[][] readHeadOutputs = new double[_readHeadCount][];
+                for (int i = 0; i < _readHeadCount; i++)
                 {
-                    readHead.UpdateAddressingData(controllerOutput);
-                    double[] vectorFromMemory = readHead.GetVectorFromMemory(_memory);
-                    Array.Copy(vectorFromMemory, 0, ntmInput, actualOffset, vectorFromMemory.Length);
-                    actualOffset += vectorFromMemory.Length;
+                    ReadHead readHead = _readHeads[i];
+                    readHead.UpdateAddressingData(controllerOutput.ReadHeadsOutputs[i]);
+                    readHeadOutputs[i] = readHead.GetVectorFromMemory(_memory);
                 }
+                return new ControllerInput(input, readHeadOutputs, _controller.InputsCount);
             }
-            return ntmInput;
+            return new ControllerInput(input, _controller.InputsCount);
         }
 
         public NeuralTuringMachine Clone()

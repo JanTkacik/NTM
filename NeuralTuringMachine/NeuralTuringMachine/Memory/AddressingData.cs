@@ -10,16 +10,16 @@ namespace NeuralTuringMachine.Memory
         private readonly double[] _s;
         private readonly double _gama;
 
-        public AddressingData(double[] output, int outputOffset, int keyVectorLength, int maxConvShift)
+        public AddressingData(double[] output, int keyVectorLength, int maxConvShift)
         {
             var convShiftLen = (maxConvShift * 2) + 1;
             _keyVector = new double[keyVectorLength];
             _s = new double[convShiftLen];
-            Array.Copy(output, outputOffset, _keyVector, 0, keyVectorLength);
-            _beta = output[keyVectorLength + outputOffset];
-            _g = output[keyVectorLength + outputOffset + 1];
-            Array.Copy(output, outputOffset + keyVectorLength + 2, _s, 0, convShiftLen);
-            _gama = output[keyVectorLength + outputOffset + convShiftLen + 3];
+            Array.Copy(output, 0, _keyVector, 0, keyVectorLength);
+            _beta = output[keyVectorLength];
+            _g = output[keyVectorLength + 1];
+            Array.Copy(output, keyVectorLength + 2, _s, 0, convShiftLen);
+            _gama = output[keyVectorLength + convShiftLen + 3];
 
             NormalizeConvolutionVector();
         }
