@@ -29,13 +29,8 @@ namespace NeuralTuringMachine.GeneticsOptimalization
             double[] weightVector = _readHead.GetWeightVector(_memory);
             
             double fitness = _distance.GetDistance(weightVector, _idealWeightVector);
-
-            if (double.IsNaN(fitness))
-            {
-                int a = 0;
-            }
-
-            return fitness;
+            
+            return 1 / (1 + fitness);
         }
     }
 }

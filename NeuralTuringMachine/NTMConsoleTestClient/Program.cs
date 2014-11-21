@@ -1,5 +1,7 @@
 ﻿using System;
+using AForge.Neuro;
 using NeuralTuringMachine.Learning;
+using NeuralTuringMachine.Performance;
 
 namespace NTMConsoleTestClient
 {
@@ -70,7 +72,35 @@ namespace NTMConsoleTestClient
             outputs[8] = new double[] {0, 1, 1};
             outputs[9] = new double[] {1, 0, 0};
 
-            teacher.Run(inputs, outputs);
+            for (int i = 0; i < 1000; i++)
+            {
+                teacher.Run(inputs, outputs);
+                double error = PerfMeter.CalculateError(neuralTuringMachine, inputs, outputs);
+                WriteController(neuralTuringMachine.Controller);
+                Console.WriteLine("ERROR in iteration " + i + " is " + error);
+            }
+
+            Console.ReadLine();
+        }
+
+        private static void WriteController(Network network)
+        {
+            for (int i = 0; i < network.Layers.Length; i++)
+            {
+                Layer layer = network.Layers[i];
+                Console.WriteLine("Layer: " + i);
+                Neuron[] neurons = layer.Neurons;
+                for (int j = 0; j < neurons.Length; j++)
+                {
+                    Console.WriteLine("Neuron: " + j);
+                    foreach (double weight in neurons[j].Weights)
+                    {
+                        Console.Write(weight);
+                        Console.Write(",");
+                    }
+                    Console.WriteLine();
+                }
+            }
         }
     }
 }

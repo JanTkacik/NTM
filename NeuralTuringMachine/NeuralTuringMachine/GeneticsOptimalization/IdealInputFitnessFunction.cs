@@ -30,7 +30,8 @@ namespace NeuralTuringMachine.GeneticsOptimalization
             ControllerInput input = new ControllerInput(_input, readFromMemoryInput, _controllerInputsCount);
             double[] controllerOutput = _ntm.Compute(input.Input);
 
-            return _distance.GetDistance(controllerOutput, _idealOutput);
+            double distance = _distance.GetDistance(controllerOutput, _idealOutput);
+            return 1 / (1 + distance);
         }
     }
 }

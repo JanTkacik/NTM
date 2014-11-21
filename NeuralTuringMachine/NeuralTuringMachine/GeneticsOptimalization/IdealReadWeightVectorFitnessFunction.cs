@@ -24,7 +24,8 @@ namespace NeuralTuringMachine.GeneticsOptimalization
 
             double[] readFromMemory = _memory.Read(weightVector);
 
-            return _distance.GetDistance(readFromMemory, _idealReadValue);
+            double distance = _distance.GetDistance(readFromMemory, _idealReadValue);
+            return 1/(1 + distance);
         }
     }
 }

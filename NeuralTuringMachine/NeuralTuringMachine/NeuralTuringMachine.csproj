@@ -67,8 +67,10 @@
     <Compile Include="Memory\Head\ReadHeadWithFixedLastWeights.cs" />
     <Compile Include="Memory\Head\WriteHeadWithFixedLastWeights.cs" />
     <Compile Include="Misc\ArrayHelper.cs" />
+    <Compile Include="Misc\BackPropagationLearning.cs" />
     <Compile Include="NeuralTuringMachine.cs" />
     <Compile Include="Memory\NTMMemory.cs" />
+    <Compile Include="Performance\PerfMeter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Memory\Head\ReadHead.cs" />
     <Compile Include="Memory\Head\WriteHead.cs" />

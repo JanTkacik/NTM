@@ -33,7 +33,8 @@ namespace NeuralTuringMachine.GeneticsOptimalization
 
             double[] memoryContentAfter = _currentMemory.GetDataAfterWrite(weightVector, _writeHead.EraseVector, _writeHead.AddVector);
 
-            return _distance.GetDistance(_idealMemoryContent, memoryContentAfter);
+            double distance = _distance.GetDistance(_idealMemoryContent, memoryContentAfter);
+            return 1/(1 + distance);
         }
     }
 }

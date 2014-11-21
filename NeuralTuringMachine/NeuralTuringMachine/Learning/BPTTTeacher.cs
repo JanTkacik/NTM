@@ -5,6 +5,7 @@ using AForge.Neuro;
 using AForge.Neuro.Learning;
 using NeuralTuringMachine.Controller;
 using NeuralTuringMachine.GeneticsOptimalization;
+using BackPropagationLearning = NeuralTuringMachine.Misc.BackPropagationLearning;
 
 namespace NeuralTuringMachine.Learning
 {
@@ -16,7 +17,7 @@ namespace NeuralTuringMachine.Learning
         private NeuralTuringMachine[] _bpttMachines;
         private double[][] _ntmOutputs;
 
-        public BpttTeacher(NeuralTuringMachine machine, double learningRate = 0.001, double momentum = 0)
+        public BpttTeacher(NeuralTuringMachine machine, double learningRate = 0.5, double momentum = 0.1)
         {
             _originalMachine = machine;
             _learningRate = learningRate;
@@ -104,14 +105,28 @@ namespace NeuralTuringMachine.Learning
                 int neuronsCount = layer.Neurons.Length;
                 for (int j = 0; j < neuronsCount; j++)
                 {
-                    Neuron neuron = layer.Neurons[j];
+                    ActivationNeuron neuron = (ActivationNeuron)layer.Neurons[j];
                     int weightsCount = neuron.Weights.Length;
                     for (int k = 0; k < weightsCount; k++)
                     {
                         neuron.Weights[k] = GetAverageNeuronWeight(i,j,k);
                     }
+                    neuron.Threshold = GetAverageNeuronThreshold(i, j);
                 }
             }
+        }
+
+        private double GetAverageNeuronThreshold(int layerIndex, int neuronIndex)
+        {
+            double average = 0;
+            int controllerCount = _bpttMachines.Length;
+
+            foreach (NeuralTuringMachine neuralTuringMachine in _bpttMachines)
+            {
+                average += ((ActivationNeuron)neuralTuringMachine.Controller.Layers[layerIndex].Neurons[neuronIndex]).Threshold;
+            }
+
+            return average / controllerCount;
         }
 
         private double GetAverageNeuronWeight(int layerIndex, int neuronIndex, int weightIndex)
@@ -195,9 +210,28 @@ namespace NeuralTuringMachine.Learning
 
         private double[] RunGenetic(Population population)
         {
-            for (int i = 0; i < 1000; i++)
+            int stagnateStreak = 0;
+            double lastMax = 0;
+
+            for (int i = 0; i < 100000; i++)
             {
                 population.RunEpoch();
+                double fitnessMax = population.FitnessMax;
+                if (fitnessMax > lastMax)
+                {
+                    lastMax = fitnessMax;
+                    stagnateStreak = 0;
+                }
+                else
+                {
+                    stagnateStreak++;
+                }
+
+                if (stagnateStreak >= 10)
+                {
+                    break;
+                }
+                //Console.WriteLine("Genetics: iteration - " + i + " fitness avg - " + population.FitnessAvg + " fitness max - " + fitnessMax);
             }
 
             NonNegativeDoubleArrayChromosome bestChromosome = (NonNegativeDoubleArrayChromosome)population.BestChromosome;
