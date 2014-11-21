@@ -1,4 +1,5 @@
 ﻿using System;
+using NeuralTuringMachine.Misc;
 
 namespace NeuralTuringMachine.Controller
 {
@@ -30,6 +31,18 @@ namespace NeuralTuringMachine.Controller
                 Array.Copy(rawOutput, offset, WriteHeadsOutputs[i], 0, writeHeadLength);
                 offset += writeHeadLength;
             }
+        }
+
+        private ControllerOutput(double[] dataOutput, double[][] readHeadOutputs, double[][] writeHeadOutputs)
+        {
+            DataOutput = dataOutput;
+            ReadHeadsOutputs = readHeadOutputs;
+            WriteHeadsOutputs = writeHeadOutputs;
+        }
+
+        public ControllerOutput Clone()
+        {
+            return new ControllerOutput(ArrayHelper.CloneArray(DataOutput), ArrayHelper.CloneArray(ReadHeadsOutputs), ArrayHelper.CloneArray(WriteHeadsOutputs));
         }
     }
 }

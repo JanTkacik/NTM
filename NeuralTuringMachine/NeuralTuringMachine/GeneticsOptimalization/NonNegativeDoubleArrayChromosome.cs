@@ -4,37 +4,37 @@ using AForge.Math.Random;
 
 namespace NeuralTuringMachine.GeneticsOptimalization
 {
-    class ControllerInputChromosome : DoubleArrayChromosome
+    class NonNegativeDoubleArrayChromosome : DoubleArrayChromosome
     {
-        public ControllerInputChromosome(IRandomNumberGenerator chromosomeGenerator, IRandomNumberGenerator mutationMultiplierGenerator, IRandomNumberGenerator mutationAdditionGenerator, int length)
+        public NonNegativeDoubleArrayChromosome(IRandomNumberGenerator chromosomeGenerator, IRandomNumberGenerator mutationMultiplierGenerator, IRandomNumberGenerator mutationAdditionGenerator, int length)
             : base(chromosomeGenerator, mutationMultiplierGenerator, mutationAdditionGenerator, length)
         {
         }
 
-        public ControllerInputChromosome(IRandomNumberGenerator chromosomeGenerator, IRandomNumberGenerator mutationMultiplierGenerator, IRandomNumberGenerator mutationAdditionGenerator, double[] values)
+        public NonNegativeDoubleArrayChromosome(IRandomNumberGenerator chromosomeGenerator, IRandomNumberGenerator mutationMultiplierGenerator, IRandomNumberGenerator mutationAdditionGenerator, double[] values)
             : base(chromosomeGenerator, mutationMultiplierGenerator, mutationAdditionGenerator, values)
         {
         }
 
-        public ControllerInputChromosome(DoubleArrayChromosome source)
+        public NonNegativeDoubleArrayChromosome(DoubleArrayChromosome source)
             : base(source)
         {
         }
 
         public override IChromosome CreateNew()
         {
-            return new ControllerInputChromosome(chromosomeGenerator, mutationMultiplierGenerator, mutationAdditionGenerator, Length);
+            return new NonNegativeDoubleArrayChromosome(chromosomeGenerator, mutationMultiplierGenerator, mutationAdditionGenerator, Length);
         }
         
         public override IChromosome Clone()
         {
-            return new ControllerInputChromosome(this);
+            return new NonNegativeDoubleArrayChromosome(this);
         }
 
 
         public override void Crossover(IChromosome pair)
         {
-            ControllerInputChromosome p = (ControllerInputChromosome)pair;
+            NonNegativeDoubleArrayChromosome p = (NonNegativeDoubleArrayChromosome)pair;
 
             // check for correct pair
             if ((p != null) && (p.Length == Length))

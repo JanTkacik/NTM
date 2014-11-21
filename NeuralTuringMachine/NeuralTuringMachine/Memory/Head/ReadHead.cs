@@ -1,22 +1,37 @@
-﻿namespace NeuralTuringMachine.Memory.Head
+﻿using System;
+using NeuralTuringMachine.Misc;
+
+namespace NeuralTuringMachine.Memory.Head
 {
-    class ReadHead : Head
+    public class ReadHead : Head
     {
         private readonly int _outputNeuronCount;
 
         public override int OutputNeuronCount { get { return _outputNeuronCount; } }
 
-        public ReadHead(int memoryLength, int memoryCellSize, int id, int maxConvolutialShift) : base(memoryLength, memoryCellSize, id, maxConvolutialShift)
+        public ReadHead(int memoryLength, int memoryCellSize, int maxConvolutialShift) : base(memoryLength, memoryCellSize, maxConvolutialShift)
         {
             _outputNeuronCount = MemoryCellSize + AddressingNeuronsCount;
         }
 
+        private ReadHead(double[] lastWeights, AddressingData addressingData, int memoryLength, int memoryCellSize, int maxConvolutialShift)
+            : base(memoryLength, memoryCellSize, maxConvolutialShift)
+        {
+            _outputNeuronCount = MemoryCellSize + AddressingNeuronsCount;
+            LastWeights = lastWeights;
+            ActualAddressingData = addressingData;
+        }
+        
         public double[] GetVectorFromMemory(NtmMemory memory)
         {
             double[] weightVector = GetWeightVector(memory);
+            LastWeights = weightVector;
             return memory.Read(weightVector);
         }
 
-        
+        public ReadHead Clone()
+        {
+            return new ReadHead(ArrayHelper.CloneArray(LastWeights), ActualAddressingData.Clone(), MemoryLength, MemoryCellSize, MaxConvolutialShift);
+        }
     }
 }

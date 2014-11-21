@@ -1,8 +1,9 @@
 ﻿using System;
+using NeuralTuringMachine.Misc;
 
 namespace NeuralTuringMachine.Memory
 {
-    class AddressingData
+    public class AddressingData
     {
         private readonly double[] _keyVector;
         private readonly double _beta;
@@ -22,6 +23,15 @@ namespace NeuralTuringMachine.Memory
             _gama = output[keyVectorLength + convShiftLen + 3];
 
             NormalizeConvolutionVector();
+        }
+
+        private AddressingData(double[] keyVector, double beta, double g, double[] s, double gama)
+        {
+            _keyVector = keyVector;
+            _beta = beta;
+            _g = g;
+            _s = s;
+            _gama = gama;
         }
 
         private void NormalizeConvolutionVector()
@@ -65,6 +75,11 @@ namespace NeuralTuringMachine.Memory
                 // SHARPENING MUST BE LARGER THAN ONE - SHARPENING SMALLER THAN ONE MEANS BLURRING
                 return _gama + 1;
             }
+        }
+
+        public AddressingData Clone()
+        {
+            return new AddressingData(ArrayHelper.CloneArray(_keyVector), _beta, _g, ArrayHelper.CloneArray(_s), _gama);
         }
     }
 }

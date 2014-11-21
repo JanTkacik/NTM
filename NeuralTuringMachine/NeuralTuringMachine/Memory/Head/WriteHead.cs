@@ -1,39 +1,65 @@
 ﻿using System;
+using NeuralTuringMachine.Misc;
 
 namespace NeuralTuringMachine.Memory.Head
 {
-    class WriteHead : Head
+    public class WriteHead : Head
     {
         private readonly int _outputNeuronCount;
 
-        private readonly double[] _eraseVector;
-        private readonly double[] _addVector;
+        public double[] EraseVector { get; private set; }
+        public double[] AddVector { get; private set; }
 
         public override int OutputNeuronCount { get { return _outputNeuronCount; } }
 
-        public WriteHead(int memoryLength, int memoryCellSize, int id, int maxConvShift) : base(memoryLength, memoryCellSize, id, maxConvShift)
+        public WriteHead(int memoryLength, int memoryCellSize, int maxConvShift) : base(memoryLength, memoryCellSize, maxConvShift)
         {
             //ADD, ERASE, KEY vectors
             _outputNeuronCount = (MemoryCellSize * 3) + AddressingNeuronsCount;
 
-            _eraseVector = new double[MemoryCellSize];
-            _addVector = new double[MemoryCellSize];
+            EraseVector = new double[MemoryCellSize];
+            AddVector = new double[MemoryCellSize];
+        }
+
+        private WriteHead(
+            double[] eraseVector, 
+            double[] addVector, 
+            double[] lastWeights, 
+            AddressingData addressingData, 
+            int memoryLength, int memoryCellSize, int maxConvolutialShift) : base(memoryLength, memoryCellSize, maxConvolutialShift)
+        {
+            _outputNeuronCount = (MemoryCellSize * 3) + AddressingNeuronsCount;
+            EraseVector = eraseVector;
+            AddVector = addVector;
+            LastWeights = lastWeights;
+            ActualAddressingData = addressingData;
         }
 
         public void UpdateEraseVector(double[] writeHeadOutput)
         {
-            Array.Copy(writeHeadOutput, MemoryCellSize + AddressingNeuronsCount, _eraseVector, 0, MemoryCellSize);
+            Array.Copy(writeHeadOutput, MemoryCellSize + AddressingNeuronsCount, EraseVector, 0, MemoryCellSize);
         }
 
         public void UpdateAddVector(double[] writeHeadOutput)
         {
-            Array.Copy(writeHeadOutput, (MemoryCellSize * 2) + AddressingNeuronsCount, _addVector, 0, MemoryCellSize);
+            Array.Copy(writeHeadOutput, (MemoryCellSize * 2) + AddressingNeuronsCount, AddVector, 0, MemoryCellSize);
         }
 
         public void UpdateMemory(NtmMemory memory)
         {
             double[] weightVector = GetWeightVector(memory);
-            memory.Write(weightVector, _eraseVector, _addVector);
+            LastWeights = weightVector;
+            memory.Write(weightVector, EraseVector, AddVector);
+        }
+
+        public WriteHead Clone()
+        {
+            return new WriteHead(
+                ArrayHelper.CloneArray(EraseVector), 
+                ArrayHelper.CloneArray(AddVector), 
+                ArrayHelper.CloneArray(LastWeights), 
+                ActualAddressingData.Clone(), 
+                MemoryLength, MemoryCellSize, MaxConvolutialShift);
         }
     }
 }
