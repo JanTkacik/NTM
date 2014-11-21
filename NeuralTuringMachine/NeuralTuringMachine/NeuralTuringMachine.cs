@@ -219,7 +219,11 @@ namespace NeuralTuringMachine
                 writeHeadClone.Add(head.Clone());
             }
 
-            ControllerOutput controllerOutputClone = LastControllerOutput.Clone();
+            ControllerOutput controllerOutputClone = null;
+            if (LastControllerOutput != null)
+            {
+                controllerOutputClone = LastControllerOutput.Clone();
+            }
 
             return new NeuralTuringMachine(
                 _inputCount, 

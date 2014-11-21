@@ -31,7 +31,6 @@ namespace NeuralTuringMachine.GeneticsOptimalization
             return new NonNegativeDoubleArrayChromosome(this);
         }
 
-
         public override void Crossover(IChromosome pair)
         {
             NonNegativeDoubleArrayChromosome p = (NonNegativeDoubleArrayChromosome)pair;
@@ -52,6 +51,19 @@ namespace NeuralTuringMachine.GeneticsOptimalization
                 Array.Copy(p.Value, crossOverPoint, val, crossOverPoint, crossOverLength);
                 // copy temp to the second
                 Array.Copy(temp, 0, p.Value, crossOverPoint, crossOverLength);
+            }
+        }
+
+        public override void Mutate()
+        {
+            base.Mutate();
+            int length = val.Length;
+            for (int i = 0; i < length; i++)
+            {
+                while (val[i] > 1)
+                {
+                    val[i] = rand.NextDouble();
+                }
             }
         }
     }

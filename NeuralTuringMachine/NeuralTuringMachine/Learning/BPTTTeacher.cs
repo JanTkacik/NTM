@@ -1,5 +1,4 @@
 ﻿using System;
-using AForge;
 using AForge.Genetic;
 using AForge.Math.Random;
 using AForge.Neuro;
@@ -134,7 +133,7 @@ namespace NeuralTuringMachine.Learning
             Population population =
                 new Population(
                     100,
-                    new NonNegativeDoubleArrayChromosome(new UniformGenerator(new Range(0, 1)), new UniformGenerator(new Range(0, 1)), new UniformGenerator(new Range(0, 1)), chromosomeLength),
+                    new NonNegativeDoubleArrayChromosome(new UniformOneGenerator(), new UniformOneGenerator(), new UniformOneGenerator(), chromosomeLength),
                     new IdealWriteHeadOutputFitnessFunction(idealMemoryContent, lastWeights, currentNTM.MaxConvolutialShift, currentNTM.Memory),
                     new RouletteWheelSelection());
 
@@ -147,7 +146,7 @@ namespace NeuralTuringMachine.Learning
             Population population =
                 new Population(
                     100,
-                    new NonNegativeDoubleArrayChromosome(new UniformGenerator(new Range(0, 1)), new UniformGenerator(new Range(0, 1)), new UniformGenerator(new Range(0, 1)), chromosomeLength),
+                    new NonNegativeDoubleArrayChromosome(new UniformOneGenerator(), new UniformOneGenerator(), new UniformOneGenerator(), chromosomeLength),
                     new IdealMemoryContentFitnessFunction(idealReadInput, readWeights, memoryCellCount, memoryVectorLength),
                     new RouletteWheelSelection());
 
@@ -161,7 +160,7 @@ namespace NeuralTuringMachine.Learning
             Population population =
                 new Population(
                     100,
-                    new NonNegativeDoubleArrayChromosome(new UniformGenerator(new Range(0, 1)), new UniformGenerator(new Range(0, 1)), new UniformGenerator(new Range(0, 1)), chromosomeLength), 
+                    new NonNegativeDoubleArrayChromosome(new UniformOneGenerator(), new UniformOneGenerator(),new UniformOneGenerator(), chromosomeLength), 
                     new IdealInputFitnessFunction(input, idealOutput, ntm.Controller),
                     new RouletteWheelSelection());
 

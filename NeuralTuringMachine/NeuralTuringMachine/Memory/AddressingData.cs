@@ -20,7 +20,7 @@ namespace NeuralTuringMachine.Memory
             _beta = output[keyVectorLength];
             _g = output[keyVectorLength + 1];
             Array.Copy(output, keyVectorLength + 2, _s, 0, convShiftLen);
-            _gama = output[keyVectorLength + convShiftLen + 3];
+            _gama = output[keyVectorLength + convShiftLen + 2];
 
             NormalizeConvolutionVector();
         }

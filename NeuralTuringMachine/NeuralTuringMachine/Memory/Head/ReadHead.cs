@@ -1,5 +1,4 @@
-﻿using System;
-using NeuralTuringMachine.Misc;
+﻿using NeuralTuringMachine.Misc;
 
 namespace NeuralTuringMachine.Memory.Head
 {
@@ -31,7 +30,11 @@ namespace NeuralTuringMachine.Memory.Head
 
         public ReadHead Clone()
         {
-            return new ReadHead(ArrayHelper.CloneArray(LastWeights), ActualAddressingData.Clone(), MemoryLength, MemoryCellSize, MaxConvolutialShift);
+            if (ActualAddressingData != null)
+            {
+                return new ReadHead(ArrayHelper.CloneArray(LastWeights), ActualAddressingData.Clone(), MemoryLength, MemoryCellSize, MaxConvolutialShift);
+            }
+            return new ReadHead(ArrayHelper.CloneArray(LastWeights), null, MemoryLength, MemoryCellSize, MaxConvolutialShift);
         }
     }
 }

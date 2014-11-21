@@ -54,12 +54,21 @@ namespace NeuralTuringMachine.Memory.Head
 
         public WriteHead Clone()
         {
+            if (ActualAddressingData != null)
+            {
+                return new WriteHead(
+                    ArrayHelper.CloneArray(EraseVector),
+                    ArrayHelper.CloneArray(AddVector),
+                    ArrayHelper.CloneArray(LastWeights),
+                    ActualAddressingData.Clone(),
+                    MemoryLength, MemoryCellSize, MaxConvolutialShift);
+            }
             return new WriteHead(
-                ArrayHelper.CloneArray(EraseVector), 
-                ArrayHelper.CloneArray(AddVector), 
-                ArrayHelper.CloneArray(LastWeights), 
-                ActualAddressingData.Clone(), 
-                MemoryLength, MemoryCellSize, MaxConvolutialShift);
+                    ArrayHelper.CloneArray(EraseVector),
+                    ArrayHelper.CloneArray(AddVector),
+                    ArrayHelper.CloneArray(LastWeights),
+                    null,
+                    MemoryLength, MemoryCellSize, MaxConvolutialShift);
         }
     }
 }
