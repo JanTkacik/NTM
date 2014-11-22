@@ -1,43 +1,45 @@
 ﻿using System;
+using System.Text;
+using NeuralTuringMachine.Memory.Head;
+using NeuralTuringMachine.Misc;
 
 namespace NeuralTuringMachine.Memory
 {
     public class NtmMemory
     {
-        public int CellCount { get; private set; }
-        public int MemoryVectorLength { get; private set; }
+        public MemorySettings MemorySettings { get; private set; }
         private readonly double[][] _memory;
+        private static readonly Random Rand = new Random();
 
-        public NtmMemory(int memoryCellCount, int memoryVectorLength)
+        public NtmMemory(MemorySettings settings)
         {
-            CellCount = memoryCellCount;
-            MemoryVectorLength = memoryVectorLength;
+            MemorySettings = settings;
+            int memoryCellCount = MemorySettings.MemoryCellCount;
+            int memoryVectorLength = MemorySettings.MemoryVectorLength;
+
             _memory = new double[memoryCellCount][];
-            for (int i = 0; i < CellCount; i++) 
+            for (int i = 0; i < memoryCellCount; i++) 
             {
-                _memory[i] = new double[MemoryVectorLength];
+                _memory[i] = new double[memoryVectorLength];
             }
         }
 
-        private NtmMemory(int memoryCellCount, int memoryVectorLength, double[][] memory) : this(memoryCellCount, memoryVectorLength)
+        private NtmMemory(MemorySettings settings, double[][] memory)
         {
-            for (int i = 0; i < CellCount; i++)
-            {
-                for (int j = 0; j < MemoryVectorLength; j++)
-                {
-                    _memory[i][j] = memory[i][j];
-                }
-            }
+            MemorySettings = settings;
+            _memory = memory;
         }
 
         //CONVEX COMBINATION
         public double[] Read(double[] weightVector)
         {
-            double[] readVector = new double[MemoryVectorLength];
+            int memoryCellCount = MemorySettings.MemoryCellCount;
+            int memoryVectorLength = MemorySettings.MemoryVectorLength;
+            double[] readVector = new double[memoryVectorLength];
 
-            for (int i = 0; i < CellCount; i++)
+            for (int i = 0; i < memoryCellCount; i++)
             {
-                for (int j = 0; j < MemoryVectorLength; j++)
+                for (int j = 0; j < memoryVectorLength; j++)
                 {
                     readVector[j] = weightVector[i] * _memory[i][j];
                 }
@@ -54,9 +56,11 @@ namespace NeuralTuringMachine.Memory
 
         private void Erase(double[] weightVector, double[] eraseVector)
         {
-            for (int i = 0; i < CellCount; i++)
+            int memoryCellCount = MemorySettings.MemoryCellCount;
+            int memoryVectorLength = MemorySettings.MemoryVectorLength;
+            for (int i = 0; i < memoryCellCount; i++)
             {
-                for (int j = 0; j < MemoryVectorLength; j++)
+                for (int j = 0; j < memoryVectorLength; j++)
                 {
                     _memory[i][j] = _memory[i][j] * (1 - (eraseVector[j] * weightVector[i]));
                 }
@@ -65,9 +69,11 @@ namespace NeuralTuringMachine.Memory
 
         private void Add(double[] weightVector, double[] addVector)
         {
-            for (int i = 0; i < CellCount; i++)
+            int memoryCellCount = MemorySettings.MemoryCellCount;
+            int memoryVectorLength = MemorySettings.MemoryVectorLength;
+            for (int i = 0; i < memoryCellCount; i++)
             {
-                for (int j = 0; j < MemoryVectorLength; j++)
+                for (int j = 0; j < memoryVectorLength; j++)
                 {
                     _memory[i][j] = _memory[i][j] + (weightVector[i] * addVector[j]);
                 }
@@ -81,42 +87,106 @@ namespace NeuralTuringMachine.Memory
 
         public NtmMemory Clone()
         {
-            return new NtmMemory(CellCount, MemoryVectorLength, _memory);
+            return new NtmMemory(MemorySettings, ArrayHelper.CloneArray(_memory));
         }
 
         public void SetMemoryContent(double[] memoryContent)
         {
+            int memoryCellCount = MemorySettings.MemoryCellCount;
+            int memoryVectorLength = MemorySettings.MemoryVectorLength;
             int offset = 0;
-            for (int i = 0; i < CellCount; i++)
+            for (int i = 0; i < memoryCellCount; i++)
             {
-                Array.Copy(memoryContent, offset, _memory[i], 0, MemoryVectorLength);
-                offset += MemoryVectorLength;
+                Array.Copy(memoryContent, offset, _memory[i], 0, memoryVectorLength);
+                offset += memoryVectorLength;
             }
         }
 
         public double[] GetDataAfterWrite(double[] weightVector, double[] eraseVector, double[] addVector)
         {
-            double[] returnData = new double[MemoryVectorLength * CellCount];
+            int memoryCellCount = MemorySettings.MemoryCellCount;
+            int memoryVectorLength = MemorySettings.MemoryVectorLength;
+            double[] returnData = new double[memoryVectorLength * memoryCellCount];
             
             //ERASE
-            for (int i = 0; i < CellCount; i++)
+            for (int i = 0; i < memoryCellCount; i++)
             {
-                for (int j = 0; j < MemoryVectorLength; j++)
+                for (int j = 0; j < memoryVectorLength; j++)
                 {
-                    returnData[(i * MemoryVectorLength) + j] = _memory[i][j] * (1 - (eraseVector[j] * weightVector[i]));
+                    returnData[(i * memoryVectorLength) + j] = _memory[i][j] * (1 - (eraseVector[j] * weightVector[i]));
                 }
             }
 
             //ADD
-            for (int i = 0; i < CellCount; i++)
+            for (int i = 0; i < memoryCellCount; i++)
             {
-                for (int j = 0; j < MemoryVectorLength; j++)
+                for (int j = 0; j < memoryVectorLength; j++)
                 {
-                    returnData[(i * MemoryVectorLength) + j] = returnData[(i * MemoryVectorLength) + j] + (weightVector[i] * addVector[j]);
+                    returnData[(i * memoryVectorLength) + j] = returnData[(i * memoryVectorLength) + j] + (weightVector[i] * addVector[j]);
                 }
             }
 
             return returnData;
+        }
+
+        public void ResetMemory()
+        {
+            int memoryCellCount = MemorySettings.MemoryCellCount;
+            int memoryVectorLength = MemorySettings.MemoryVectorLength;
+            for (int i = 0; i < memoryCellCount; i++)
+            {
+                for (int j = 0; j < memoryVectorLength; j++)
+                {
+                    _memory[i][j] = 0;
+                }
+            }
+        }
+
+        public void Randomize()
+        {
+            int memoryCellCount = MemorySettings.MemoryCellCount;
+            int memoryVectorLength = MemorySettings.MemoryVectorLength;
+            for (int i = 0; i < memoryCellCount; i++)
+            {
+                for (int j = 0; j < memoryVectorLength; j++)
+                {
+                    _memory[i][j] = Rand.NextDouble();
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            int memoryCellCount = MemorySettings.MemoryCellCount;
+            int memoryVectorLength = MemorySettings.MemoryVectorLength;
+            StringBuilder builder = new StringBuilder();
+            AppendTableRowSeparator(builder);
+            for (int i = 0; i < memoryCellCount; i++)
+            {
+                builder.Append("|");
+                builder.AppendFormat("{0:00}",i);
+                builder.Append("|");
+                for (int j = 0; j < memoryVectorLength; j++)
+                {
+                    builder.AppendFormat("{0:0.000}", _memory[i][j]);
+                    builder.Append("|");
+                }
+                builder.Append(Environment.NewLine);
+                AppendTableRowSeparator(builder);
+            }
+
+            return builder.ToString();
+        }
+
+        private void AppendTableRowSeparator(StringBuilder builder)
+        {
+            int memoryVectorLength = MemorySettings.MemoryVectorLength;
+            builder.Append("+--+");
+            for (int i = 0; i < memoryVectorLength; i++)
+            {
+                builder.Append("-----+");
+            }
+            builder.Append(Environment.NewLine);
         }
     }
 }

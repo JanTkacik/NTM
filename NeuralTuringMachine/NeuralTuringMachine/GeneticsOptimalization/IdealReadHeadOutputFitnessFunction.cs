@@ -12,11 +12,11 @@ namespace NeuralTuringMachine.GeneticsOptimalization
         private readonly ReadHeadWithFixedLastWeights _readHead;
         private readonly IDistance _distance;
 
-        public IdealReadHeadOutputFitnessFunction(double[] idealWeightVector, double[] lastWeightVector, int maxConvolutionalShift, NtmMemory memory)
+        public IdealReadHeadOutputFitnessFunction(double[] idealWeightVector, double[] lastWeightVector, NtmMemory memory)
         {
             _idealWeightVector = idealWeightVector;
             _memory = memory;
-            _readHead = new ReadHeadWithFixedLastWeights(lastWeightVector, memory.CellCount, memory.MemoryVectorLength, maxConvolutionalShift);
+            _readHead = new ReadHeadWithFixedLastWeights(lastWeightVector, memory.MemorySettings);
             _distance = new EuclideanDistance();
         }
 

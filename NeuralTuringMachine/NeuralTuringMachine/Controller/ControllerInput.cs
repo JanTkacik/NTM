@@ -31,8 +31,14 @@ namespace NeuralTuringMachine.Controller
 
         public ControllerInput(double[] dataInput, int controllerInputLength)
         {
+            Random rand = new Random(DateTime.Now.Millisecond);
             Input = new double[controllerInputLength];
             Array.Copy(dataInput, Input, dataInput.Length);
+            int offset = dataInput.Length;
+            for (int i = offset; i < controllerInputLength; i++)
+            {
+                Input[i] = rand.NextDouble();
+            }
         }
     }
 }

@@ -2,7 +2,7 @@
 {
     public class WriteHeadWithFixedLastWeights : WriteHead
     {
-        public WriteHeadWithFixedLastWeights(double[] lastWeights, int memoryLength, int memoryCellSize, int maxConvShift) : base(memoryLength, memoryCellSize, maxConvShift)
+        public WriteHeadWithFixedLastWeights(double[] lastWeights, MemorySettings settings) : base(settings)
         {
             LastWeights = lastWeights;
         }

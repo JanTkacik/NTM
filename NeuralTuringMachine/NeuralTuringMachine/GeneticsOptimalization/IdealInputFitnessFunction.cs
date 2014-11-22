@@ -8,18 +8,18 @@ namespace NeuralTuringMachine.GeneticsOptimalization
     public class IdealInputFitnessFunction : IFitnessFunction
     {
         private readonly double[] _input;
-        private readonly double[] _idealOutput;
-        private readonly Network _ntm;
+        private readonly ControllerOutput _idealControllerOutput;
+        private readonly NeuralTuringMachine _machine;
+        private readonly Network _controller;
         private readonly int _controllerInputsCount;
-        private readonly IDistance _distance;
 
-        public IdealInputFitnessFunction(double[] input, double[] idealOutput, Network network)
+        public IdealInputFitnessFunction(double[] input, ControllerOutput idealControllerOutput, NeuralTuringMachine machine)
         {
             _input = input;
-            _idealOutput = idealOutput;
-            _ntm = network;
-            _controllerInputsCount = network.InputsCount;
-            _distance = new EuclideanDistance();
+            _idealControllerOutput = idealControllerOutput;
+            _machine = machine;
+            _controller = _machine.Controller;
+            _controllerInputsCount = _controller.InputsCount;
         }
 
         public double Evaluate(IChromosome chromosome)
@@ -28,10 +28,9 @@ namespace NeuralTuringMachine.GeneticsOptimalization
             double[] readFromMemoryInput = doubleArrayChromosome.Value;
 
             ControllerInput input = new ControllerInput(_input, readFromMemoryInput, _controllerInputsCount);
-            double[] controllerOutput = _ntm.Compute(input.Input);
+            ControllerOutput computedOutput = new ControllerOutput(_controller.Compute(input.Input), _machine.OutputCount,  _machine.Memory.MemorySettings);
 
-            double distance = _distance.GetDistance(controllerOutput, _idealOutput);
-            return 1 / (1 + distance);
+            return ControllerOutput.GetSimilarityScore(computedOutput, _idealControllerOutput);
         }
     }
 }

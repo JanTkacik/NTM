@@ -1,6 +1,7 @@
 ﻿using AForge.Genetic;
 using AForge.Math.Metrics;
 using NeuralTuringMachine.Memory;
+using NeuralTuringMachine.Memory.Head;
 
 namespace NeuralTuringMachine.GeneticsOptimalization
 {
@@ -11,11 +12,11 @@ namespace NeuralTuringMachine.GeneticsOptimalization
         private readonly NtmMemory _memory;
         private readonly IDistance _distance;
 
-        public IdealMemoryContentFitnessFunction(double[] idealReadData, double[] readWeights, int memoryCellCount, int memoryVectorLength)
+        public IdealMemoryContentFitnessFunction(double[] idealReadData, double[] readWeights, MemorySettings memorySettings)
         {
             _idealReadData = idealReadData;
             _readWeights = readWeights;
-            _memory = new NtmMemory(memoryCellCount, memoryVectorLength);
+            _memory = new NtmMemory(memorySettings);
             _distance = new EuclideanDistance();
         }
 

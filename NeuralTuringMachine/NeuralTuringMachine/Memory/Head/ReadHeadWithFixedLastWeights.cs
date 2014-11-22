@@ -2,7 +2,7 @@
 {
     public class ReadHeadWithFixedLastWeights : ReadHead
     {
-        public ReadHeadWithFixedLastWeights(double[] lastWeights, int memoryLength, int memoryCellSize, int maxConvolutialShift) : base(memoryLength, memoryCellSize, maxConvolutialShift)
+        public ReadHeadWithFixedLastWeights(double[] lastWeights, MemorySettings settings) : base(settings)
         {
             LastWeights = lastWeights;
         }

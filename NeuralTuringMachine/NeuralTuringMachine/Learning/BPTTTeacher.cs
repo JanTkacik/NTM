@@ -5,7 +5,8 @@ using AForge.Neuro;
 using AForge.Neuro.Learning;
 using NeuralTuringMachine.Controller;
 using NeuralTuringMachine.GeneticsOptimalization;
-using BackPropagationLearning = NeuralTuringMachine.Misc.BackPropagationLearning;
+using NeuralTuringMachine.Memory;
+using NeuralTuringMachine.Memory.Head;
 
 namespace NeuralTuringMachine.Learning
 {
@@ -13,15 +14,13 @@ namespace NeuralTuringMachine.Learning
     {
         private readonly NeuralTuringMachine _originalMachine;
         private readonly double _learningRate;
-        private readonly double _momentum;
         private NeuralTuringMachine[] _bpttMachines;
         private double[][] _ntmOutputs;
 
-        public BpttTeacher(NeuralTuringMachine machine, double learningRate = 0.5, double momentum = 0.1)
+        public BpttTeacher(NeuralTuringMachine machine, double learningRate = 0.01)
         {
             _originalMachine = machine;
             _learningRate = learningRate;
-            _momentum = momentum;
         }
 
         public void Run(double[][] inputs, double[][] outputs)
@@ -30,8 +29,11 @@ namespace NeuralTuringMachine.Learning
             int inputCount = inputs.Length;
             _bpttMachines = new NeuralTuringMachine[inputCount];
             _ntmOutputs = new double[inputCount][];
-            double[][] _idealOutputs = new double[inputCount][];
+            double[][] idealOutputs = new double[inputCount][];
             
+            //Reset memory before forward propagation
+            _originalMachine.Memory.ResetMemory();
+
             //Forward propagation
             _bpttMachines[0] = _originalMachine.Clone();
             for (int i = 0; i < inputCount; i++)
@@ -61,17 +63,17 @@ namespace NeuralTuringMachine.Learning
                 }
                 else
                 {
-                    double[] idealReadInput = FindIdealReadInput(inputs[i + 1], _idealOutputs[i + 1], _bpttMachines[i + 1]);
+                    double[] idealReadInput = FindIdealReadInput(inputs[i + 1], new ControllerOutput(idealOutputs[i + 1], dataOutputLength, _bpttMachines[i + 1].Memory.MemorySettings), _bpttMachines[i + 1]);
                     
                     //READ HEAD
                     //TODO remove hack - works only for one read head
-                    double[] readHeadIdealWeightVector = FindReadHeadIdealWeightVector(idealReadInput, _bpttMachines[i + 1]);
-                    double[] readHeadIdealOutput = FindReadHeadIdealOutput(readHeadIdealWeightVector, _bpttMachines[i].GetReadHead(0).LastWeights, _bpttMachines[i + 1]);
+                    double[] readHeadIdealWeightVector = FindReadHeadIdealWeightVector(idealReadInput, _bpttMachines[i + 1].Memory);
+                    double[] readHeadIdealOutput = FindReadHeadIdealOutput(readHeadIdealWeightVector, _bpttMachines[i].GetReadHead(0).LastWeights, _bpttMachines[i + 1].Memory);
 
                     //WRITE HEAD
                     //TODO remove hack - works only for one write head
-                    double[] idealMemoryContent = FindIdealMemoryContent(idealReadInput, _bpttMachines[i + 1].GetReadHead(0).LastWeights, _bpttMachines[i].Memory.CellCount, _bpttMachines[i].Memory.MemoryVectorLength);
-                    double[] writeHeadIdealOutput = FindWriteHeadIdealOutput(idealMemoryContent, _bpttMachines[i].GetWriteHead(0).LastWeights, _bpttMachines[i]);
+                    double[] idealMemoryContent = FindIdealMemoryContent(idealReadInput, _bpttMachines[i + 1].GetReadHead(0).LastWeights, _bpttMachines[i].Memory.MemorySettings);
+                    double[] writeHeadIdealOutput = FindWriteHeadIdealOutput(idealMemoryContent, _bpttMachines[i].GetWriteHead(0).LastWeights, _bpttMachines[i].Memory);
 
                     int offset = dataOutputLength;
                     Array.Copy(readHeadIdealOutput, 0, output, offset, readHeadIdealOutput.Length);
@@ -79,21 +81,28 @@ namespace NeuralTuringMachine.Learning
                     Array.Copy(writeHeadIdealOutput, 0, output, offset, writeHeadIdealOutput.Length);
                 }
 
-                _idealOutputs[i] = output;
+                idealOutputs[i] = output;
             }
+
+            //Console.WriteLine("Ideal input error 1: {0}", idealReadInputErrors.Average());
+            //Console.WriteLine("Ideal input error 2: {0}", idealReadInputErrors2.Average());
 
             //Backward error propagation
             for (int i = 0; i < inputCount; i++)
             {
-                BackPropagationLearning bpTeacher = new BackPropagationLearning(_bpttMachines[i].Controller)
-                {
-                    LearningRate = _learningRate,
-                    Momentum = _momentum
-                };
+                ResilientBackpropagationLearning bpTeacher = new ResilientBackpropagationLearning(_bpttMachines[i].Controller)
+                    {
+                        LearningRate = _learningRate
+                    };
+                //BackPropagationLearning bpTeacher = new BackPropagationLearning(_bpttMachines[i].Controller)
+                //{
+                //    LearningRate = _learningRate,
+                //    Momentum = _momentum
+                //};
 
                 ControllerInput input = _bpttMachines[i].GetInputForController(inputs[i], i > 0 ? _bpttMachines[i - 1].LastControllerOutput : null);
-
-                bpTeacher.Run(input.Input, _idealOutputs[i]);
+                
+                bpTeacher.Run(input.Input, idealOutputs[i]);
             }
 
             //Average the networks
@@ -142,67 +151,67 @@ namespace NeuralTuringMachine.Learning
             return average/controllerCount;
         }
 
-        private double[] FindWriteHeadIdealOutput(double[] idealMemoryContent, double[] lastWeights, NeuralTuringMachine currentNTM)
+        private double[] FindWriteHeadIdealOutput(double[] idealMemoryContent, double[] lastWeights, NtmMemory currentMemory)
         {
-            int chromosomeLength = currentNTM.WriteHeadLength;
+            int chromosomeLength = currentMemory.MemorySettings.WriteHeadLength;
             Population population =
                 new Population(
                     100,
                     new NonNegativeDoubleArrayChromosome(new UniformOneGenerator(), new UniformOneGenerator(), new UniformOneGenerator(), chromosomeLength),
-                    new IdealWriteHeadOutputFitnessFunction(idealMemoryContent, lastWeights, currentNTM.MaxConvolutialShift, currentNTM.Memory),
+                    new IdealWriteHeadOutputFitnessFunction(idealMemoryContent, lastWeights, currentMemory),
                     new RouletteWheelSelection());
 
             return RunGenetic(population);
         }
 
-        private double[] FindIdealMemoryContent(double[] idealReadInput, double[] readWeights, int memoryCellCount, int memoryVectorLength)
+        private double[] FindIdealMemoryContent(double[] idealReadInput, double[] readWeights, MemorySettings settings)
         {
-            int chromosomeLength = memoryCellCount*memoryVectorLength;
+            int chromosomeLength = settings.MemoryCellCount * settings.MemoryVectorLength;
             Population population =
                 new Population(
                     100,
                     new NonNegativeDoubleArrayChromosome(new UniformOneGenerator(), new UniformOneGenerator(), new UniformOneGenerator(), chromosomeLength),
-                    new IdealMemoryContentFitnessFunction(idealReadInput, readWeights, memoryCellCount, memoryVectorLength),
+                    new IdealMemoryContentFitnessFunction(idealReadInput, readWeights, settings),
                     new RouletteWheelSelection());
 
             return RunGenetic(population);
         }
         
 
-        public double[] FindIdealReadInput(double[] input, double[] idealOutput, NeuralTuringMachine ntm)
+        public double[] FindIdealReadInput(double[] input, ControllerOutput idealOutput, NeuralTuringMachine ntm)
         {
             int chromosomeLength = ntm.Controller.InputsCount - ntm.InputCount;
             Population population =
                 new Population(
-                    100,
+                    10,
                     new NonNegativeDoubleArrayChromosome(new UniformOneGenerator(), new UniformOneGenerator(),new UniformOneGenerator(), chromosomeLength), 
-                    new IdealInputFitnessFunction(input, idealOutput, ntm.Controller),
+                    new IdealInputFitnessFunction(input, idealOutput, ntm),
                     new RouletteWheelSelection());
 
             return RunGenetic(population);
         }
 
-        public double[] FindReadHeadIdealWeightVector(double[] nextIdealReadInput, NeuralTuringMachine nextTM)
+        public double[] FindReadHeadIdealWeightVector(double[] nextIdealReadInput, NtmMemory nextMemory)
         {
-            int chromosomeLength = nextTM.Memory.CellCount;
+            int chromosomeLength = nextMemory.MemorySettings.MemoryCellCount;
             Population population =
                 new Population(
                     100,
                     new NonNegativeDoubleArrayChromosome(new UniformOneGenerator(), new UniformOneGenerator(),new UniformOneGenerator(), chromosomeLength),
-                    new IdealReadWeightVectorFitnessFunction(nextIdealReadInput, nextTM.Memory),
+                    new IdealReadWeightVectorFitnessFunction(nextIdealReadInput, nextMemory),
                     new RouletteWheelSelection());
 
             return RunGenetic(population);
         }
 
-        private double[] FindReadHeadIdealOutput(double[] idealWeightVector, double[] lastWeightVector, NeuralTuringMachine nextTM)
+        private double[] FindReadHeadIdealOutput(double[] idealWeightVector, double[] lastWeightVector, NtmMemory nextMemory)
         {
-            int chromosomeLength = nextTM.ReadHeadLength;
+            int chromosomeLength = nextMemory.MemorySettings.ReadHeadLength;
             Population population =
                 new Population(
-                    100,
+                    30,
                     new NonNegativeDoubleArrayChromosome(new UniformOneGenerator(), new UniformOneGenerator(), new UniformOneGenerator(), chromosomeLength),
-                    new IdealReadHeadOutputFitnessFunction(idealWeightVector, lastWeightVector, nextTM.MaxConvolutialShift, nextTM.Memory),
+                    new IdealReadHeadOutputFitnessFunction(idealWeightVector, lastWeightVector, nextMemory),
                     new RouletteWheelSelection());
 
             return RunGenetic(population);
@@ -212,8 +221,8 @@ namespace NeuralTuringMachine.Learning
         {
             int stagnateStreak = 0;
             double lastMax = 0;
-
-            for (int i = 0; i < 100000; i++)
+            int i;
+            for (i = 0; i < 100000; i++)
             {
                 population.RunEpoch();
                 double fitnessMax = population.FitnessMax;
@@ -231,7 +240,6 @@ namespace NeuralTuringMachine.Learning
                 {
                     break;
                 }
-                //Console.WriteLine("Genetics: iteration - " + i + " fitness avg - " + population.FitnessAvg + " fitness max - " + fitnessMax);
             }
 
             NonNegativeDoubleArrayChromosome bestChromosome = (NonNegativeDoubleArrayChromosome)population.BestChromosome;

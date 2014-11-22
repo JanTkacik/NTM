@@ -12,12 +12,12 @@ namespace NeuralTuringMachine.GeneticsOptimalization
         private readonly IDistance _distance;
         private readonly WriteHeadWithFixedLastWeights _writeHead;
 
-        public IdealWriteHeadOutputFitnessFunction(double[] idealMemoryContent, double[] lastWeights, int maxConvShift, NtmMemory currentMemory)
+        public IdealWriteHeadOutputFitnessFunction(double[] idealMemoryContent, double[] lastWeights, NtmMemory currentMemory)
         {
             _idealMemoryContent = idealMemoryContent;
             _currentMemory = currentMemory;
             _distance = new EuclideanDistance();
-            _writeHead = new WriteHeadWithFixedLastWeights(lastWeights, currentMemory.CellCount, currentMemory.MemoryVectorLength, maxConvShift);
+            _writeHead = new WriteHeadWithFixedLastWeights(lastWeights, currentMemory.MemorySettings);
         }
 
         public double Evaluate(IChromosome chromosome)

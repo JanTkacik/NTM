@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{69011C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTMConsoleTestClient", "NTMConsoleTestClient\NTMConsoleTestClient.csproj", "{F9AA3FB2-4221-487D-A4E1-6CD4451172BE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuralTuringMachine.Tests", "NeuralTuringMachine.Tests\NeuralTuringMachine.Tests.csproj", "{48C0D0B7-9DAD-4FEE-88D7-9AD47494D609}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{F9AA3FB2-4221-487D-A4E1-6CD4451172BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9AA3FB2-4221-487D-A4E1-6CD4451172BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9AA3FB2-4221-487D-A4E1-6CD4451172BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48C0D0B7-9DAD-4FEE-88D7-9AD47494D609}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48C0D0B7-9DAD-4FEE-88D7-9AD47494D609}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48C0D0B7-9DAD-4FEE-88D7-9AD47494D609}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48C0D0B7-9DAD-4FEE-88D7-9AD47494D609}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

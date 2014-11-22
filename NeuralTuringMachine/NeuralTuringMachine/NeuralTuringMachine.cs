@@ -11,13 +11,7 @@ namespace NeuralTuringMachine
     public class NeuralTuringMachine
     {
         private readonly int _inputCount;
-        private readonly int _outputCount;
-        private readonly int _readHeadCount;
-        private readonly int _writeHeadCount;
-        private readonly int _hiddenNeuronsCount;
-        private readonly int _hiddenLayersCount;
-        private readonly int _memoryCellCount;
-        private readonly int _memoryVectorLength;
+        public int OutputCount { get; private set; }
         //INPUT IS IN ORDER "Input" "ReadHead1" "ReadHead2" ... "ReadHeadN"
         //OUTPUT IS IN ORDER "Output" "ReadHead1" "ReadHead2" ... "ReadHeadN" "WriteHead1" "WriteHead2" ... "WriteHeadN"
         //HEAD ADDRESSING DATA IS IN ORDER "KeyVector" "beta" "g" "s-vector" "gama"
@@ -43,58 +37,32 @@ namespace NeuralTuringMachine
             get { return _inputCount; }
         }
         
-        public int ReadHeadLength { get; private set; }
-        
-        public int WriteHeadLength { get; private set; }
-        
-        public int MaxConvolutialShift { get; private set; }
-        
         //TODO REFACTOR
         public NeuralTuringMachine(
             int inputCount,
             int outputCount, 
-            int readHeadCount, 
-            int writeHeadCount, 
             int hiddenNeuronsCount, 
             int hiddenLayersCount, 
-            int memoryCellCount, 
-            int memoryVectorLength,
-            int maxConvolutialShift)
+            MemorySettings settings)
         {
             _inputCount = inputCount;
-            _outputCount = outputCount;
-            _readHeadCount = readHeadCount;
-            _writeHeadCount = writeHeadCount;
-            _hiddenNeuronsCount = hiddenNeuronsCount;
-            _hiddenLayersCount = hiddenLayersCount;
-            _memoryCellCount = memoryCellCount;
-            _memoryVectorLength = memoryVectorLength;
-            MaxConvolutialShift = maxConvolutialShift;
-            _readHeads = new List<ReadHead>(readHeadCount);
-            _writeHeads = new List<WriteHead>(writeHeadCount);
+            OutputCount = outputCount;
+            _readHeads = new List<ReadHead>(settings.ReadHeadCount);
+            _writeHeads = new List<WriteHead>(settings.WriteHeadCount);
 
             InitializeReadHeads();
-            ReadHeadLength = _readHeads[0].OutputNeuronCount;
             InitializeWriteHeads();
-            WriteHeadLength = _writeHeads[0].OutputNeuronCount;
 
-            List<int> neuronsCounts = GetNeuronsCount();
-            _controllerInputCount = inputCount + (readHeadCount * memoryVectorLength);
+            List<int> neuronsCounts = GetNeuronsCount(hiddenLayersCount, hiddenNeuronsCount, settings);
+            _controllerInputCount = inputCount + (settings.ReadHeadCount * settings.MemoryVectorLength);
 
             _controller = new ActivationNetwork(new SigmoidFunction(), _controllerInputCount, neuronsCounts.ToArray());
-            Memory = new NtmMemory(memoryCellCount, memoryVectorLength);
+            Memory = new NtmMemory(settings);
         }
 
         private NeuralTuringMachine(
             int inputCount,
             int outputCount,
-            int readHeadCount,
-            int writeHeadCount,
-            int hiddenNeuronsCount,
-            int hiddenLayersCount,
-            int memoryCellCount,
-            int memoryVectorLength,
-            int maxConvolutialShift,
             Network controller,
             NtmMemory memory,
             List<ReadHead> readHeads,
@@ -102,38 +70,24 @@ namespace NeuralTuringMachine
             ControllerOutput lastControllerOutput)
         {
             _inputCount = inputCount;
-            _outputCount = outputCount;
-            _readHeadCount = readHeadCount;
-            _writeHeadCount = writeHeadCount;
-            _hiddenNeuronsCount = hiddenNeuronsCount;
-            _hiddenLayersCount = hiddenLayersCount;
-            _memoryCellCount = memoryCellCount;
-            _memoryVectorLength = memoryVectorLength;
-            MaxConvolutialShift = maxConvolutialShift;
-            _readHeads = new List<ReadHead>(readHeadCount);
-            _writeHeads = new List<WriteHead>(writeHeadCount);
+            OutputCount = outputCount;
 
             _readHeads = readHeads;
-            ReadHeadLength = _readHeads[0].OutputNeuronCount;
             _writeHeads = writeHeads;
-            WriteHeadLength = _writeHeads[0].OutputNeuronCount;
-
-            _controllerInputCount = inputCount + (readHeadCount * memoryVectorLength);
-
+            
             _controller = controller;
             Memory = memory;
 
             LastControllerOutput = lastControllerOutput;
         }
         
-        private List<int> GetNeuronsCount()
+        private List<int> GetNeuronsCount(int hiddenLayersCount, int hiddenNeuronsCount, MemorySettings settings)
         {
-            int outputNeuronsCount = _outputCount + _readHeads.Sum(head => head.OutputNeuronCount) +
-                                     _writeHeads.Sum(head => head.OutputNeuronCount);
-            List<int> neuronsCounts = new List<int>(_hiddenNeuronsCount + 1);
-            for (int i = 0; i < _hiddenLayersCount; i++)
+            int outputNeuronsCount = OutputCount + (settings.ReadHeadCount*settings.ReadHeadLength) + (settings.WriteHeadCount*settings.WriteHeadLength);
+            List<int> neuronsCounts = new List<int>(hiddenLayersCount + 1);
+            for (int i = 0; i < hiddenLayersCount; i++)
             {
-                neuronsCounts.Add(_hiddenNeuronsCount/_hiddenLayersCount);
+                neuronsCounts.Add(hiddenNeuronsCount / hiddenLayersCount);
             }
             neuronsCounts.Add(outputNeuronsCount);
             return neuronsCounts;
@@ -141,19 +95,21 @@ namespace NeuralTuringMachine
 
         private void InitializeWriteHeads()
         {
-            for (int i = 0; i < _writeHeadCount; i++)
+            MemorySettings memorySettings = Memory.MemorySettings;
+            int writeHeadCount = memorySettings.WriteHeadCount;
+            for (int i = 0; i < writeHeadCount; i++)
             {
-                WriteHead writeHead = new WriteHead(_memoryCellCount, _memoryVectorLength, MaxConvolutialShift);
-                _writeHeads.Add(writeHead);
+                _writeHeads.Add(new WriteHead(memorySettings));
             }
         }
 
         private void InitializeReadHeads()
         {
-            for (int i = 0; i < _readHeadCount; i++)
+            MemorySettings memorySettings = Memory.MemorySettings;
+            int readHeadCount = memorySettings.ReadHeadCount;
+            for (int i = 0; i < readHeadCount; i++)
             {
-                ReadHead readHead = new ReadHead(_memoryCellCount, _memoryVectorLength, MaxConvolutialShift);
-                _readHeads.Add(readHead);
+                _readHeads.Add(new ReadHead(memorySettings));
             }
         }
 
@@ -163,7 +119,7 @@ namespace NeuralTuringMachine
 
             ControllerInput ntmInput = GetInputForController(input, LastControllerOutput);
 
-            LastControllerOutput = new ControllerOutput(_controller.Compute(ntmInput.Input), _outputCount, _readHeadCount, ReadHeadLength, _writeHeadCount, WriteHeadLength);
+            LastControllerOutput = new ControllerOutput(_controller.Compute(ntmInput.Input), OutputCount, Memory.MemorySettings);
 
             return LastControllerOutput.DataOutput;
         }
@@ -185,10 +141,11 @@ namespace NeuralTuringMachine
 
         public ControllerInput GetInputForController(double[] input, ControllerOutput controllerOutput)
         {
+            int readHeadCount = Memory.MemorySettings.ReadHeadCount;
             if (controllerOutput != null)
             {
-                double[][] readHeadOutputs = new double[_readHeadCount][];
-                for (int i = 0; i < _readHeadCount; i++)
+                double[][] readHeadOutputs = new double[readHeadCount][];
+                for (int i = 0; i < readHeadCount; i++)
                 {
                     ReadHead readHead = _readHeads[i];
                     readHead.UpdateAddressingData(controllerOutput.ReadHeadsOutputs[i]);
@@ -227,14 +184,7 @@ namespace NeuralTuringMachine
 
             return new NeuralTuringMachine(
                 _inputCount, 
-                _outputCount, 
-                _readHeadCount, 
-                _writeHeadCount, 
-                _hiddenNeuronsCount, 
-                _hiddenLayersCount, 
-                _memoryCellCount, 
-                _memoryVectorLength, 
-                MaxConvolutialShift, 
+                OutputCount,  
                 networkClone, 
                 memoryClone,
                 readHeadsClone,

@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A07A9F3C-1D44-426E-834F-FDC55F09BB82}</ProjectGuid>
+    <ProjectGuid>{48C0D0B7-9DAD-4FEE-88D7-9AD47494D609}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NeuralTuringMachine</RootNamespace>
-    <AssemblyName>NeuralTuringMachine</AssemblyName>
+    <RootNamespace>NeuralTuringMachine.Tests</RootNamespace>
+    <AssemblyName>NeuralTuringMachine.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -32,17 +32,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AForge">
-      <HintPath>..\packages\AForge.2.2.5\lib\AForge.dll</HintPath>
-    </Reference>
-    <Reference Include="AForge.Genetic">
-      <HintPath>..\packages\AForge.Genetic.2.2.5\lib\AForge.Genetic.dll</HintPath>
-    </Reference>
-    <Reference Include="AForge.Math">
-      <HintPath>..\packages\AForge.Math.2.2.5\lib\AForge.Math.dll</HintPath>
-    </Reference>
-    <Reference Include="AForge.Neuro">
-      <HintPath>..\packages\AForge.Neuro.2.2.5\lib\AForge.Neuro.dll</HintPath>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -53,31 +44,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controller\ControllerInput.cs" />
-    <Compile Include="Controller\ControllerOutput.cs" />
-    <Compile Include="GeneticsOptimalization\IdealMemoryContentFitnessFunction.cs" />
-    <Compile Include="GeneticsOptimalization\IdealReadHeadOutputFitnessFunction.cs" />
-    <Compile Include="GeneticsOptimalization\IdealReadWeightVectorFitnessFunction.cs" />
-    <Compile Include="GeneticsOptimalization\IdealWriteHeadOutputFitnessFunction.cs" />
-    <Compile Include="GeneticsOptimalization\NonNegativeDoubleArrayChromosome.cs" />
-    <Compile Include="GeneticsOptimalization\IdealInputFitnessFunction.cs" />
-    <Compile Include="Learning\BPTTTeacher.cs" />
-    <Compile Include="Learning\GeneticTeacher.cs" />
-    <Compile Include="Memory\AddressingData.cs" />
-    <Compile Include="Memory\Head\Head.cs" />
-    <Compile Include="Memory\Head\MemorySettings.cs" />
-    <Compile Include="Memory\Head\ReadHeadWithFixedLastWeights.cs" />
-    <Compile Include="Memory\Head\WriteHeadWithFixedLastWeights.cs" />
-    <Compile Include="Misc\ArrayHelper.cs" />
-    <Compile Include="NeuralTuringMachine.cs" />
-    <Compile Include="Memory\NTMMemory.cs" />
-    <Compile Include="Performance\PerfMeter.cs" />
+    <Compile Include="MemoryAndAddressingTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Memory\Head\ReadHead.cs" />
-    <Compile Include="Memory\Head\WriteHead.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NeuralTuringMachine\NeuralTuringMachine.csproj">
+      <Project>{a07a9f3c-1d44-426e-834f-fdc55f09bb82}</Project>
+      <Name>NeuralTuringMachine</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
