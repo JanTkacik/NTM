@@ -17,7 +17,7 @@ namespace NeuralTuringMachine.Learning
         private NeuralTuringMachine[] _bpttMachines;
         private double[][] _ntmOutputs;
 
-        public BpttTeacher(NeuralTuringMachine machine, double learningRate = 0.01)
+        public BpttTeacher(NeuralTuringMachine machine, double learningRate = 0.005)
         {
             _originalMachine = machine;
             _learningRate = learningRate;
@@ -32,7 +32,7 @@ namespace NeuralTuringMachine.Learning
             double[][] idealOutputs = new double[inputCount][];
             
             //Reset memory before forward propagation
-            _originalMachine.Memory.ResetMemory();
+            _originalMachine.Memory.Randomize();
 
             //Forward propagation
             _bpttMachines[0] = _originalMachine.Clone();
@@ -45,7 +45,7 @@ namespace NeuralTuringMachine.Learning
                     _bpttMachines[i + 1] = _bpttMachines[i].Clone();
                 }
             }
-            
+
             //Find ideal outputs
             for (int i = inputCount - 1; i >= 0; i--)
             {
@@ -183,8 +183,8 @@ namespace NeuralTuringMachine.Learning
             int chromosomeLength = ntm.Controller.InputsCount - ntm.InputCount;
             Population population =
                 new Population(
-                    10,
-                    new NonNegativeDoubleArrayChromosome(new UniformOneGenerator(), new UniformOneGenerator(),new UniformOneGenerator(), chromosomeLength), 
+                    100,
+                    new NonNegativeDoubleArrayChromosome(new UniformOneGenerator(DateTime.Now.Millisecond), new UniformOneGenerator(DateTime.Now.Millisecond), new UniformOneGenerator(DateTime.Now.Millisecond), chromosomeLength), 
                     new IdealInputFitnessFunction(input, idealOutput, ntm),
                     new RouletteWheelSelection());
 

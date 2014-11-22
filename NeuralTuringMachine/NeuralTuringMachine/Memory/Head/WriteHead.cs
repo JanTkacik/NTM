@@ -6,11 +6,11 @@ namespace NeuralTuringMachine.Memory.Head
 {
     public class WriteHead : Head
     {
-        private static ISimilarity _similarity = new EuclideanSimilarity();
+        private static readonly ISimilarity _similarity = new EuclideanSimilarity();
 
         public double[] EraseVector { get; private set; }
         public double[] AddVector { get; private set; }
-
+        
         public WriteHead(MemorySettings settings) : base(settings)
         {
             int memoryVectorLength = MemorySettings.MemoryVectorLength;

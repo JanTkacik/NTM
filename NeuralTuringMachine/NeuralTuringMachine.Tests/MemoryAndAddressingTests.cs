@@ -22,7 +22,7 @@ namespace NeuralTuringMachine.Tests
         }
 
         [Test]
-        public void ItIsPossibleToFindHeadThatProducesWeightFocusingOneRandomLocationFirstLocation()
+        public void ItIsPossibleToFindHeadThatProducesWeightFocusingOneRandomLocation()
         {
             MemorySettings memorySettings = new MemorySettings(5, 3, 1, 1, 1);
             NtmMemory memory = new NtmMemory(memorySettings);
@@ -30,7 +30,7 @@ namespace NeuralTuringMachine.Tests
 
             ReadHead readHead = new ReadHeadWithFixedLastWeights(new[] { 0.2, 0.2, 0.2, 0.2, 0.2 }, memorySettings);
                                                         //KEY     //BETA   //GATE  //CONVOLUTION //GAMA SHARPENING
-            readHead.UpdateAddressingData(new double[] { 0, 0, 0,    1,       1,      0, 0, 1,           1 });
+            readHead.UpdateAddressingData(new double[] { 0, 0, 0,    1,       1,      0, 1, 0,           1 });
 
             var vectorFromMemory = readHead.GetWeightVector(memory);
         }
@@ -53,6 +53,19 @@ namespace NeuralTuringMachine.Tests
             readHead.UpdateAddressingData(new double[] { 0, 0, 0,       1,      0,      1, 0, 0,        1 });
             readHead.GetVectorFromMemory(memory);
             var weight3 = readHead.LastWeights;
+        }
+
+        [Test]
+        public void ItIsPossibleToFocusOnOneCellWhenMemoryIsEmpty()
+        {
+            MemorySettings memorySettings = new MemorySettings(5, 3, 1, 1, 1);
+            NtmMemory memory = new NtmMemory(memorySettings);
+            memory.ResetMemory();
+
+            ReadHead readHead = new ReadHead(memorySettings);
+            //KEY     //BETA   //GATE  //CONVOLUTION //GAMA SHARPENING
+            readHead.UpdateAddressingData(new double[] { 0, 0, 0, 1, 1, 0, 1, 0, 1 });
+            double[] weightVector = readHead.GetWeightVector(memory);
         }
     }
 }

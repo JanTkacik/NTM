@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="Controller\ControllerInput.cs" />
     <Compile Include="Controller\ControllerOutput.cs" />
+    <Compile Include="Controller\MockController.cs" />
     <Compile Include="GeneticsOptimalization\IdealMemoryContentFitnessFunction.cs" />
     <Compile Include="GeneticsOptimalization\IdealReadHeadOutputFitnessFunction.cs" />
     <Compile Include="GeneticsOptimalization\IdealReadWeightVectorFitnessFunction.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="GeneticsOptimalization\NonNegativeDoubleArrayChromosome.cs" />
     <Compile Include="GeneticsOptimalization\IdealInputFitnessFunction.cs" />
     <Compile Include="Learning\BPTTTeacher.cs" />
+    <Compile Include="Learning\BPTTTeacherWithKnownMemoryState.cs" />
     <Compile Include="Learning\GeneticTeacher.cs" />
     <Compile Include="Memory\AddressingData.cs" />
     <Compile Include="Memory\Head\Head.cs" />
@@ -69,6 +71,7 @@
     <Compile Include="Memory\Head\ReadHeadWithFixedLastWeights.cs" />
     <Compile Include="Memory\Head\WriteHeadWithFixedLastWeights.cs" />
     <Compile Include="Misc\ArrayHelper.cs" />
+    <Compile Include="Misc\ConsoleWriterHelper.cs" />
     <Compile Include="NeuralTuringMachine.cs" />
     <Compile Include="Memory\NTMMemory.cs" />
     <Compile Include="Performance\PerfMeter.cs" />

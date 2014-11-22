@@ -41,7 +41,7 @@ namespace NeuralTuringMachine.Memory
             {
                 for (int j = 0; j < memoryVectorLength; j++)
                 {
-                    readVector[j] = weightVector[i] * _memory[i][j];
+                    readVector[j] += weightVector[i] * _memory[i][j];
                 }
             }
 

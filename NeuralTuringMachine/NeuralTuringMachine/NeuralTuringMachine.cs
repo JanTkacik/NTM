@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using AForge.Neuro;
 using NeuralTuringMachine.Controller;
 using NeuralTuringMachine.Memory;
@@ -15,7 +14,7 @@ namespace NeuralTuringMachine
         //INPUT IS IN ORDER "Input" "ReadHead1" "ReadHead2" ... "ReadHeadN"
         //OUTPUT IS IN ORDER "Output" "ReadHead1" "ReadHead2" ... "ReadHeadN" "WriteHead1" "WriteHead2" ... "WriteHeadN"
         //HEAD ADDRESSING DATA IS IN ORDER "KeyVector" "beta" "g" "s-vector" "gama"
-        private readonly Network _controller;
+        private Network _controller;
         private readonly List<ReadHead> _readHeads;
         private readonly List<WriteHead> _writeHeads;
         private readonly int _controllerInputCount;
@@ -28,6 +27,11 @@ namespace NeuralTuringMachine
             {
                 return (ActivationNetwork)_controller;
             }
+        }
+
+        public void SetController(Network controller)
+        {
+            _controller = controller;
         }
         
         public NtmMemory Memory { get; set; }
@@ -50,6 +54,7 @@ namespace NeuralTuringMachine
             _readHeads = new List<ReadHead>(settings.ReadHeadCount);
             _writeHeads = new List<WriteHead>(settings.WriteHeadCount);
 
+            Memory = new NtmMemory(settings);
             InitializeReadHeads();
             InitializeWriteHeads();
 
@@ -57,7 +62,7 @@ namespace NeuralTuringMachine
             _controllerInputCount = inputCount + (settings.ReadHeadCount * settings.MemoryVectorLength);
 
             _controller = new ActivationNetwork(new SigmoidFunction(), _controllerInputCount, neuronsCounts.ToArray());
-            Memory = new NtmMemory(settings);
+            
         }
 
         private NeuralTuringMachine(
@@ -115,11 +120,11 @@ namespace NeuralTuringMachine
 
         public double[] Compute(double[] input)
         {
-            UpdateMemory(LastControllerOutput);
-
             ControllerInput ntmInput = GetInputForController(input, LastControllerOutput);
 
             LastControllerOutput = new ControllerOutput(_controller.Compute(ntmInput.Input), OutputCount, Memory.MemorySettings);
+
+            UpdateMemory(LastControllerOutput);
 
             return LastControllerOutput.DataOutput;
         }

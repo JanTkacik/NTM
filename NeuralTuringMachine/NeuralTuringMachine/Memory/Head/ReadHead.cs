@@ -21,11 +21,15 @@ namespace NeuralTuringMachine.Memory.Head
             UpdateAddressingData(rawControllerOutput);
         }
 
+        public double[] LastReadData { get; private set; }
+
         public double[] GetVectorFromMemory(NtmMemory memory)
         {
             double[] weightVector = GetWeightVector(memory);
             LastWeights = weightVector;
-            return memory.Read(weightVector);
+            double[] readData = memory.Read(weightVector);
+            LastReadData = readData;
+            return readData;
         }
 
         public ReadHead Clone()

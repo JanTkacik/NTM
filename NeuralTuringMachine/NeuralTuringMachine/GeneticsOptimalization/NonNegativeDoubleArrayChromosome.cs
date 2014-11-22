@@ -64,6 +64,10 @@ namespace NeuralTuringMachine.GeneticsOptimalization
                 {
                     val[i] = rand.NextDouble();
                 }
+                while (val[i] < 0)
+                {
+                    val[i] = rand.NextDouble();
+                }
             }
         }
     }
