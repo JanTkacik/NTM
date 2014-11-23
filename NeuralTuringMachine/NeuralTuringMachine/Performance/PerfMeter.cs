@@ -12,7 +12,6 @@ namespace NeuralTuringMachine.Performance
         private static double _lastError = 0;
         private static double _bestError = double.PositiveInfinity;
         private static readonly StreamWriter StreamWriter = File.CreateText("NTM.txt");
-        private static readonly FileStream BestControllerStream = File.Create("BestController");
 
         public static double CalculateError(NeuralTuringMachine machine, double[][] input, double[][] output)
         {
@@ -59,7 +58,9 @@ namespace NeuralTuringMachine.Performance
             if (error < _bestError)
             {
                 _bestError = error;
-                machine.Controller.Save(BestControllerStream);
+                FileStream bestControllerStream = File.Create("BestController");
+                machine.Controller.Save(bestControllerStream);
+                bestControllerStream.Close();
             }
 
             Console.SetCursorPosition(0, positionH.Item2 + 1);

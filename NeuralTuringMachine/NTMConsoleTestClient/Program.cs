@@ -1,6 +1,6 @@
 ﻿using System;
+using System.IO;
 using AForge.Neuro;
-using NeuralTuringMachine.Controller;
 using NeuralTuringMachine.Learning;
 using NeuralTuringMachine.Memory.Head;
 using NeuralTuringMachine.Performance;
@@ -40,6 +40,11 @@ namespace NTMConsoleTestClient
                     hiddenLayersCount,
                     new MemorySettings(memoryCellsCount, memoryVectorLength, maxConvolutionalShift, readHeadCount, writeHeadCount)
                     );
+
+            FileStream fileStream = File.OpenRead("BestControllerA");
+            ActivationNetwork bestController = (ActivationNetwork)Network.Load(fileStream);
+            neuralTuringMachine.SetController(bestController);
+            fileStream.Close();
 
             BpttTeacher teacher = new BpttTeacher(neuralTuringMachine);
             BpttTeacherWitKnownMemoryState teacherWitKnownMemory = new BpttTeacherWitKnownMemoryState(neuralTuringMachine);
@@ -115,10 +120,17 @@ namespace NTMConsoleTestClient
             while(!stop)
             {
                 //GenerateInputAndOutput(inputs, outputs);
+                //for (int j = 0; j < iterations; j++)
+                //{
+                //    //teacher.Run(inputs, outputs);
+                //    teacherWitKnownMemory.Run(inputsWithReadData, outputsWithHeads);
+                //    i++;
+                //}
+
                 for (int j = 0; j < iterations; j++)
                 {
-                    //teacher.Run(inputs, outputs);
-                    teacherWitKnownMemory.Run(inputsWithReadData, outputsWithHeads);
+                    GenerateInputAndOutput(inputs, outputs);
+                    PerfMeter.CalculateError(neuralTuringMachine, inputs, outputs);
                     i++;
                 }
                 PerfMeter.CalculateError(neuralTuringMachine, inputs, outputs);
