@@ -4,23 +4,18 @@ namespace NeuralTuringMachine.Learning
 {
     public class BpttTeacherWitKnownMemoryState
     {
-        private readonly NeuralTuringMachine _originalMachine;
-        private readonly double _learningRate;
+        private readonly NTM _originalMachine;
+        private readonly ResilientBackpropagationLearning _bpTeacher;
 
-        public BpttTeacherWitKnownMemoryState(NeuralTuringMachine machine, double learningRate = 0.01)
+        public BpttTeacherWitKnownMemoryState(NTM machine)
         {
             _originalMachine = machine;
-            _learningRate = learningRate;
+            _bpTeacher = new ResilientBackpropagationLearning(_originalMachine.Controller);
         }
 
         public void Run(double[][] inputs, double[][] outputs)
         {
-            ResilientBackpropagationLearning bpTeacher = new ResilientBackpropagationLearning(_originalMachine.Controller)
-                    {
-                        LearningRate = _learningRate
-                    };
-            
-            bpTeacher.RunEpoch(inputs, outputs);
+            _bpTeacher.RunEpoch(inputs, outputs);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using AForge.Math.Metrics;
-using NeuralTuringMachine.Memory;
+using CsvHelper;
 using NeuralTuringMachine.Memory.Head;
 using NeuralTuringMachine.Misc;
 
@@ -10,9 +10,9 @@ namespace NeuralTuringMachine.Controller
     {
         private MemorySettings MemorySettings { get; set; }
         private static readonly ISimilarity Similarity = new EuclideanSimilarity();
-        private const double DataSimilarityWeight = 0.5;
-        private const double ReadHeadSimilarityWeight = 0.25;
-        private const double WriteHeadSimilarityWeight = 0.25;
+        private const double DataSimilarityWeight = 1 / ((double)(3));
+        private const double ReadHeadSimilarityWeight = 1 / ((double)(3));
+        private const double WriteHeadSimilarityWeight = 1 / ((double)(3));
 
         public double[] DataOutput { get; private set; }
         public double[][] ReadHeadsOutputs { get; private set; }
@@ -81,6 +81,34 @@ namespace NeuralTuringMachine.Controller
             }
 
             return similarity;
+        }
+
+        public void WriteCSVLog(CsvWriter logger)
+        {
+            logger.WriteField("Output");
+            logger.WriteField("Output-Data");
+            foreach (double d in DataOutput)
+            {
+                logger.WriteField(d);
+            }
+            logger.WriteField("Output-ReadHeads");
+            for (int index = 0; index < ReadHeadsOutputs.Length; index++)
+            {
+                logger.WriteField("Output-ReadHead-" + index);
+                foreach (double headOutput in ReadHeadsOutputs[index])
+                {
+                    logger.WriteField(headOutput);
+                }
+            }
+            logger.WriteField("Output-WriteHeads");
+            for (int index = 0; index < WriteHeadsOutputs.Length; index++)
+            {
+                logger.WriteField("Output-WriteHead-" + index);
+                foreach (double headOutput in WriteHeadsOutputs[index])
+                {
+                    logger.WriteField(headOutput);
+                }
+            }
         }
     }
 }

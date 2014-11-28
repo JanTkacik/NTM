@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using AForge.Genetic;
 using AForge.Math.Random;
 using AForge.Neuro;
@@ -12,22 +13,26 @@ namespace NeuralTuringMachine.Learning
 {
     public class BpttTeacher
     {
-        private readonly NeuralTuringMachine _originalMachine;
+        private readonly NTMFactory _factory;
+        private readonly NTM _originalMachine;
         private readonly double _learningRate;
-        private NeuralTuringMachine[] _bpttMachines;
+        private NTM[] _bpttMachines;
         private double[][] _ntmOutputs;
+        private readonly StreamWriter _idealReadInputLog;
 
-        public BpttTeacher(NeuralTuringMachine machine, double learningRate = 0.005)
+        public BpttTeacher(NTMFactory factory, NTM machine, double learningRate = 0.01)
         {
+            _factory = factory;
             _originalMachine = machine;
             _learningRate = learningRate;
+            _idealReadInputLog = File.CreateText("IdealReadInputFitness");
         }
 
         public void Run(double[][] inputs, double[][] outputs)
         {
             //Make copies of Neural turing machine for bptt
             int inputCount = inputs.Length;
-            _bpttMachines = new NeuralTuringMachine[inputCount];
+            _bpttMachines = new NTM[inputCount];
             _ntmOutputs = new double[inputCount][];
             double[][] idealOutputs = new double[inputCount][];
             
@@ -35,14 +40,14 @@ namespace NeuralTuringMachine.Learning
             _originalMachine.Memory.Randomize();
 
             //Forward propagation
-            _bpttMachines[0] = _originalMachine.Clone();
+            _bpttMachines[0] = _factory.CloneNTM(_originalMachine);
             for (int i = 0; i < inputCount; i++)
             {
                 _ntmOutputs[i] = _bpttMachines[i].Compute(inputs[i]);
 
                 if (i < inputCount - 1)
                 {
-                    _bpttMachines[i + 1] = _bpttMachines[i].Clone();
+                    _bpttMachines[i + 1] = _factory.CloneNTM(_bpttMachines[i]);
                 }
             }
 
@@ -130,7 +135,7 @@ namespace NeuralTuringMachine.Learning
             double average = 0;
             int controllerCount = _bpttMachines.Length;
 
-            foreach (NeuralTuringMachine neuralTuringMachine in _bpttMachines)
+            foreach (NTM neuralTuringMachine in _bpttMachines)
             {
                 average += ((ActivationNeuron)neuralTuringMachine.Controller.Layers[layerIndex].Neurons[neuronIndex]).Threshold;
             }
@@ -143,7 +148,7 @@ namespace NeuralTuringMachine.Learning
             double average = 0;
             int controllerCount = _bpttMachines.Length;
 
-            foreach (NeuralTuringMachine neuralTuringMachine in _bpttMachines)
+            foreach (NTM neuralTuringMachine in _bpttMachines)
             {
                 average += neuralTuringMachine.Controller.Layers[layerIndex].Neurons[neuronIndex].Weights[weightIndex];
             }
@@ -178,7 +183,7 @@ namespace NeuralTuringMachine.Learning
         }
         
 
-        public double[] FindIdealReadInput(double[] input, ControllerOutput idealOutput, NeuralTuringMachine ntm)
+        public double[] FindIdealReadInput(double[] input, ControllerOutput idealOutput, NTM ntm)
         {
             int chromosomeLength = ntm.Controller.InputsCount - ntm.InputCount;
             Population population =
@@ -188,7 +193,11 @@ namespace NeuralTuringMachine.Learning
                     new IdealInputFitnessFunction(input, idealOutput, ntm),
                     new RouletteWheelSelection());
 
-            return RunGenetic(population);
+            double[] result = RunGenetic(population);
+            double fitnessMax = population.FitnessMax;
+            _idealReadInputLog.WriteLine(fitnessMax);
+            _idealReadInputLog.Flush();
+            return result;
         }
 
         public double[] FindReadHeadIdealWeightVector(double[] nextIdealReadInput, NtmMemory nextMemory)

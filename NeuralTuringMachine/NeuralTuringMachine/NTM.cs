@@ -1,16 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using AForge.Neuro;
+using CsvHelper;
 using NeuralTuringMachine.Controller;
 using NeuralTuringMachine.Memory;
 using NeuralTuringMachine.Memory.Head;
 
 namespace NeuralTuringMachine
 {
-    public class NeuralTuringMachine
+    public class NTM
     {
+        private static readonly StreamWriter _streamWriter = new StreamWriter("NTMLog", true);
+        private static readonly CsvWriter _logger = new CsvWriter(_streamWriter);
+
         private readonly int _inputCount;
         public int OutputCount { get; private set; }
+        public int NTMId { get; private set; }
         //INPUT IS IN ORDER "Input" "ReadHead1" "ReadHead2" ... "ReadHeadN"
         //OUTPUT IS IN ORDER "Output" "ReadHead1" "ReadHead2" ... "ReadHeadN" "WriteHead1" "WriteHead2" ... "WriteHeadN"
         //HEAD ADDRESSING DATA IS IN ORDER "KeyVector" "beta" "g" "s-vector" "gama"
@@ -18,6 +23,7 @@ namespace NeuralTuringMachine
         private readonly List<ReadHead> _readHeads;
         private readonly List<WriteHead> _writeHeads;
         private readonly int _controllerInputCount;
+        public long Time { get; private set; }
 
         public ControllerOutput LastControllerOutput { get; private set; }
 
@@ -42,15 +48,17 @@ namespace NeuralTuringMachine
         }
         
         //TODO REFACTOR
-        public NeuralTuringMachine(
+        public NTM(
             int inputCount,
             int outputCount, 
             int hiddenNeuronsCount, 
             int hiddenLayersCount, 
-            MemorySettings settings)
+            MemorySettings settings,
+            int ntmId)
         {
             _inputCount = inputCount;
             OutputCount = outputCount;
+            NTMId = ntmId;
             _readHeads = new List<ReadHead>(settings.ReadHeadCount);
             _writeHeads = new List<WriteHead>(settings.WriteHeadCount);
 
@@ -62,17 +70,18 @@ namespace NeuralTuringMachine
             _controllerInputCount = inputCount + (settings.ReadHeadCount * settings.MemoryVectorLength);
 
             _controller = new ActivationNetwork(new SigmoidFunction(), _controllerInputCount, neuronsCounts.ToArray());
-            
+            Time = 0;
         }
 
-        private NeuralTuringMachine(
+        private NTM(
             int inputCount,
             int outputCount,
             Network controller,
             NtmMemory memory,
             List<ReadHead> readHeads,
             List<WriteHead> writeHeads,
-            ControllerOutput lastControllerOutput)
+            ControllerOutput lastControllerOutput,
+            long actualTime, int ntmId)
         {
             _inputCount = inputCount;
             OutputCount = outputCount;
@@ -84,11 +93,14 @@ namespace NeuralTuringMachine
             Memory = memory;
 
             LastControllerOutput = lastControllerOutput;
+            Time = actualTime;
+            NTMId = ntmId;
         }
-        
+
+        #region Initialization
         private List<int> GetNeuronsCount(int hiddenLayersCount, int hiddenNeuronsCount, MemorySettings settings)
         {
-            int outputNeuronsCount = OutputCount + (settings.ReadHeadCount*settings.ReadHeadLength) + (settings.WriteHeadCount*settings.WriteHeadLength);
+            int outputNeuronsCount = OutputCount + (settings.ReadHeadCount * settings.ReadHeadLength) + (settings.WriteHeadCount * settings.WriteHeadLength);
             List<int> neuronsCounts = new List<int>(hiddenLayersCount + 1);
             for (int i = 0; i < hiddenLayersCount; i++)
             {
@@ -117,16 +129,35 @@ namespace NeuralTuringMachine
                 _readHeads.Add(new ReadHead(memorySettings));
             }
         }
+        
+        #endregion
 
+        #region Computation
         public double[] Compute(double[] input)
         {
             ControllerInput ntmInput = GetInputForController(input, LastControllerOutput);
 
             LastControllerOutput = new ControllerOutput(_controller.Compute(ntmInput.Input), OutputCount, Memory.MemorySettings);
 
+            WriteCSVLog(_logger);
+            ntmInput.WriteCSVLog(_logger);
+            LastControllerOutput.WriteCSVLog(_logger);
+            Memory.WriteCSVLog(_logger);
+            _logger.NextRecord();
+            _streamWriter.Flush();
+
             UpdateMemory(LastControllerOutput);
 
+            Time++;
+
             return LastControllerOutput.DataOutput;
+        }
+
+        private void WriteCSVLog(CsvWriter logger)
+        {
+            logger.WriteField("NTM");
+            logger.WriteField(NTMId);
+            logger.WriteField(Time);
         }
 
         private void UpdateMemory(ControllerOutput controllerOutput)
@@ -159,9 +190,11 @@ namespace NeuralTuringMachine
                 return new ControllerInput(input, readHeadOutputs, _controller.InputsCount);
             }
             return new ControllerInput(input, _controller.InputsCount);
-        }
+        } 
+        #endregion
 
-        public NeuralTuringMachine Clone()
+        #region Clone
+        public NTM Clone(int ntmId)
         {
             MemoryStream controllerStream = new MemoryStream();
             _controller.Save(controllerStream);
@@ -187,16 +220,20 @@ namespace NeuralTuringMachine
                 controllerOutputClone = LastControllerOutput.Clone();
             }
 
-            return new NeuralTuringMachine(
-                _inputCount, 
-                OutputCount,  
-                networkClone, 
+            return new NTM(
+                _inputCount,
+                OutputCount,
+                networkClone,
                 memoryClone,
                 readHeadsClone,
                 writeHeadClone,
-                controllerOutputClone);
-        }
+                controllerOutputClone,
+                Time, ntmId);
+        } 
+        #endregion
 
+        #region Nothing to do here as public - TODO remove
+        //TODO remove
         public ReadHead GetReadHead(int i)
         {
             return _readHeads[i];
@@ -206,5 +243,7 @@ namespace NeuralTuringMachine
         {
             return _writeHeads[i];
         }
+        
+        #endregion
     }
 }

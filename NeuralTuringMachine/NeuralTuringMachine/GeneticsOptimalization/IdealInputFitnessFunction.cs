@@ -9,11 +9,11 @@ namespace NeuralTuringMachine.GeneticsOptimalization
     {
         private readonly double[] _input;
         private readonly ControllerOutput _idealControllerOutput;
-        private readonly NeuralTuringMachine _machine;
+        private readonly NTM _machine;
         private readonly Network _controller;
         private readonly int _controllerInputsCount;
 
-        public IdealInputFitnessFunction(double[] input, ControllerOutput idealControllerOutput, NeuralTuringMachine machine)
+        public IdealInputFitnessFunction(double[] input, ControllerOutput idealControllerOutput, NTM machine)
         {
             _input = input;
             _idealControllerOutput = idealControllerOutput;

@@ -1,5 +1,5 @@
-﻿using NUnit.Framework;
-using NeuralTuringMachine.Memory;
+﻿using NeuralTuringMachine.Memory;
+using NUnit.Framework;
 using NeuralTuringMachine.Memory.Head;
 
 namespace NeuralTuringMachine.Tests

@@ -1,6 +1,5 @@
 ﻿using System;
-using System.IO;
-using AForge.Neuro;
+using NeuralTuringMachine;
 using NeuralTuringMachine.Learning;
 using NeuralTuringMachine.Memory.Head;
 using NeuralTuringMachine.Performance;
@@ -9,14 +8,14 @@ namespace NTMConsoleTestClient
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             const int inputCount = 5;
             const int outputCount = 3;
             const int readHeadCount = 1;
             const int writeHeadCount = 1;
-            const int hiddenNeuronCount = 10;
-            const int hiddenLayersCount = 1;
+            const int hiddenNeuronCount = 100;
+            const int hiddenLayersCount = 3;
             const int memoryCellsCount = 10;
             const int memoryVectorLength = 3;
             const int maxConvolutionalShift = 1;
@@ -32,21 +31,15 @@ namespace NTMConsoleTestClient
             //Console.WriteLine("Memory vector length: " + memoryVectorLength);
             //Console.WriteLine("Max convolutional shift: " + maxConvolutionalShift);
 
-            NeuralTuringMachine.NeuralTuringMachine neuralTuringMachine =
-                new NeuralTuringMachine.NeuralTuringMachine(
-                    inputCount,
-                    outputCount,
-                    hiddenNeuronCount,
-                    hiddenLayersCount,
-                    new MemorySettings(memoryCellsCount, memoryVectorLength, maxConvolutionalShift, readHeadCount, writeHeadCount)
-                    );
+            NTMFactory factory = new NTMFactory();
+            NTM neuralTuringMachine = factory.CreateNTM(inputCount, outputCount, hiddenNeuronCount, hiddenLayersCount, new MemorySettings(memoryCellsCount, memoryVectorLength, maxConvolutionalShift, readHeadCount, writeHeadCount));
+            
+            //FileStream fileStream = File.OpenRead("BestControllerA");
+            //ActivationNetwork bestController = (ActivationNetwork)Network.Load(fileStream);
+            //neuralTuringMachine.SetController(bestController);
+            //fileStream.Close();
 
-            FileStream fileStream = File.OpenRead("BestControllerA");
-            ActivationNetwork bestController = (ActivationNetwork)Network.Load(fileStream);
-            neuralTuringMachine.SetController(bestController);
-            fileStream.Close();
-
-            BpttTeacher teacher = new BpttTeacher(neuralTuringMachine);
+            BpttTeacher teacher = new BpttTeacher(factory, neuralTuringMachine);
             BpttTeacherWitKnownMemoryState teacherWitKnownMemory = new BpttTeacherWitKnownMemoryState(neuralTuringMachine);
 
             //DATA FOR COPY TEST
@@ -130,7 +123,8 @@ namespace NTMConsoleTestClient
                 for (int j = 0; j < iterations; j++)
                 {
                     GenerateInputAndOutput(inputs, outputs);
-                    PerfMeter.CalculateError(neuralTuringMachine, inputs, outputs);
+                    teacher.Run(inputs, outputs);
+                    //PerfMeter.CalculateError(neuralTuringMachine, inputs, outputs);
                     i++;
                 }
                 PerfMeter.CalculateError(neuralTuringMachine, inputs, outputs);

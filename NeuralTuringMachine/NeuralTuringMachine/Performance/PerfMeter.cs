@@ -13,7 +13,7 @@ namespace NeuralTuringMachine.Performance
         private static double _bestError = double.PositiveInfinity;
         private static readonly StreamWriter StreamWriter = File.CreateText("NTM.txt");
 
-        public static double CalculateError(NeuralTuringMachine machine, double[][] input, double[][] output)
+        public static double CalculateError(NTM machine, double[][] input, double[][] output)
         {
             EuclideanDistance distance = new EuclideanDistance();
             double error = 0;

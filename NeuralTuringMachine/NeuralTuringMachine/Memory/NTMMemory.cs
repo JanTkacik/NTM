@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using CsvHelper;
 using NeuralTuringMachine.Memory.Head;
 using NeuralTuringMachine.Misc;
 
@@ -187,6 +188,20 @@ namespace NeuralTuringMachine.Memory
                 builder.Append("-----+");
             }
             builder.Append(Environment.NewLine);
+        }
+
+        public void WriteCSVLog(CsvWriter logger)
+        {
+            logger.WriteField("Memory");
+            for (int index = 0; index < _memory.Length; index++)
+            {
+                double[] cell = _memory[index];
+                logger.WriteField("Memory-Cell-" + index);
+                foreach (double d in cell)
+                {
+                    logger.WriteField(d);
+                }
+            }
         }
     }
 }
