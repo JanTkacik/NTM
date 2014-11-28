@@ -5,9 +5,10 @@ using AForge.Math.Random;
 using AForge.Neuro;
 using AForge.Neuro.Learning;
 using NeuralTuringMachine.Controller;
-using NeuralTuringMachine.GeneticsOptimalization;
 using NeuralTuringMachine.Memory;
 using NeuralTuringMachine.Memory.Head;
+using NeuralTuringMachine.Optimization;
+using ParticleSwarmOptimization;
 
 namespace NeuralTuringMachine.Learning
 {
@@ -190,6 +191,25 @@ namespace NeuralTuringMachine.Learning
                 new Population(
                     100,
                     new NonNegativeDoubleArrayChromosome(new UniformOneGenerator(DateTime.Now.Millisecond), new UniformOneGenerator(DateTime.Now.Millisecond), new UniformOneGenerator(DateTime.Now.Millisecond), chromosomeLength), 
+                    new IdealInputFitnessFunction(input, idealOutput, ntm),
+                    new RouletteWheelSelection());
+
+            double[] result = RunGenetic(population);
+            double fitnessMax = population.FitnessMax;
+            _idealReadInputLog.WriteLine(fitnessMax);
+            _idealReadInputLog.Flush();
+            return result;
+        }
+
+        public double[] FindIdealReadInputPSO(double[] input, ControllerOutput idealOutput, NTM ntm)
+        {
+            Swarm swarm = new Swarm();
+
+            int chromosomeLength = ntm.Controller.InputsCount - ntm.InputCount;
+            Population population =
+                new Population(
+                    100,
+                    new NonNegativeDoubleArrayChromosome(new UniformOneGenerator(DateTime.Now.Millisecond), new UniformOneGenerator(DateTime.Now.Millisecond), new UniformOneGenerator(DateTime.Now.Millisecond), chromosomeLength),
                     new IdealInputFitnessFunction(input, idealOutput, ntm),
                     new RouletteWheelSelection());
 

@@ -2,7 +2,7 @@
 using AForge.Genetic;
 using AForge.Math.Random;
 
-namespace NeuralTuringMachine.GeneticsOptimalization
+namespace NeuralTuringMachine.Optimization
 {
     class NonNegativeDoubleArrayChromosome : DoubleArrayChromosome
     {

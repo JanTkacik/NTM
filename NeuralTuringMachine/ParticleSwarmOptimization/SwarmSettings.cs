@@ -2,7 +2,7 @@
 {
     public class SwarmSettings
     {
-        public int SwarmSize { get; private set; };
+        public int SwarmSize { get; private set; }
         public double InertiaWeight { get; private set; }
         public double CognitiveWeight { get; private set; }
         public double SocialWeight { get; private set; }

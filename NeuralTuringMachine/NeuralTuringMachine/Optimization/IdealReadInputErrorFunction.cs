@@ -1,11 +1,11 @@
 ﻿using AForge.Genetic;
-using AForge.Math.Metrics;
 using AForge.Neuro;
 using NeuralTuringMachine.Controller;
+using ParticleSwarmOptimization;
 
-namespace NeuralTuringMachine.GeneticsOptimalization
+namespace NeuralTuringMachine.Optimization
 {
-    public class IdealInputFitnessFunction : IFitnessFunction
+    class IdealReadInputErrorFunction : IErrorFunction 
     {
         private readonly double[] _input;
         private readonly ControllerOutput _idealControllerOutput;
@@ -13,7 +13,7 @@ namespace NeuralTuringMachine.GeneticsOptimalization
         private readonly Network _controller;
         private readonly int _controllerInputsCount;
 
-        public IdealInputFitnessFunction(double[] input, ControllerOutput idealControllerOutput, NTM machine)
+        public IdealReadInputErrorFunction(double[] input, ControllerOutput idealControllerOutput, NTM machine)
         {
             _input = input;
             _idealControllerOutput = idealControllerOutput;
@@ -31,6 +31,24 @@ namespace NeuralTuringMachine.GeneticsOptimalization
             ControllerOutput computedOutput = new ControllerOutput(_controller.Compute(input.Input), _machine.OutputCount,  _machine.Memory.MemorySettings);
 
             return ControllerOutput.GetSimilarityScore(computedOutput, _idealControllerOutput);
+        }
+
+        public int Dimensions { get {return } }
+
+
+        public double MinForDimension(int dimension)
+        {
+            return 0;
+        }
+
+        public double MaxForDimension(int dimension)
+        {
+            return 1
+        }
+
+        public double CalculateError(double[] position)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

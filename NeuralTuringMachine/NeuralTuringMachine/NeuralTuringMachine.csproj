@@ -59,12 +59,12 @@
     <Compile Include="Controller\ControllerInput.cs" />
     <Compile Include="Controller\ControllerOutput.cs" />
     <Compile Include="Controller\MockController.cs" />
-    <Compile Include="GeneticsOptimalization\IdealMemoryContentFitnessFunction.cs" />
-    <Compile Include="GeneticsOptimalization\IdealReadHeadOutputFitnessFunction.cs" />
-    <Compile Include="GeneticsOptimalization\IdealReadWeightVectorFitnessFunction.cs" />
-    <Compile Include="GeneticsOptimalization\IdealWriteHeadOutputFitnessFunction.cs" />
-    <Compile Include="GeneticsOptimalization\NonNegativeDoubleArrayChromosome.cs" />
-    <Compile Include="GeneticsOptimalization\IdealInputFitnessFunction.cs" />
+    <Compile Include="Optimization\IdealMemoryContentFitnessFunction.cs" />
+    <Compile Include="Optimization\IdealReadHeadOutputFitnessFunction.cs" />
+    <Compile Include="Optimization\IdealReadWeightVectorFitnessFunction.cs" />
+    <Compile Include="Optimization\IdealWriteHeadOutputFitnessFunction.cs" />
+    <Compile Include="Optimization\NonNegativeDoubleArrayChromosome.cs" />
+    <Compile Include="Optimization\IdealInputFitnessFunction.cs" />
     <Compile Include="Learning\BPTTTeacher.cs" />
     <Compile Include="Learning\BPTTTeacherWithKnownMemoryState.cs" />
     <Compile Include="Memory\AddressingData.cs" />
@@ -84,6 +84,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ParticleSwarmOptimization\ParticleSwarmOptimization.csproj">
+      <Project>{04b2bac1-2cf6-46f6-a81b-fa6cb4ddc5d8}</Project>
+      <Name>ParticleSwarmOptimization</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

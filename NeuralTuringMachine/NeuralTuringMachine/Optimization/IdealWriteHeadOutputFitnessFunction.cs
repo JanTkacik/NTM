@@ -3,7 +3,7 @@ using AForge.Math.Metrics;
 using NeuralTuringMachine.Memory;
 using NeuralTuringMachine.Memory.Head;
 
-namespace NeuralTuringMachine.GeneticsOptimalization
+namespace NeuralTuringMachine.Optimization
 {
     class IdealWriteHeadOutputFitnessFunction : IFitnessFunction
     {

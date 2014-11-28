@@ -2,7 +2,7 @@
 using AForge.Math.Metrics;
 using NeuralTuringMachine.Memory;
 
-namespace NeuralTuringMachine.GeneticsOptimalization
+namespace NeuralTuringMachine.Optimization
 {
     public class IdealReadWeightVectorFitnessFunction : IFitnessFunction
     {
