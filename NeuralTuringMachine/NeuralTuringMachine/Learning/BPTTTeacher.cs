@@ -37,9 +37,6 @@ namespace NeuralTuringMachine.Learning
             _ntmOutputs = new double[inputCount][];
             double[][] idealOutputs = new double[inputCount][];
             
-            //Reset memory before forward propagation
-            _originalMachine.Memory.Randomize();
-
             //Forward propagation
             _bpttMachines[0] = _factory.CloneNTM(_originalMachine);
             for (int i = 0; i < inputCount; i++)
@@ -203,7 +200,7 @@ namespace NeuralTuringMachine.Learning
 
         public double[] FindIdealReadInputPSO(double[] input, ControllerOutput idealOutput, NTM ntm)
         {
-            Swarm swarm = new Swarm();
+            //Swarm swarm = new Swarm();
 
             int chromosomeLength = ntm.Controller.InputsCount - ntm.InputCount;
             Population population =

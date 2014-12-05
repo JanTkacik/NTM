@@ -10,14 +10,14 @@ namespace NTMConsoleTestClient
     {
         static void Main()
         {
-            const int inputCount = 5;
-            const int outputCount = 3;
+            const int inputCount = 3;
+            const int outputCount = 1;
             const int readHeadCount = 1;
             const int writeHeadCount = 1;
-            const int hiddenNeuronCount = 100;
+            const int hiddenNeuronCount = 99;
             const int hiddenLayersCount = 3;
             const int memoryCellsCount = 10;
-            const int memoryVectorLength = 3;
+            const int memoryVectorLength = 1;
             const int maxConvolutionalShift = 1;
 
             //Console.WriteLine("NEURAL TURING MACHINE TEST");
@@ -41,7 +41,7 @@ namespace NTMConsoleTestClient
 
             BpttTeacher teacher = new BpttTeacher(factory, neuralTuringMachine);
             BpttTeacherWitKnownMemoryState teacherWitKnownMemory = new BpttTeacherWitKnownMemoryState(neuralTuringMachine);
-
+            
             //DATA FOR COPY TEST
             double[][] inputs = new double[10][];
             //                   START, COPY, D0, D1, D2
@@ -113,20 +113,21 @@ namespace NTMConsoleTestClient
             while(!stop)
             {
                 //GenerateInputAndOutput(inputs, outputs);
-                //for (int j = 0; j < iterations; j++)
-                //{
-                //    //teacher.Run(inputs, outputs);
-                //    teacherWitKnownMemory.Run(inputsWithReadData, outputsWithHeads);
-                //    i++;
-                //}
-
                 for (int j = 0; j < iterations; j++)
                 {
-                    GenerateInputAndOutput(inputs, outputs);
-                    teacher.Run(inputs, outputs);
-                    //PerfMeter.CalculateError(neuralTuringMachine, inputs, outputs);
+                    //teacher.Run(inputs, outputs);
+                    GenerateInputAndOutputWithHeads(out inputsWithReadData,out outputsWithHeads,out inputs,out outputs, 4, 1);
+                    teacherWitKnownMemory.Run(inputsWithReadData, outputsWithHeads);
                     i++;
                 }
+
+                //for (int j = 0; j < iterations; j++)
+                //{
+                //    GenerateInputAndOutput(inputs, outputs);
+                //    teacher.Run(inputs, outputs);
+                //    //PerfMeter.CalculateError(neuralTuringMachine, inputs, outputs);
+                //    i++;
+                //}
                 PerfMeter.CalculateError(neuralTuringMachine, inputs, outputs);
                 Console.WriteLine("Iteration " + i);
                 Console.WriteLine("Press ESC to end, N for next iteration, B for 10 iterations, V for 100 iterations");
@@ -217,6 +218,137 @@ namespace NTMConsoleTestClient
                         output[i][j] = 0;
                     }
                 }
+            }
+        }
+
+        private static void GenerateInputAndOutputWithHeads(out double[][] input, out double[][] output, out double[][] inputWithoutHeads, out double[][] outputWithoutHeads, int length, int inputCount)
+        {
+            Random random = new Random(DateTime.Now.Millisecond);
+            if (length < 1)
+            {
+                throw new ArgumentOutOfRangeException("length", length, "Length must be larger than 1");
+            }
+
+            int usedLength = (length*2) + 2; 
+
+            int inputVectorLength = (2*inputCount) + 2;
+            int outputVecotrLength = 12 + (5 * inputCount);
+
+            input = new double[usedLength][];
+            output = new double[usedLength][];
+            inputWithoutHeads = new double[usedLength][];
+            outputWithoutHeads = new double[usedLength][];
+
+            for (int i = 0; i < usedLength; i++)
+            {
+                input[i] = new double[inputVectorLength];
+                output[i] = new double[outputVecotrLength];
+                inputWithoutHeads[i] = new double[2 + inputCount];
+                outputWithoutHeads[i] = new double[inputCount];
+            }
+            
+            double[][] randomNumbers = new double[length][];
+            for (int i = 0; i < length; i++)
+            {
+                randomNumbers[i] = new double[inputCount];
+                for (int j = 0; j < inputCount; j++)
+                {
+                    double randomNumber = random.NextDouble();
+                    if (randomNumber > 0.5)
+                    {
+                        randomNumbers[i][j] = 1;
+                        inputWithoutHeads[i + 1][j + 2] = 1;
+                        outputWithoutHeads[length + 2 + i][j] = 1;
+                    }
+                }
+            }
+
+            inputWithoutHeads[0][0] = 1;
+            inputWithoutHeads[1 + length][1] = 1;
+
+
+            //START
+            input[0][0] = 1; //Start flag
+
+            output[0][2*inputCount] = 1; //Read head beta
+            output[0][(2*inputCount) + 1] = 1; //Read head gate
+            output[0][(2*inputCount) + 3] = 1; //Read head Convolution 0
+            output[0][(2*inputCount) + 5] = 1; //Read head gama 
+
+            output[0][(3*inputCount) + 6] = 1; //Write head beta
+            output[0][(3*inputCount) + 7] = 1; //Write head gate
+            output[0][(3*inputCount) + 9] = 1; //Write head Convolution 0
+            output[0][(3*inputCount) + 11] = 1; //Write head gama 
+
+            //Erase vector
+            for (int i = 0; i < inputCount; i++)
+            {
+                output[0][(3*inputCount) + i + 12] = 1; 
+            }
+
+            //COPY INPUT
+            for (int i = 0; i < length; i++)
+            {
+                //INPUT VECTOR
+                for (int j = 0; j < inputCount; j++)
+                {
+                    input[i + 1][j + 2] = randomNumbers[i][j];
+                }
+
+                //OUTPUT VECTOR
+                output[i + 1][2 * inputCount] = 1; //Read head beta
+                output[i + 1][(2 * inputCount) + 3] = 1; //Read head Convolution 0
+                output[i + 1][(2 * inputCount) + 5] = 1; //Read head gama 
+
+                output[i + 1][(3 * inputCount) + 6] = 1; //Write head beta
+                output[i + 1][(3 * inputCount) + 8] = 1; //Write head Convolution +1
+                output[i + 1][(3 * inputCount) + 11] = 1; //Write head gama 
+
+                //Erase vector
+                for (int j = 0; j < inputCount; j++)
+                {
+                    output[i + 1][(3 * inputCount) + j + 12] = 1;
+                }
+                //Add vector
+                for (int j = 0; j < inputCount; j++)
+                {
+                    output[i + 1][(4 * inputCount) + j + 12] = randomNumbers[i][j];
+                }
+            }
+
+            //COPY START
+            input[length + 1][1] = 1; //Copy flag
+
+            output[length + 1][2 * inputCount] = 1; //Read head beta
+            output[length + 1][(2 * inputCount) + 2] = 1; //Read head Convolution +1
+            output[length + 1][(2 * inputCount) + 5] = 1; //Read head gama 
+
+            output[length + 1][(3 * inputCount) + 6] = 1; //Write head beta
+            output[length + 1][(3 * inputCount) + 9] = 1; //Write head Convolution 0
+            output[length + 1][(3 * inputCount) + 11] = 1; //Write head gama 
+
+            //REPLAY
+            for (int i = 0; i < length; i++)
+            {
+                //INPUT VECTOR
+                for (int j = 0; j < inputCount; j++)
+                {
+                    input[i + 2 + length][j + 2 + inputCount] = randomNumbers[i][j];
+                }
+
+                //OUTPUT VECTOR
+                for (int j = 0; j < inputCount; j++)
+                {
+                    output[i + 2 + length][j] = randomNumbers[i][j];
+                }
+
+                output[i + 2 + length][2 * inputCount] = 1; //Read head beta
+                output[i + 2 + length][(2 * inputCount) + 2] = 1; //Read head Convolution +1
+                output[i + 2 + length][(2 * inputCount) + 5] = 1; //Read head gama 
+
+                output[i + 2 + length][(3 * inputCount) + 6] = 1; //Write head beta
+                output[i + 2 + length][(3 * inputCount) + 9] = 1; //Write head Convolution 0
+                output[i + 2 + length][(3 * inputCount) + 11] = 1; //Write head gama 
             }
         }
     }

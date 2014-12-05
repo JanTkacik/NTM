@@ -59,6 +59,7 @@
     <Compile Include="Controller\ControllerInput.cs" />
     <Compile Include="Controller\ControllerOutput.cs" />
     <Compile Include="Controller\MockController.cs" />
+    <Compile Include="Controller\RectifiedLinearActivationFunction.cs" />
     <Compile Include="Optimization\IdealMemoryContentFitnessFunction.cs" />
     <Compile Include="Optimization\IdealReadHeadOutputFitnessFunction.cs" />
     <Compile Include="Optimization\IdealReadWeightVectorFitnessFunction.cs" />
