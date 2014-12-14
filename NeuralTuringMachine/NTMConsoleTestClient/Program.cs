@@ -14,8 +14,8 @@ namespace NTMConsoleTestClient
             const int outputCount = 3;
             const int readHeadCount = 1;
             const int writeHeadCount = 1;
-            const int hiddenNeuronCount = 100;
-            const int hiddenLayersCount = 3;
+            const int hiddenNeuronCount = 10;
+            const int hiddenLayersCount = 1;
             const int memoryCellsCount = 10;
             const int memoryVectorLength = 3;
             const int maxConvolutionalShift = 1;
@@ -113,20 +113,20 @@ namespace NTMConsoleTestClient
             while(!stop)
             {
                 //GenerateInputAndOutput(inputs, outputs);
-                //for (int j = 0; j < iterations; j++)
-                //{
-                //    //teacher.Run(inputs, outputs);
-                //    teacherWitKnownMemory.Run(inputsWithReadData, outputsWithHeads);
-                //    i++;
-                //}
-
                 for (int j = 0; j < iterations; j++)
                 {
-                    GenerateInputAndOutput(inputs, outputs);
-                    teacher.Run(inputs, outputs);
-                    //PerfMeter.CalculateError(neuralTuringMachine, inputs, outputs);
+                    //teacher.Run(inputs, outputs);
+                    teacherWitKnownMemory.Run(inputsWithReadData, outputsWithHeads);
                     i++;
                 }
+
+                //for (int j = 0; j < iterations; j++)
+                //{
+                //    GenerateInputAndOutput(inputs, outputs);
+                //    teacher.Run(inputs, outputs);
+                //    //PerfMeter.CalculateError(neuralTuringMachine, inputs, outputs);
+                //    i++;
+                //}
                 PerfMeter.CalculateError(neuralTuringMachine, inputs, outputs);
                 Console.WriteLine("Iteration " + i);
                 Console.WriteLine("Press ESC to end, N for next iteration, B for 10 iterations, V for 100 iterations");

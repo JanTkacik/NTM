@@ -201,24 +201,24 @@ namespace NeuralTuringMachine.Learning
             return result;
         }
 
-        public double[] FindIdealReadInputPSO(double[] input, ControllerOutput idealOutput, NTM ntm)
-        {
-            Swarm swarm = new Swarm();
+        //public double[] FindIdealReadInputPSO(double[] input, ControllerOutput idealOutput, NTM ntm)
+        //{
+        //    Swarm swarm = new Swarm();
 
-            int chromosomeLength = ntm.Controller.InputsCount - ntm.InputCount;
-            Population population =
-                new Population(
-                    100,
-                    new NonNegativeDoubleArrayChromosome(new UniformOneGenerator(DateTime.Now.Millisecond), new UniformOneGenerator(DateTime.Now.Millisecond), new UniformOneGenerator(DateTime.Now.Millisecond), chromosomeLength),
-                    new IdealInputFitnessFunction(input, idealOutput, ntm),
-                    new RouletteWheelSelection());
+        //    int chromosomeLength = ntm.Controller.InputsCount - ntm.InputCount;
+        //    Population population =
+        //        new Population(
+        //            100,
+        //            new NonNegativeDoubleArrayChromosome(new UniformOneGenerator(DateTime.Now.Millisecond), new UniformOneGenerator(DateTime.Now.Millisecond), new UniformOneGenerator(DateTime.Now.Millisecond), chromosomeLength),
+        //            new IdealInputFitnessFunction(input, idealOutput, ntm),
+        //            new RouletteWheelSelection());
 
-            double[] result = RunGenetic(population);
-            double fitnessMax = population.FitnessMax;
-            _idealReadInputLog.WriteLine(fitnessMax);
-            _idealReadInputLog.Flush();
-            return result;
-        }
+        //    double[] result = RunGenetic(population);
+        //    double fitnessMax = population.FitnessMax;
+        //    _idealReadInputLog.WriteLine(fitnessMax);
+        //    _idealReadInputLog.Flush();
+        //    return result;
+        //}
 
         public double[] FindReadHeadIdealWeightVector(double[] nextIdealReadInput, NtmMemory nextMemory)
         {
