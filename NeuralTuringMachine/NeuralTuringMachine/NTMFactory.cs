@@ -14,6 +14,7 @@ namespace NeuralTuringMachine
         public NTM CreateNTM(int inputCount, int outputCount, int hiddenNeuronsCount, int hiddenLayersCount, MemorySettings memorySettings)
         {
             NTM neuralTuringMachine = new NTM(inputCount, outputCount, hiddenNeuronsCount, hiddenLayersCount, memorySettings, NTMId);
+            neuralTuringMachine.Memory.Randomize();
             NTMId++;
             return neuralTuringMachine;
         }
@@ -21,6 +22,7 @@ namespace NeuralTuringMachine
         public NTM CloneNTM(NTM machine)
         {
             NTM neuralTuringMachine = machine.Clone(NTMId);
+            neuralTuringMachine.Memory.Randomize();
             NTMId++;
             return neuralTuringMachine;
         }

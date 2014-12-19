@@ -10,8 +10,8 @@ namespace NeuralTuringMachine.Memory
         //FOCUS CONSTANT IS NOT MENTIONED IN TEXT
         private static ISimilarity _similarity = new EuclideanSimilarity();
 
-        private const double FocusConstant = 10;
-        private const double SharpeningConstant = 2;
+        private const double FocusConstant = 1;
+        private const double SharpeningConstant = 1;
 
         private readonly double[] _keyVector;
         private readonly double _beta;

@@ -18,7 +18,6 @@ namespace NeuralTuringMachine.Performance
             EuclideanDistance distance = new EuclideanDistance();
             double error = 0;
             int inputCount = input.Length;
-            machine.Memory.Randomize();
 
             //LOG MEMORY OPERATIONS
             double[][] computedOutputs = new double[inputCount][];
@@ -30,6 +29,7 @@ namespace NeuralTuringMachine.Performance
 
             for (int i = 0; i < inputCount; i++)
             {
+                machine.Memory.Randomize();
                 double[] computedOutput = machine.Compute(input[i]);
                 computedOutputs[i] = computedOutput;
                 error += distance.GetDistance(computedOutput, output[i]);
