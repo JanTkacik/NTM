@@ -27,6 +27,8 @@ namespace NTM2.Memory
 
         public NTMMemory(HeadSetting[] headSettings, Head[] heads, NTMMemory memory)
         {
+            _memoryColumnsN = memory._memoryColumnsN;
+            _memoryRowsM = memory._memoryRowsM;
             _headSettings = headSettings;
             _heads = heads;
             _oldMemory = memory;

@@ -6,6 +6,8 @@ namespace NTM2.Controller
 {
     public class NTMController
     {
+        private readonly int _memoryColumnsN;
+        private readonly int _memoryRowsM;
         private readonly int _weightsCount;
         private readonly Head[] _heads;
         private readonly Unit[] _outputLayer;
@@ -43,6 +45,8 @@ namespace NTM2.Controller
 
         public NTMController(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM)
         {
+            _memoryColumnsN = memoryColumnsN;
+            _memoryRowsM = memoryRowsM;
             int headUnitSize = Head.GetUnitSize(memoryRowsM);
             _heads = new Head[headCount];
             _wtm1s = BetaSimilarity.GetTensor2(headCount, memoryColumnsN);
@@ -64,6 +68,8 @@ namespace NTM2.Controller
         }
 
         private NTMController(
+            int memoryColumnsN,
+            int memoryRowsM,
             Unit[][][] wh1R,
             Unit[][] wh1X,
             Unit[] wh1B,
@@ -76,6 +82,8 @@ namespace NTM2.Controller
             Unit[] outputLayer,
             Head[] heads)
         {
+            _memoryColumnsN = memoryColumnsN;
+            _memoryRowsM = memoryRowsM;
             _wh1r = wh1R;
             _wh1x = wh1X;
             _wh1b = wh1B;
@@ -138,6 +146,8 @@ namespace NTM2.Controller
         public NTMController Process(ReadData[] readData, double[] input)
         {
             NTMController newController = new NTMController(
+                _memoryColumnsN,
+                _memoryRowsM,
                 _wh1r,
                 _wh1x,
                 _wh1b,
@@ -148,7 +158,7 @@ namespace NTM2.Controller
                 input,
                 Unit.GetVector(_wh1r.Length),
                 Unit.GetVector(_wyh1.Length),
-                Head.GetVector(readData.Length, i => _memory.MemoryRowsM));
+                Head.GetVector(readData.Length, i => _memoryRowsM));
 
             newController.ForwardPropagation(readData, input);
             return newController;
