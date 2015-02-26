@@ -27,10 +27,10 @@ namespace CopyTaskTest
             {
                 Tuple<double[][], double[][]> sequence = SequenceGenerator.GenerateSequence(rand.Next(20) + 1, vectorSize);
                 Ntm[] machines = rmsPropTeacher.Train(sequence.Item1, sequence.Item2, 0.95, 0.5, 0.001, 0.001);
-                double error = CalculateLogLoss(sequence.Item2, machines);
-
+                
                 if (i%100 == 0)
                 {
+                    double error = CalculateLogLoss(sequence.Item2, machines);
                     double averageError = error/(sequence.Item2.Length*sequence.Item2[0].Length);
                     Console.WriteLine("Iteration: {0}, average error: {1}",i,averageError);
                 }
