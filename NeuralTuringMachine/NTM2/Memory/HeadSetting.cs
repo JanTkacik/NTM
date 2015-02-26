@@ -22,9 +22,10 @@ namespace NTM2.Memory
             _gammaIndex = Math.Log(Math.Exp(gamma.Value) + 1) + 1;
 
             double sum = 0;
-            foreach (Unit unit in _data)
+            for (int i = 0; i < _data.Length; i++)
             {
-                unit.Value = Math.Pow(unit.Value, _gammaIndex);
+                Unit unit = _data[i];
+                unit.Value = Math.Pow(_shiftedAddressing.Data[i].Value, _gammaIndex);
                 sum += unit.Value;
             }
 

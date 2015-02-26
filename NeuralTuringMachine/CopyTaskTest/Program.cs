@@ -27,7 +27,7 @@ namespace CopyTaskTest
             {
                 Tuple<double[][], double[][]> sequence = SequenceGenerator.GenerateSequence(rand.Next(20) + 1, vectorSize);
                 Ntm[] machines = rmsPropTeacher.Train(sequence.Item1, sequence.Item2, 0.95, 0.5, 0.001, 0.001);
-                double error = CalculateLoss(sequence.Item2, machines);
+                double error = CalculateLogLoss(sequence.Item2, machines);
 
                 if (i%100 == 0)
                 {
@@ -37,7 +37,7 @@ namespace CopyTaskTest
             }
         }
 
-        private static double CalculateLoss(double[][] knownOutput, Ntm[] trainedMachines)
+        private static double CalculateLogLoss(double[][] knownOutput, Ntm[] trainedMachines)
         {
             double totalLoss = 0;
             int okt = knownOutput.Length - ((knownOutput.Length - 2) / 2);
