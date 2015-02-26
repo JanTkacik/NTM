@@ -43,8 +43,8 @@ namespace CopyTaskTest
                 }
             }
 
-            double[][] output = new double[inputVectorSize][];
-            for (int i = 0; i < inputVectorSize; i++)
+            double[][] output = new double[sequenceLength][];
+            for (int i = 0; i < sequenceLength; i++)
             {
                 output[i] = new double[vectorSize];
                 if (i >= (length + 2))
