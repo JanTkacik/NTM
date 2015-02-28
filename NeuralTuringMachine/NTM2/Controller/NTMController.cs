@@ -6,6 +6,8 @@ namespace NTM2.Controller
 {
     public class NTMController
     {
+        private readonly UnitFactory _unitFactory;
+
         private readonly int _memoryColumnsN;
         private readonly int _memoryRowsM;
         private readonly int _weightsCount;
@@ -45,17 +47,18 @@ namespace NTM2.Controller
 
         public NTMController(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM)
         {
+            _unitFactory = new UnitFactory();
             _memoryColumnsN = memoryColumnsN;
             _memoryRowsM = memoryRowsM;
             int headUnitSize = Head.GetUnitSize(memoryRowsM);
             _heads = new Head[headCount];
             _wtm1s = BetaSimilarity.GetTensor2(headCount, memoryColumnsN);
-            _memory = new NTMMemory(memoryColumnsN, memoryRowsM);
-            _wh1r = Unit.GetTensor3(controllerSize, headCount, memoryRowsM);
-            _wh1x = Unit.GetTensor2(controllerSize, inputSize);
-            _wh1b = Unit.GetVector(controllerSize);
-            _wyh1 = Unit.GetTensor2(outputSize, controllerSize + 1);
-            _wuh1 = Unit.GetTensor3(headCount, headUnitSize, controllerSize + 1);
+            _memory = new NTMMemory(memoryColumnsN, memoryRowsM, _unitFactory);
+            _wh1r = _unitFactory.GetTensor3(controllerSize, headCount, memoryRowsM);
+            _wh1x = _unitFactory.GetTensor2(controllerSize, inputSize);
+            _wh1b = _unitFactory.GetVector(controllerSize);
+            _wyh1 = _unitFactory.GetTensor2(outputSize, controllerSize + 1);
+            _wuh1 = _unitFactory.GetTensor3(headCount, headUnitSize, controllerSize + 1);
 
             _weightsCount =
                 (headCount * memoryColumnsN) +
@@ -80,8 +83,10 @@ namespace NTM2.Controller
             double[] input,
             Unit[] hiddenLayer,
             Unit[] outputLayer,
-            Head[] heads)
+            Head[] heads,
+            UnitFactory unitFactory)
         {
+            _unitFactory = unitFactory;
             _memoryColumnsN = memoryColumnsN;
             _memoryRowsM = memoryRowsM;
             _wh1r = wh1R;
@@ -100,18 +105,18 @@ namespace NTM2.Controller
         public Ntm[] ProcessAndUpdateErrors(double[][] input, double[][] knownOutput)
         {
             //FOREACH HEAD - SET WEIGHTS TO BIAS VALUES
-            ContentAddressing[] contentAddressings = ContentAddressing.GetVector(HeadCount, i => _wtm1s[i]);
-            HeadSetting[] oldSettings = HeadSetting.GetVector(HeadCount, i => new Tuple<int, ContentAddressing>(_memory.MemoryColumnsN, contentAddressings[i]));
+            ContentAddressing[] contentAddressings = ContentAddressing.GetVector(HeadCount, i => _wtm1s[i], _unitFactory);
+            HeadSetting[] oldSettings = HeadSetting.GetVector(HeadCount, i => new Tuple<int, ContentAddressing>(_memory.MemoryColumnsN, contentAddressings[i]), _unitFactory);
             ReadData[] readDatas = ReadData.GetVector(HeadCount, i => new Tuple<HeadSetting, NTMMemory>(oldSettings[i], _memory));
 
             Ntm[] machines = new Ntm[input.Length];
             Ntm empty = new Ntm(this, new MemoryState(oldSettings, readDatas, _memory));
 
             //BPTT
-            machines[0] = new Ntm(empty, input[0]);
+            machines[0] = new Ntm(empty, input[0], _unitFactory);
             for (int i = 1; i < input.Length; i++)
             {
-                machines[i] = new Ntm(machines[i - 1], input[i]);
+                machines[i] = new Ntm(machines[i - 1], input[i], _unitFactory);
             }
 
             UpdateWeights(unit => unit.Gradient = 0);
@@ -156,9 +161,10 @@ namespace NTM2.Controller
                 _weightsCount,
                 readData,
                 input,
-                Unit.GetVector(_wh1r.Length),
-                Unit.GetVector(_wyh1.Length),
-                Head.GetVector(readData.Length, i => _memoryRowsM));
+                _unitFactory.GetVector(_wh1r.Length),
+                _unitFactory.GetVector(_wyh1.Length),
+                Head.GetVector(readData.Length, i => _memoryRowsM, _unitFactory),
+                _unitFactory);
 
             newController.ForwardPropagation(readData, input);
             return newController;

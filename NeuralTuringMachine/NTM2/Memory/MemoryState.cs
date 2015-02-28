@@ -16,7 +16,7 @@ namespace NTM2.Memory
             _memory = memory;
         }
 
-        public MemoryState(Head[] heads, NTMMemory memory)
+        public MemoryState(Head[] heads, NTMMemory memory, UnitFactory unitFactory)
         {
             _reads = new ReadData[heads.Length];
             _headSettings = new HeadSetting[heads.Length];
@@ -30,15 +30,15 @@ namespace NTM2.Memory
                     CosineSimilarity cosineSimilarity = new CosineSimilarity(head.KeyVector, memoryColumn);
                     similarities[j] = new BetaSimilarity(head.Beta, cosineSimilarity);
                 }
-                ContentAddressing ca = new ContentAddressing(similarities);
-                GatedAddressing ga = new GatedAddressing(head.Gate, ca, head.OldHeadSettings);
-                ShiftedAddressing sa = new ShiftedAddressing(head.Shift, ga);
+                ContentAddressing ca = new ContentAddressing(similarities, unitFactory);
+                GatedAddressing ga = new GatedAddressing(head.Gate, ca, head.OldHeadSettings, unitFactory);
+                ShiftedAddressing sa = new ShiftedAddressing(head.Shift, ga, unitFactory);
 
-                _headSettings[i] = new HeadSetting(head.Gamma, sa);
+                _headSettings[i] = new HeadSetting(head.Gamma, sa, unitFactory);
                 _reads[i] = new ReadData(_headSettings[i], memory);
             }
 
-            _memory = new NTMMemory(_headSettings, heads, memory);
+            _memory = new NTMMemory(_headSettings, heads, memory, unitFactory);
         }
 
         public ReadData[] ReadData

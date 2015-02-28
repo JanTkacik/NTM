@@ -9,12 +9,12 @@ namespace NTM2.Memory.Addressing
         private readonly HeadSetting _oldHeadSettings;
         private readonly Unit[] _data;
 
-        public GatedAddressing(Unit gate, ContentAddressing contentAddressing, HeadSetting oldHeadSettings)
+        public GatedAddressing(Unit gate, ContentAddressing contentAddressing, HeadSetting oldHeadSettings, UnitFactory unitFactory)
         {
             _gate = gate;
             _contentAddressing = contentAddressing;
             _oldHeadSettings = oldHeadSettings;
-            _data = Unit.GetVector(_contentAddressing.Data.Length);
+            _data = unitFactory.GetVector(_contentAddressing.Data.Length);
 
             //Implementation of focusing by location - page 8 part 3.3.2. Focusing by Location
             double g = Sigmoid.GetValue(_gate.Value);

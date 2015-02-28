@@ -15,11 +15,11 @@ namespace NTM2.Memory.Addressing
         private readonly Unit[] _data;
 
         //IMPLEMENTATION OF SHIFT - page 9
-        public ShiftedAddressing(Unit shift, GatedAddressing gatedAddressing)
+        public ShiftedAddressing(Unit shift, GatedAddressing gatedAddressing, UnitFactory unitFactory)
         {
             _shift = shift;
             _gatedAddressing = gatedAddressing;
-            _data = Unit.GetVector(_gatedAddressing.Data.Length);
+            _data = unitFactory.GetVector(_gatedAddressing.Data.Length);
 
             //WTF
             double length = (double)_gatedAddressing.Data.Length;

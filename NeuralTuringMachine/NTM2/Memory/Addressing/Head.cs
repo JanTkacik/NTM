@@ -50,12 +50,12 @@ namespace NTM2.Memory.Addressing
             get { return _addVector; }
         }
 
-        public Head(int memoryRowSize)
+        public Head(int memoryRowSize, UnitFactory unitFactory)
         {
             _memoryRowSize = memoryRowSize;
-            _eraseVector = Unit.GetVector(memoryRowSize);
-            _addVector = Unit.GetVector(memoryRowSize);
-            _keyVector = Unit.GetVector(memoryRowSize);
+            _eraseVector = unitFactory.GetVector(memoryRowSize);
+            _addVector = unitFactory.GetVector(memoryRowSize);
+            _keyVector = unitFactory.GetVector(memoryRowSize);
             _beta = new Unit();
             _gate = new Unit();
             _shift = new Unit();
@@ -72,12 +72,12 @@ namespace NTM2.Memory.Addressing
             return GetUnitSize(_memoryRowSize);
         }
 
-        public static Head[] GetVector(int length, Func<int, int> constructorParamGetter)
+        public static Head[] GetVector(int length, Func<int, int> constructorParamGetter, UnitFactory unitFactory)
         {
             Head[] vector = new Head[length];
             for (int i = 0; i < length; i++)
             {
-                vector[i] = new Head(constructorParamGetter(i));
+                vector[i] = new Head(constructorParamGetter(i), unitFactory);
             }
             return vector;
         }

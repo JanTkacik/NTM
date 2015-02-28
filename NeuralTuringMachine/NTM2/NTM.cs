@@ -14,14 +14,14 @@ namespace NTM2
             _memoryState = memoryState;
         }
 
-        public Ntm(Ntm oldMachine, double[] input)
+        public Ntm(Ntm oldMachine, double[] input, UnitFactory unitFactory)
         {
             _controller = oldMachine._controller.Process(oldMachine._memoryState.ReadData, input);
             for (int i = 0; i < _controller.HeadCount; i++)
             {
                 _controller.Heads[i].OldHeadSettings = oldMachine._memoryState.HeadSettings[i];
             }
-            _memoryState = new MemoryState(_controller.Heads, oldMachine._memoryState.Memory);
+            _memoryState = new MemoryState(_controller.Heads, oldMachine._memoryState.Memory, unitFactory);
         }
 
         public NTMController Controller

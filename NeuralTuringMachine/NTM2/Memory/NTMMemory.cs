@@ -17,21 +17,21 @@ namespace NTM2.Memory
         private readonly int _memoryColumnsN;
         private readonly int _memoryRowsM;
 
-        public NTMMemory(int memoryColumnsN, int memoryRowsM)
+        public NTMMemory(int memoryColumnsN, int memoryRowsM, UnitFactory unitFactory)
         {
             _memoryColumnsN = memoryColumnsN;
             _memoryRowsM = memoryRowsM;
-            _data = Unit.GetTensor2(memoryColumnsN, memoryRowsM);
+            _data = unitFactory.GetTensor2(memoryColumnsN, memoryRowsM);
         }
 
-        public NTMMemory(HeadSetting[] headSettings, Head[] heads, NTMMemory memory)
+        public NTMMemory(HeadSetting[] headSettings, Head[] heads, NTMMemory memory, UnitFactory unitFactory)
         {
             _memoryColumnsN = memory._memoryColumnsN;
             _memoryRowsM = memory._memoryRowsM;
             _headSettings = headSettings;
             _heads = heads;
             _oldMemory = memory;
-            _data = Unit.GetTensor2(memory.MemoryColumnsN, memory.MemoryRowsM);
+            _data = unitFactory.GetTensor2(memory.MemoryColumnsN, memory.MemoryRowsM);
 
             int headsCount = heads.Length;
             _erase = GetTensor2(headsCount, memory.MemoryRowsM);
