@@ -2,19 +2,12 @@
 {
     public class Unit
     {
-        public double Value { get; set; }
-        public double Gradient { get; set; }
-
-        public Unit() 
-        {
-            Value = 0;
-            Gradient = 0;
-        }
-
-        public Unit(double value)
+        public double Value;
+        public double Gradient;
+        
+        public Unit(double value = 0)
         {
             Value = value;
-            Gradient = 0;
         }
 
         public override string ToString()

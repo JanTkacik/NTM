@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using NTM2;
 using NTM2.Controller;
@@ -11,6 +12,7 @@ namespace CopyTaskTest
         static void Main()
         {
             double[] errors = new double[100];
+            long[] times = new long[100];
             for (int i = 0; i < 100; i++)
             {
                 errors[i] = 1;
@@ -34,11 +36,15 @@ namespace CopyTaskTest
             Console.WriteLine(controller.WeightsCount);
 
             RMSPropTeacher rmsPropTeacher = new RMSPropTeacher(controller);
-            for (int i = 1; i < 100000; i++)
+            for (int i = 1; i < 10000; i++)
             {
                 Tuple<double[][], double[][]> sequence = SequenceGenerator.GenerateSequence(rand.Next(20) + 1,
                                                                                             vectorSize);
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
                 Ntm[] machines = rmsPropTeacher.Train(sequence.Item1, sequence.Item2, 0.95, 0.5, 0.001, 0.001);
+                stopwatch.Stop();
+                times[i%100] = stopwatch.ElapsedMilliseconds;
 
                 double error = CalculateLogLoss(sequence.Item2, machines);
                 double averageError = error / (sequence.Item2.Length * sequence.Item2[0].Length);
@@ -47,7 +53,7 @@ namespace CopyTaskTest
 
                 if (i % 100 == 0)
                 {
-                    Console.WriteLine("Iteration: {0:}, average error: {1:0.000}", i, errors.Average());
+                    Console.WriteLine("Iteration: {0}, average error: {1}, iterations per second: {2:0.0}", i, errors.Average(), 1000/times.Average());
                 }
             }
 

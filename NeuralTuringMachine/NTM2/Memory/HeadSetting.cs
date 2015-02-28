@@ -22,8 +22,7 @@ namespace NTM2.Memory
             _gammaIndex = Math.Log(Math.Exp(gamma.Value) + 1) + 1;
 
             double sum = 0;
-            for (int i = 0; i < _data.Length; i++)
-            {
+            for (int i = 0; i < _data.Length; i++){
                 Unit unit = _data[i];
                 unit.Value = Math.Pow(_shiftedAddressing.Data[i].Value, _gammaIndex);
                 sum += unit.Value;
@@ -71,40 +70,47 @@ namespace NTM2.Memory
 
         public void BackwardErrorPropagation()
         {
-            for (int i = 0; i < _shiftedAddressing.Data.Length; i++)
+            //TODO replace by constant
+            Unit[] shiftedAddressingData = _shiftedAddressing.Data;
+            int shiftedAddressingDataLength = shiftedAddressingData.Length;
+
+            for (int i = 0; i < shiftedAddressingDataLength; i++)
             {
-                if (_shiftedAddressing.Data[i].Value < double.Epsilon)
+                Unit weight = shiftedAddressingData[i];
+                if (weight.Value < double.Epsilon)
                 {
                     continue;
                 }
                 double gradient = 0;
                 for (int j = 0; j < _data.Length; j++)
                 {
+                    Unit dataWeight = _data[j];
                     if (i == j)
                     {
-                        gradient += _data[j].Gradient * (1 - _data[j].Value);
+                        gradient += dataWeight.Gradient * (1 - dataWeight.Value);
                     }
                     else
                     {
-                        gradient -= _data[j].Gradient * _data[j].Value;
+                        gradient -= dataWeight.Gradient * dataWeight.Value;
                     }
                 }
                 //PRIORITY ??? 
-                gradient = gradient * _gammaIndex / _shiftedAddressing.Data[i].Value * _data[i].Value;
-                _shiftedAddressing.Data[i].Gradient += gradient;
+                gradient = gradient * _gammaIndex / weight.Value * _data[i].Value;
+                weight.Gradient += gradient;
             }
-            
-            double[] lns = new double[_shiftedAddressing.Data.Length];
+
+            double[] lns = new double[shiftedAddressingDataLength];
             double lnexp = 0;
             double s = 0;
             for (int i = 0; i < lns.Length; i++)
             {
-                if (_shiftedAddressing.Data[i].Value < double.Epsilon)
+                Unit weight = shiftedAddressingData[i];
+                if (weight.Value < double.Epsilon)
                 {
                     continue;
                 }
-                lns[i] = Math.Log(_shiftedAddressing.Data[i].Value);
-                double pow = Math.Pow(_shiftedAddressing.Data[i].Value, _gammaIndex);
+                lns[i] = Math.Log(weight.Value);
+                double pow = Math.Pow(weight.Value, _gammaIndex);
                 lnexp += lns[i] * pow;
                 s += pow;
             }
@@ -112,11 +118,12 @@ namespace NTM2.Memory
             double gradient2 = 0;
             for (int i = 0; i < _data.Length; i++)
             {
-                if (_shiftedAddressing.Data[i].Value < double.Epsilon)
+                if (shiftedAddressingData[i].Value < double.Epsilon)
                 {
                     continue;
                 }
-                gradient2 += _data[i].Gradient * (_data[i].Value * (lns[i] - lnexps));
+                Unit dataWeight = _data[i];
+                gradient2 += dataWeight.Gradient * (dataWeight.Value * (lns[i] - lnexps));
             }
             gradient2 = gradient2 / (1 + Math.Exp(-_gamma.Value));
             _gamma.Gradient += gradient2;
