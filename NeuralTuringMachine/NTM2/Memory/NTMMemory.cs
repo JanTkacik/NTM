@@ -1,5 +1,4 @@
-﻿using System;
-using NTM2.Controller;
+﻿using NTM2.Controller;
 using NTM2.Memory.Addressing;
 
 namespace NTM2.Memory
@@ -13,7 +12,7 @@ namespace NTM2.Memory
 
         private readonly double[][] _erase;
         private readonly double[][] _add;
-        private readonly double[][] _tilt;
+        private readonly double[][] _erasures;
 
         private readonly int _memoryColumnsN;
         private readonly int _memoryRowsM;
@@ -37,7 +36,7 @@ namespace NTM2.Memory
             int headsCount = heads.Length;
             _erase = GetTensor2(headsCount, memory.MemoryRowsM);
             _add = GetTensor2(headsCount, memory.MemoryRowsM);
-            _tilt = GetTensor2(memory.MemoryColumnsN, memory.MemoryRowsM);
+            _erasures = GetTensor2(memory.MemoryColumnsN, memory.MemoryRowsM);
 
             for (int i = 0; i < headsCount; i++)
             {
@@ -51,19 +50,24 @@ namespace NTM2.Memory
                 }
             }
 
-            for (int i = 0; i < memory.MemoryColumnsN; i++)
+            for (int i = 0; i < _oldMemory.Data.Length; i++)
             {
-                for (int j = 0; j < memory.MemoryRowsM; j++)
+                Unit[] oldRow = _oldMemory.Data[i];
+                double[] erasure = _erasures[i];
+                Unit[] row = _data[i];
+                for (int j = 0; j < oldRow.Length; j++)
                 {
-                    double mTilt = 1;
-                    double adds = 0;
-                    for (int k = 0; k < headsCount; k++)
+                    Unit oldCell = oldRow[j];
+                    double erase = 1;
+                    double add = 0;
+                    for (int k = 0; k < _headSettings.Length; k++)
                     {
-                        mTilt *= (1 - (_headSettings[k].Data[i].Value*_erase[k][j]));
-                        adds += _headSettings[k].Data[i].Value*_add[k][j];
+                        HeadSetting headSetting = _headSettings[k];
+                        erase *= (1 - (headSetting.Data[i].Value*_erase[k][j]));
+                        add += headSetting.Data[i].Value*_add[k][j];
                     }
-                    _tilt[i][j] = _oldMemory.Data[i][j].Value * mTilt;
-                    Data[i][j].Value = _tilt[i][j] + adds;
+                    erasure[j] = erase;
+                    row[j].Value += (erase*oldCell.Value) + add;
                 }
             }
         }
@@ -103,25 +107,30 @@ namespace NTM2.Memory
             //Gradient of head settings
             for (int i = 0; i < _headSettings.Length; i++)
             {
-                for (int j = 0; j < _headSettings[i].Data.Length; j++)
+                HeadSetting headSetting = _headSettings[i];
+                double[] erase = _erase[i];
+                double[] add = _add[i];
+                for (int j = 0; j < _data.Length; j++)
                 {
+                    Unit[] row = _data[j];
+                    Unit[] oldRow = _oldMemory._data[j];
                     double gradient = 0;
-                    for (int k = 0; k < _data[j].Length; k++)
+                    for (int k = 0; k < row.Length; k++)
                     {
-                        double e = _erase[i][k];
-                        double gradientErase = _oldMemory._data[j][k].Value * (-e);
+                        Unit data = row[k];
+                        double oldDataValue = oldRow[k].Value;
                         for (int q = 0; q < _headSettings.Length; q++)
                         {
                             if (q == i)
                             {
-                                continue;
+                                continue; 
                             }
-                            gradientErase *= 1 - (_headSettings[q].Data[j].Value*_erase[q][k]);
+                            HeadSetting setting = _headSettings[q];
+                            oldDataValue *= (1 - (setting.Data[j].Value*_erase[q][k]));
                         }
-                        double gradientAdd = _add[i][k];
-                        gradient += (gradientErase + gradientAdd) * _data[j][k].Gradient;
+                        gradient += ((oldDataValue*(-erase[k])) + add[k])*data.Gradient;
                     }
-                    _headSettings[i].Data[j].Gradient += gradient;
+                    headSetting.Data[j].Gradient += gradient;
                 }
             }
 
@@ -129,11 +138,16 @@ namespace NTM2.Memory
             for (int k = 0; k < _heads.Length; k++)
             {
                 Head head = _heads[k];
-                for (int i = 0; i < head.EraseVector.Length; i++)
+                Unit[] headErase = head.EraseVector;
+                double[] erase = _erase[k];
+                HeadSetting headSetting = _headSettings[k];
+
+                for (int i = 0; i < headErase.Length; i++)
                 {
                     double gradient = 0;
                     for (int j = 0; j < _data.Length; j++)
                     {
+                        Unit[] row = _data[j];
                         double gradientErase = _oldMemory._data[j][i].Value;
                         for (int q = 0; q < _headSettings.Length; q++)
                         {
@@ -143,9 +157,10 @@ namespace NTM2.Memory
                             }
                             gradientErase *= 1 - (_headSettings[q].Data[j].Value * _erase[q][i]);
                         }
-                        gradient += _data[j][i].Gradient * gradientErase * (-_headSettings[k].Data[j].Value);
+                        gradient += row[i].Gradient * gradientErase * (-headSetting.Data[j].Value);
                     }
-                    head.EraseVector[i].Gradient += gradient * _erase[k][i] * (1 - _erase[k][i]);
+                    double e = erase[i];
+                    head.EraseVector[i].Gradient += gradient * e * (1 - e);
                 }
             }
 
@@ -153,14 +168,20 @@ namespace NTM2.Memory
             for (int k = 0; k < _heads.Length; k++)
             {
                 Head head = _heads[k];
-                for (int i = 0; i < head.AddVector.Length; i++)
+                double[] add = _add[k];
+                HeadSetting headSetting = _headSettings[k];
+                Unit[] addVector = head.AddVector;
+
+                for (int i = 0; i < addVector.Length; i++)
                 {
                     double gradient = 0;
                     for (int j = 0; j < _data.Length; j++)
                     {
-                        gradient += _data[j][i].Gradient*_headSettings[k].Data[j].Value;
+                        Unit[] row = _data[j];
+                        gradient += row[i].Gradient*headSetting.Data[j].Value;
                     }
-                    head.AddVector[i].Gradient += gradient*_add[k][i]*(1 - _add[k][i]);
+                    double a = add[i];
+                    addVector[i].Gradient += gradient * a * (1 - a);
                 }
             }
 

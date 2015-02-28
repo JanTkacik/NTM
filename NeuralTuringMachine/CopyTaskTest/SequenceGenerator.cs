@@ -4,7 +4,7 @@ namespace CopyTaskTest
 {
     public static class SequenceGenerator
     {
-        public static Random Rand = new Random();
+        public static Random Rand = new Random(8);
 
         public static Tuple<double[][], double[][]> GenerateSequence(int length, int vectorSize)
         {

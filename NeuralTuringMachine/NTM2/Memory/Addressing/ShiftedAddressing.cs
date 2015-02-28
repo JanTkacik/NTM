@@ -34,9 +34,9 @@ namespace NTM2.Memory.Addressing
                 int imj = (i + (int) _convolution) % n;
                 _data[i].Value = (_gatedAddressing.Data[imj].Value*simj) +
                                  (_gatedAddressing.Data[(imj + 1)%n].Value*(1 - simj));
-                if (_data[i].Value < 0)
+                if (_data[i].Value < 0 || double.IsNaN(_data[i].Value))
                 {
-                    throw new Exception("Error - weight should not be smaller than zero");
+                    throw new Exception("Error - weight should not be smaller than zero or nan");
                 }
             }
         }

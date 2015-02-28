@@ -18,12 +18,15 @@ namespace NTM2.Memory.Addressing
             //Subtracting max increase numerical stability
             double max = _units.Max(similarity => similarity.Data.Value);
             double sum = 0;
-            for (int i = 0; i < _data.Length; i++)
-            {
-                _data[i].Value = Math.Exp(_units[i].Data.Value - max);
-                sum += _data[i].Value;
-            }
 
+            for (int i = 0; i < _units.Length; i++)
+            {
+                BetaSimilarity unit = _units[i];
+                double weight = Math.Exp(unit.Data.Value - max);
+                _data[i].Value = weight;
+                sum += weight;
+            }
+            
             foreach (Unit unit in _data)
             {
                 unit.Value = unit.Value/sum;
