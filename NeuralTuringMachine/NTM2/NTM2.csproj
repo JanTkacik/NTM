@@ -57,6 +57,12 @@
     <Compile Include="NTM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ObjectPool\ObjectPool.csproj">
+      <Project>{DB20DDF8-64AC-4C0C-9F28-F37C352E79E0}</Project>
+      <Name>ObjectPool</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

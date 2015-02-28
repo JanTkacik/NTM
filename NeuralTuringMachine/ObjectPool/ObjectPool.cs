@@ -58,7 +58,7 @@ namespace ObjectPool
             newObject.ReturnToPoolAction = ReturnToPoolAction;
             return newObject;
         }
-
+        
         ~ObjectPool()
         {
             foreach (T item in _pooledObject)
