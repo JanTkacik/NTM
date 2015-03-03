@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MsgPack">
+      <HintPath>..\..\3rdPartyLibs\MsgPack.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -39,6 +42,12 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="YoVisionClient">
+      <HintPath>..\..\3rdPartyLibs\YoVisionClient.dll</HintPath>
+    </Reference>
+    <Reference Include="YoVisionCore">
+      <HintPath>..\..\3rdPartyLibs\YoVisionCore.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -52,10 +61,6 @@
     <ProjectReference Include="..\NTM2\NTM2.csproj">
       <Project>{F278510E-04AC-4C11-8CE2-7B561B822070}</Project>
       <Name>NTM2</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ObjectPool\ObjectPool.csproj">
-      <Project>{DB20DDF8-64AC-4C0C-9F28-F37C352E79E0}</Project>
-      <Name>ObjectPool</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NTM2.Controller;
 
 namespace NTM2.Memory.Addressing
@@ -22,7 +18,7 @@ namespace NTM2.Memory.Addressing
             _data = unitFactory.GetVector(_gatedAddressing.Data.Length);
 
             //WTF
-            double length = (double)_gatedAddressing.Data.Length;
+            double length = _gatedAddressing.Data.Length;
             double maxShift = ((2*Sigmoid.GetValue(_shift.Value)) - 1);
             _convolution = (maxShift + length) % length;
 

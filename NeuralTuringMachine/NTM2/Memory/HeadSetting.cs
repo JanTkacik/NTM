@@ -94,8 +94,8 @@ namespace NTM2.Memory
                         gradient -= dataWeight.Gradient * dataWeight.Value;
                     }
                 }
-                //PRIORITY ??? 
-                gradient = gradient * _gammaIndex / weight.Value * _data[i].Value;
+                
+                gradient = ((gradient * _gammaIndex) / weight.Value) * _data[i].Value;
                 weight.Gradient += gradient;
             }
 

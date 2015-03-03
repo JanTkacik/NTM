@@ -7,7 +7,6 @@ namespace NTM2.Controller
     public class NTMController
     {
         private readonly UnitFactory _unitFactory;
-
         private readonly int _memoryColumnsN;
         private readonly int _memoryRowsM;
         private readonly int _weightsCount;
@@ -18,11 +17,18 @@ namespace NTM2.Controller
         private readonly ReadData[] _reads;
         private readonly NTMMemory _memory;
 
+        //Weights from controller to head
         private readonly Unit[][][] _wuh1;
+        //Weights from controller to output
         private readonly Unit[][] _wyh1;
+        //Controller bias weights
         private readonly Unit[] _wh1b;
+        //Weights from input to controller
         private readonly Unit[][] _wh1x;
+        //Weights from read data to controller
         private readonly Unit[][][] _wh1r;
+
+        //Old similarities
         private readonly BetaSimilarity[][] _wtm1s;
 
         public int WeightsCount
@@ -106,6 +112,7 @@ namespace NTM2.Controller
         {
             //FOREACH HEAD - SET WEIGHTS TO BIAS VALUES
             ContentAddressing[] contentAddressings = ContentAddressing.GetVector(HeadCount, i => _wtm1s[i], _unitFactory);
+
             HeadSetting[] oldSettings = HeadSetting.GetVector(HeadCount, i => new Tuple<int, ContentAddressing>(_memory.MemoryColumnsN, contentAddressings[i]), _unitFactory);
             ReadData[] readDatas = ReadData.GetVector(HeadCount, i => new Tuple<HeadSetting, NTMMemory>(oldSettings[i], _memory));
 
@@ -182,7 +189,7 @@ namespace NTM2.Controller
                 Unit[][] headsWeights = _wh1r[i];
                 for (int j = 0; j < headsWeights.Length; j++)
                 {
-                    //Foreach memory cell
+                    //Foreach read data
                     Unit[] weights = headsWeights[j];
                     ReadData read = readData[j];
 
@@ -410,6 +417,11 @@ namespace NTM2.Controller
             {
                 _wh1b[i].Gradient += hiddenGradients[i];
             }
+        }
+
+        public string SerializeToString()
+        {
+            return null;
         }
     }
 }

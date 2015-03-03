@@ -4,6 +4,9 @@ using System.Linq;
 using NTM2;
 using NTM2.Controller;
 using NTM2.Learning;
+using YoVisionClient;
+using YoVisionCore;
+using YoVisionCore.DataTypes;
 
 namespace CopyTaskTest
 {
@@ -11,6 +14,23 @@ namespace CopyTaskTest
     {
         static void Main()
         {
+            DataStream reportStream = null;
+            try
+            {
+                YoVisionClientHelper yoVisionClientHelper = new YoVisionClientHelper();
+                yoVisionClientHelper.Connect(EndpointType.NetTcp, 8081, "localhost", "YoVisionServer");
+                reportStream = yoVisionClientHelper.RegisterDataStream("Copy task training",
+                    new Int32DataType("Iteration"),
+                    new DoubleDataType("Average data loss"),
+                    new Int32DataType("Training time"),
+                    new Int32DataType("Sequence length"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
+            
             double[] errors = new double[100];
             long[] times = new long[100];
             for (int i = 0; i < 100; i++)
@@ -50,6 +70,15 @@ namespace CopyTaskTest
                 double averageError = error / (sequence.Item2.Length * sequence.Item2[0].Length);
 
                 errors[i % 100] = averageError;
+
+                if (reportStream != null)
+                {
+                    reportStream.Set("Iteration", i);
+                    reportStream.Set("Average data loss", averageError);
+                    reportStream.Set("Training time", stopwatch.ElapsedMilliseconds);
+                    reportStream.Set("Sequence length", (sequence.Item1.Length - 2)/2);
+                    reportStream.SendData();
+                }
 
                 if (i % 100 == 0)
                 {

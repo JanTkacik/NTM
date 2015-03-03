@@ -1,4 +1,6 @@
-﻿namespace NTM2.Controller
+﻿using System;
+
+namespace NTM2.Controller
 {
     public class UnitFactory
     {

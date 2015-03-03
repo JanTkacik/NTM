@@ -1,31 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuralTuringMachine", "NeuralTuringMachine\NeuralTuringMachine.csproj", "{A07A9F3C-1D44-426E-834F-FDC55F09BB82}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{69011CDB-BD0A-48AA-93DB-BFCE5CDD66A6}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTMConsoleTestClient", "NTMConsoleTestClient\NTMConsoleTestClient.csproj", "{F9AA3FB2-4221-487D-A4E1-6CD4451172BE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuralTuringMachine.Tests", "NeuralTuringMachine.Tests\NeuralTuringMachine.Tests.csproj", "{48C0D0B7-9DAD-4FEE-88D7-9AD47494D609}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParticleSwarmOptimization", "ParticleSwarmOptimization\ParticleSwarmOptimization.csproj", "{04B2BAC1-2CF6-46F6-A81B-FA6CB4DDC5D8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTM2", "NTM2\NTM2.csproj", "{F278510E-04AC-4C11-8CE2-7B561B822070}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CopyTaskTest", "CopyTaskTest\CopyTaskTest.csproj", "{E97783CD-2A6E-474E-96D4-61F134EF4279}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1C8AB20C-C2C7-45FC-8F8E-72BD3B4B4890}"
-	ProjectSection(SolutionItems) = preProject
-		Performance1.psess = Performance1.psess
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectPool", "ObjectPool\ObjectPool.csproj", "{DB20DDF8-64AC-4C0C-9F28-F37C352E79E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,22 +11,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A07A9F3C-1D44-426E-834F-FDC55F09BB82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A07A9F3C-1D44-426E-834F-FDC55F09BB82}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A07A9F3C-1D44-426E-834F-FDC55F09BB82}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A07A9F3C-1D44-426E-834F-FDC55F09BB82}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F9AA3FB2-4221-487D-A4E1-6CD4451172BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F9AA3FB2-4221-487D-A4E1-6CD4451172BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F9AA3FB2-4221-487D-A4E1-6CD4451172BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F9AA3FB2-4221-487D-A4E1-6CD4451172BE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{48C0D0B7-9DAD-4FEE-88D7-9AD47494D609}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{48C0D0B7-9DAD-4FEE-88D7-9AD47494D609}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{48C0D0B7-9DAD-4FEE-88D7-9AD47494D609}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{48C0D0B7-9DAD-4FEE-88D7-9AD47494D609}.Release|Any CPU.Build.0 = Release|Any CPU
-		{04B2BAC1-2CF6-46F6-A81B-FA6CB4DDC5D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{04B2BAC1-2CF6-46F6-A81B-FA6CB4DDC5D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{04B2BAC1-2CF6-46F6-A81B-FA6CB4DDC5D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{04B2BAC1-2CF6-46F6-A81B-FA6CB4DDC5D8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F278510E-04AC-4C11-8CE2-7B561B822070}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F278510E-04AC-4C11-8CE2-7B561B822070}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F278510E-04AC-4C11-8CE2-7B561B822070}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -57,10 +19,6 @@ Global
 		{E97783CD-2A6E-474E-96D4-61F134EF4279}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E97783CD-2A6E-474E-96D4-61F134EF4279}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E97783CD-2A6E-474E-96D4-61F134EF4279}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DB20DDF8-64AC-4C0C-9F28-F37C352E79E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DB20DDF8-64AC-4C0C-9F28-F37C352E79E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DB20DDF8-64AC-4C0C-9F28-F37C352E79E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DB20DDF8-64AC-4C0C-9F28-F37C352E79E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

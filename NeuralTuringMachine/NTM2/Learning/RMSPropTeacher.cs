@@ -39,7 +39,5 @@ namespace NTM2.Learning
                 });
             return machines;
         }
-
-
     }
 }

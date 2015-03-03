@@ -1,4 +1,5 @@
-﻿using NTM2.Controller;
+﻿using System;
+using NTM2.Controller;
 using NTM2.Memory.Addressing;
 
 namespace NTM2.Memory
