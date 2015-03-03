@@ -1,7 +1,7 @@
 NTM
 ===
 
-Neural turing maching implementation
+Neural turing machine implementation
 
 Source http://arxiv.org/pdf/1410.5401v1
 
