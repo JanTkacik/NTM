@@ -7,8 +7,11 @@ namespace NTM2.Controller
     class FeedForwardController : IController
     {
         #region Fields and variables
-        
+
         private readonly int _controllerSize;
+        private readonly int _inputSize;
+        private readonly int _headCount;
+        private readonly int _memoryUnitSizeM;
         private readonly UnitFactory _unitFactory;
 
         //Controller hidden layer threshold weights
@@ -16,25 +19,28 @@ namespace NTM2.Controller
 
         //Weights from input to controller
         private readonly Unit[][] _inputToHiddenLayerWeights;
-        
+
         //Weights from read data to controller
-        private readonly Unit[][][] _wh1r;
-        
+        private readonly Unit[][][] _readDataToHiddenLayerWeights;
+
         public int HiddenLayerSize
         {
             get { return _controllerSize; }
         }
 
         #endregion
-        
+
         #region Ctor
 
-        public FeedForwardController(int controllerSize, int inputSize, int headCount, int memoryCellSizeM, UnitFactory unitFactory)
+        public FeedForwardController(int controllerSize, int inputSize, int headCount, int memoryUnitSizeM, UnitFactory unitFactory)
         {
             _controllerSize = controllerSize;
+            _inputSize = inputSize;
+            _headCount = headCount;
+            _memoryUnitSizeM = memoryUnitSizeM;
             _unitFactory = unitFactory;
 
-            _wh1r = _unitFactory.GetTensor3(controllerSize, headCount, memoryCellSizeM);
+            _readDataToHiddenLayerWeights = _unitFactory.GetTensor3(controllerSize, headCount, memoryUnitSizeM);
             _inputToHiddenLayerWeights = _unitFactory.GetTensor2(controllerSize, inputSize);
             _hiddenLayerThresholds = _unitFactory.GetVector(controllerSize);
         }
@@ -44,7 +50,7 @@ namespace NTM2.Controller
         #region Forward propagation
 
         //TODO refactor - do not use tempsum - but beware of rounding issues
-        
+
         public double ForwardPropagation(double tempSum, int neuronIndex, double[] input, ReadData[] readData)
         {
             double sum = tempSum;
@@ -54,23 +60,20 @@ namespace NTM2.Controller
             return sum;
         }
 
-        private double GetReadDataContributionToHiddenLayer(int neuronIndex, ReadData[] readData, double sum)
+        private double GetReadDataContributionToHiddenLayer(int neuronIndex, ReadData[] readData, double tempSum)
         {
-            //TODO continue to refactor
-            //Foreach head
-            Unit[][] headsWeights = _wh1r[neuronIndex];
-            for (int j = 0; j < headsWeights.Length; j++)
+            Unit[][] readWeightsForEachHead = _readDataToHiddenLayerWeights[neuronIndex];
+            for (int headIndex = 0; headIndex < _headCount; headIndex++)
             {
-                //Foreach read data
-                Unit[] weights = headsWeights[j];
-                ReadData read = readData[j];
+                Unit[] headWeights = readWeightsForEachHead[headIndex];
+                ReadData read = readData[headIndex];
 
-                for (int k = 0; k < weights.Length; k++)
+                for (int memoryCellIndex = 0; memoryCellIndex < _memoryUnitSizeM; memoryCellIndex++)
                 {
-                    sum += weights[k].Value*read.Data[k].Value;
+                    tempSum += headWeights[memoryCellIndex].Value * read.Data[memoryCellIndex].Value;
                 }
             }
-            return sum;
+            return tempSum;
         }
 
         private double GetInputContributionToHiddenLayer(int neuronIndex, double[] input, double tempSum)
@@ -78,7 +81,7 @@ namespace NTM2.Controller
             Unit[] inputWeights = _inputToHiddenLayerWeights[neuronIndex];
             for (int j = 0; j < inputWeights.Length; j++)
             {
-                tempSum += inputWeights[j].Value*input[j];
+                tempSum += inputWeights[j].Value * input[j];
             }
             return tempSum;
         }
@@ -98,8 +101,8 @@ namespace NTM2.Controller
             Action<Unit[]> vectorUpdateAction = Unit.GetVectorUpdateAction(updateAction);
             Action<Unit[][]> tensor2UpdateAction = Unit.GetTensor2UpdateAction(updateAction);
             Action<Unit[][][]> tensor3UpdateAction = Unit.GetTensor3UpdateAction(updateAction);
-            
-            tensor3UpdateAction(_wh1r);
+
+            tensor3UpdateAction(_readDataToHiddenLayerWeights);
             tensor2UpdateAction(_inputToHiddenLayerWeights);
             vectorUpdateAction(_hiddenLayerThresholds);
         }
@@ -108,11 +111,9 @@ namespace NTM2.Controller
 
         #region BackwardErrorPropagation
 
-		public void BackwardErrorPropagation(double[] hiddenLayerGradients, double[] input, ReadData[] reads)
+        public void BackwardErrorPropagation(double[] hiddenLayerGradients, double[] input, ReadData[] reads)
         {
             UpdateReadDataGradient(hiddenLayerGradients, reads);
-
-            UpdateReadDataToHiddenWeightsGradient(hiddenLayerGradients, reads);
 
             UpdateInputToHiddenWeightsGradients(hiddenLayerGradients, input);
 
@@ -121,38 +122,20 @@ namespace NTM2.Controller
 
         private void UpdateReadDataGradient(double[] hiddenLayerGradients, ReadData[] reads)
         {
-            //TODO continue refactoring
-            for (int k = 0; k < hiddenLayerGradients.Length; k++)
-            {
-                Unit[][] wh1rk = _wh1r[k];
-                for (int i = 0; i < reads.Length; i++)
-                {
-                    ReadData readData = reads[i];
-                    Unit[] wh1rki = wh1rk[i];
-                    for (int j = 0; j < wh1rki.Length; j++)
-                    {
-                        readData.Data[j].Gradient += hiddenLayerGradients[k]*wh1rki[j].Value;
-                    }
-                }
-            }
-        }
-
-        private void UpdateReadDataToHiddenWeightsGradient(double[] hiddenLayerGradients, ReadData[] reads)
-        {
             for (int neuronIndex = 0; neuronIndex < _controllerSize; neuronIndex++)
             {
-                Unit[][] hiddenLayerNeuronToReadDataWeights = _wh1r[neuronIndex];
-                double hiddenGradient = hiddenLayerGradients[neuronIndex];
+                Unit[][] neuronToReadDataWeights = _readDataToHiddenLayerWeights[neuronIndex];
+                double hiddenLayerGradient = hiddenLayerGradients[neuronIndex];
 
-                //TODO change to headcount 
-                //TODO finish refactoring
-                for (int headIndex = 0; headIndex < hiddenLayerNeuronToReadDataWeights.Length; headIndex++)
+                for (int headIndex = 0; headIndex < _headCount; headIndex++)
                 {
-                    Unit[] wh1rij = hiddenLayerNeuronToReadDataWeights[headIndex];
-                    for (int k = 0; k < reads[headIndex].Data.Length; k++)
+                    ReadData readData = reads[headIndex];
+                    Unit[] neuronToHeadReadDataWeights = neuronToReadDataWeights[headIndex];
+                    for (int memoryCellIndex = 0; memoryCellIndex < _memoryUnitSizeM; memoryCellIndex++)
                     {
-                        Unit read = reads[headIndex].Data[k];
-                        wh1rij[k].Gradient += hiddenGradient*read.Value;
+                        readData.Data[memoryCellIndex].Gradient += hiddenLayerGradient * neuronToHeadReadDataWeights[memoryCellIndex].Value;
+
+                        neuronToHeadReadDataWeights[memoryCellIndex].Gradient += hiddenLayerGradient * readData.Data[memoryCellIndex].Value;
                     }
                 }
             }
@@ -171,9 +154,7 @@ namespace NTM2.Controller
 
         private void UpdateInputGradient(double hiddenLayerGradient, Unit[] inputToHiddenNeuronWeights, double[] input)
         {
-            //TODO change to use stored value
-            int inputLength = input.Length;
-            for (int inputIndex = 0; inputIndex < inputLength; inputIndex++)
+            for (int inputIndex = 0; inputIndex < _inputSize; inputIndex++)
             {
                 inputToHiddenNeuronWeights[inputIndex].Gradient += hiddenLayerGradient * input[inputIndex];
             }
@@ -186,7 +167,7 @@ namespace NTM2.Controller
                 _hiddenLayerThresholds[neuronIndex].Gradient += hiddenLayerGradients[neuronIndex];
             }
         }
-        
+
         #endregion
     }
 }
