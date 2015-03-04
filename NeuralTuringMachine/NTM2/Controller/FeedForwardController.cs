@@ -8,6 +8,8 @@ namespace NTM2.Controller
     {
         #region Fields and variables
 
+        private readonly IDifferentiableFunction _activationFunction;
+
         private readonly int _controllerSize;
         private readonly int _inputSize;
         private readonly int _headCount;
@@ -23,8 +25,10 @@ namespace NTM2.Controller
         //Weights from read data to controller
         private readonly Unit[][][] _readDataToHiddenLayerWeights;
         
+        //Hidden layer weights
         public readonly Unit[] _hiddenLayer1;
 
+        //TODO CHECK USAGES
         public int HiddenLayerSize
         {
             get { return _controllerSize; }
@@ -41,13 +45,14 @@ namespace NTM2.Controller
             _headCount = headCount;
             _memoryUnitSizeM = memoryUnitSizeM;
             _unitFactory = unitFactory;
+            _activationFunction = new SigmoidActivationFunction();
 
             _readDataToHiddenLayerWeights = _unitFactory.GetTensor3(controllerSize, headCount, memoryUnitSizeM);
             _inputToHiddenLayerWeights = _unitFactory.GetTensor2(controllerSize, inputSize);
             _hiddenLayerThresholds = _unitFactory.GetVector(controllerSize);
         }
 
-        private FeedForwardController(Unit[][][] readDataToHiddenLayerWeights, Unit[][] inputToHiddenLayerWeights, Unit[] hiddenLayerThresholds, Unit[] hiddenLayer, int controllerSize, int inputSize, int headCount, int memoryUnitSizeM, UnitFactory unitFactory)
+        private FeedForwardController(Unit[][][] readDataToHiddenLayerWeights, Unit[][] inputToHiddenLayerWeights, Unit[] hiddenLayerThresholds, Unit[] hiddenLayer, int controllerSize, int inputSize, int headCount, int memoryUnitSizeM, UnitFactory unitFactory, IDifferentiableFunction activationFunction)
         {
             _readDataToHiddenLayerWeights = readDataToHiddenLayerWeights;
             _inputToHiddenLayerWeights = inputToHiddenLayerWeights;
@@ -58,13 +63,14 @@ namespace NTM2.Controller
             _headCount = headCount;
             _memoryUnitSizeM = memoryUnitSizeM;
             _unitFactory = unitFactory;
+            _activationFunction = activationFunction;
         }
 
         public IController Clone()
         {
             return new FeedForwardController(_readDataToHiddenLayerWeights, _inputToHiddenLayerWeights,
                                              _hiddenLayerThresholds, _unitFactory.GetVector(HiddenLayerSize),
-                                             _controllerSize, _inputSize, _headCount, _memoryUnitSizeM, _unitFactory);
+                                             _controllerSize, _inputSize, _headCount, _memoryUnitSizeM, _unitFactory, _activationFunction);
         }
 
         #endregion
@@ -73,13 +79,19 @@ namespace NTM2.Controller
 
         //TODO refactor - do not use tempsum - but beware of rounding issues
 
-        public double ForwardPropagation(double tempSum, int neuronIndex, double[] input, ReadData[] readData)
+        public void ForwardPropagation(double[] input, ReadData[] readData)
         {
-            double sum = tempSum;
-            sum = GetReadDataContributionToHiddenLayer(neuronIndex, readData, sum);
-            sum = GetInputContributionToHiddenLayer(neuronIndex, input, sum);
-            sum = GetThresholdContributionToHiddenLayer(neuronIndex, sum);
-            return sum;
+            //Foreach neuron in hidden layer
+            for (int neuronIndex = 0; neuronIndex < _controllerSize; neuronIndex++)
+            {
+                double sum = 0;
+                sum = GetReadDataContributionToHiddenLayer(neuronIndex, readData, sum);
+                sum = GetInputContributionToHiddenLayer(neuronIndex, input, sum);
+                sum = GetThresholdContributionToHiddenLayer(neuronIndex, sum);
+
+                //Set new controller unit value
+                _hiddenLayer1[neuronIndex].Value = _activationFunction.Value(sum);
+            }
         }
 
         private double GetReadDataContributionToHiddenLayer(int neuronIndex, ReadData[] readData, double tempSum)
@@ -133,13 +145,28 @@ namespace NTM2.Controller
 
         #region BackwardErrorPropagation
 
-        public void BackwardErrorPropagation(double[] hiddenLayerGradients, double[] input, ReadData[] reads)
+        public void BackwardErrorPropagation(double[] input, ReadData[] reads)
         {
+            double[] hiddenLayerGradients = CalculateHiddenLayerGradinets();
+
             UpdateReadDataGradient(hiddenLayerGradients, reads);
 
             UpdateInputToHiddenWeightsGradients(hiddenLayerGradients, input);
 
             UpdateHiddenLayerThresholdsGradients(hiddenLayerGradients);
+        }
+
+        private double[] CalculateHiddenLayerGradinets()
+        {
+            double[] hiddenLayerGradients = new double[_hiddenLayer1.Length];
+            for (int i = 0; i < _hiddenLayer1.Length; i++)
+            {
+                Unit unit = _hiddenLayer1[i];
+                //TODO use derivative of activation function
+                //hiddenLayerGradients[i] = unit.Gradient * _activationFunction.Derivative(unit.Value)
+                hiddenLayerGradients[i] = unit.Gradient * unit.Value * (1 - unit.Value);
+            }
+            return hiddenLayerGradients;
         }
 
         private void UpdateReadDataGradient(double[] hiddenLayerGradients, ReadData[] reads)

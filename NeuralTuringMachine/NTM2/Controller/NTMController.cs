@@ -167,16 +167,7 @@ namespace NTM2.Controller
         //TODO readData Units are maybe not important
         private void ForwardPropagation(ReadData[] readData, double[] input)
         {
-            //Foreach neuron in hidden layer
-            for (int i = 0; i < _controller.HiddenLayerSize; i++)
-            {
-                double sum = 0;
-                
-                sum = _controller.ForwardPropagation(sum, i, input, readData);
-                
-                //Set new controller unit value
-                ((FeedForwardController)_controller)._hiddenLayer1[i].Value = Sigmoid.GetValue(sum);
-            }
+            _controller.ForwardPropagation(input, readData);
 
             //Foreach neuron in classic output layer
             for (int i = 0; i < _wyh1.Length; i++)
@@ -293,15 +284,8 @@ namespace NTM2.Controller
                     wuh1ij[((FeedForwardController)_controller)._hiddenLayer1.Length].Gradient += headUnit.Gradient;
                 }
             }
-
-            double[] hiddenGradients = new double[((FeedForwardController)_controller)._hiddenLayer1.Length];
-            for (int i = 0; i < ((FeedForwardController)_controller)._hiddenLayer1.Length; i++)
-            {
-                Unit unit = ((FeedForwardController)_controller)._hiddenLayer1[i];
-                hiddenGradients[i] = unit.Gradient * unit.Value * (1 - unit.Value);
-            }
             
-            _controller.BackwardErrorPropagation(hiddenGradients, _input, _reads);
+            _controller.BackwardErrorPropagation(_input, _reads);
         }
     }
 }
