@@ -1,4 +1,5 @@
-﻿using NTM2.Memory.Addressing;
+﻿using System;
+using NTM2.Memory.Addressing;
 
 namespace NTM2.Controller
 {
@@ -21,9 +22,39 @@ namespace NTM2.Controller
         //Weights from read data to controller
         private readonly Unit[][][] _wh1r;
 
-        public FeedForwardController(int inputSize, int outputSize, int controllerSize, int headCount)
-        {
+        private int ControllerSize { get { return _wh1b.Length; } }
 
+        public FeedForwardController(int inputSize, int outputSize, int controllerSize, int headCount, UnitFactory unitFactory)
+        {
+            _unitFactory = unitFactory;
+
+            _wh1b = _unitFactory.GetVector(controllerSize);
+        }
+
+        public double ForwardPropagation()
+        {
+            int controllerSize = ControllerSize;
+            double sum = 0;
+            for (int i = 0; i < controllerSize; i++)
+            {
+                sum += _wh1b[i].Value;
+            }
+            return sum;
+        }
+
+        public void UpdateWeights(Action<Unit> updateAction)
+        {
+            Action<Unit[]> vectorUpdateAction = Unit.GetVectorUpdateAction(updateAction);
+            vectorUpdateAction(_wh1b);
+        }
+
+        public void BackwardErrorPropagation(double[] hiddenGradients)
+        {
+            int controllerSize = ControllerSize;
+            for (int i = 0; i < controllerSize; i++)
+            {
+                _wh1b[i].Gradient += hiddenGradients[i];
+            }
         }
     }
 }
