@@ -22,8 +22,6 @@ namespace NTM2.Controller
         private readonly Unit[][][] _wuh1;
         //Weights from controller to output
         private readonly Unit[][] _wyh1;
-        //Weights from read data to controller
-        private readonly Unit[][][] _wh1r;
         
         private readonly IController _controller;
 
@@ -59,9 +57,8 @@ namespace NTM2.Controller
             _heads = new Head[headCount];
             _wtm1s = BetaSimilarity.GetTensor2(headCount, memoryColumnsN);
             _memory = new NTMMemory(memoryColumnsN, memoryRowsM, _unitFactory);
-            _wh1r = _unitFactory.GetTensor3(controllerSize, headCount, memoryRowsM);
             
-            _controller = new FeedForwardController(controllerSize, inputSize, _unitFactory);
+            _controller = new FeedForwardController(controllerSize, inputSize, headCount, memoryRowsM, _unitFactory);
 
             _wyh1 = _unitFactory.GetTensor2(outputSize, controllerSize + 1);
             _wuh1 = _unitFactory.GetTensor3(headCount, headUnitSize, controllerSize + 1);
@@ -79,7 +76,6 @@ namespace NTM2.Controller
         private NTMController(
             int memoryColumnsN,
             int memoryRowsM,
-            Unit[][][] wh1R,
             Unit[][] wyh1,
             Unit[][][] wuh1,
             int weightsCount,
@@ -94,7 +90,6 @@ namespace NTM2.Controller
             _unitFactory = unitFactory;
             _memoryColumnsN = memoryColumnsN;
             _memoryRowsM = memoryRowsM;
-            _wh1r = wh1R;
             _wyh1 = wyh1;
             _wuh1 = wuh1;
             _weightsCount = weightsCount;
@@ -158,13 +153,12 @@ namespace NTM2.Controller
             NTMController newController = new NTMController(
                 _memoryColumnsN,
                 _memoryRowsM,
-                _wh1r,
                 _wyh1,
                 _wuh1,
                 _weightsCount,
                 readData,
                 input,
-                _unitFactory.GetVector(_wh1r.Length),
+                _unitFactory.GetVector(_controller.HiddenLayerSize),
                 _unitFactory.GetVector(_wyh1.Length),
                 Head.GetVector(readData.Length, i => _memoryRowsM, _unitFactory),
                 _unitFactory,
@@ -178,26 +172,11 @@ namespace NTM2.Controller
         private void ForwardPropagation(ReadData[] readData, double[] input)
         {
             //Foreach neuron in hidden layer
-            for (int i = 0; i < _wh1r.Length; i++)
+            for (int i = 0; i < _controller.HiddenLayerSize; i++)
             {
                 double sum = 0;
-
-                //Foreach head
-                Unit[][] headsWeights = _wh1r[i];
-                for (int j = 0; j < headsWeights.Length; j++)
-                {
-                    //Foreach read data
-                    Unit[] weights = headsWeights[j];
-                    ReadData read = readData[j];
-
-                    for (int k = 0; k < weights.Length; k++)
-                    {
-                        sum += weights[k].Value * read.Data[k].Value;
-                    }
-                }
                 
-                //Plus threshold
-                sum = _controller.ForwardPropagation(sum, i, input);
+                sum = _controller.ForwardPropagation(sum, i, input, readData);
                 
                 //Set new controller unit value
                 _hiddenLayer1[i].Value = Sigmoid.GetValue(sum);
@@ -258,7 +237,6 @@ namespace NTM2.Controller
             tensor2UpdateAction(_memory.Data);
             tensor2UpdateAction(_wyh1);
             tensor3UpdateAction(_wuh1);
-            tensor3UpdateAction(_wh1r);
             
             _controller.UpdateWeights(updateAction);
         }
@@ -326,38 +304,8 @@ namespace NTM2.Controller
                 Unit unit = _hiddenLayer1[i];
                 hiddenGradients[i] = unit.Gradient * unit.Value * (1 - unit.Value);
             }
-
-            for (int k = 0; k < hiddenGradients.Length; k++)
-            {
-                Unit[][] wh1rk = _wh1r[k];
-                for (int i = 0; i < _reads.Length; i++)
-                {
-                    ReadData readData = _reads[i];
-                    Unit[] wh1rki = wh1rk[i];
-                    for (int j = 0; j < wh1rki.Length; j++)
-                    {
-                        readData.Data[j].Gradient += hiddenGradients[k] * wh1rki[j].Value;
-                    }
-                }
-            }
-
-            for (int i = 0; i < _wh1r.Length; i++)
-            {
-                Unit[][] wh1ri = _wh1r[i];
-                double hiddenGradient = hiddenGradients[i];
-
-                for (int j = 0; j < wh1ri.Length; j++)
-                {
-                    Unit[] wh1rij = wh1ri[j];
-                    for (int k = 0; k < _reads[j].Data.Length; k++)
-                    {
-                        Unit read = _reads[j].Data[k];
-                        wh1rij[k].Gradient += hiddenGradient * read.Value;
-                    }
-                }
-            }
-
-            _controller.BackwardErrorPropagation(hiddenGradients, _input);
+            
+            _controller.BackwardErrorPropagation(hiddenGradients, _input, _reads);
         }
     }
 }

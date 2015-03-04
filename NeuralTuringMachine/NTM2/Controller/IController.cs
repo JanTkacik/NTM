@@ -1,11 +1,13 @@
 ﻿using System;
+using NTM2.Memory;
 
 namespace NTM2.Controller
 {
     interface IController
     {
-        double ForwardPropagation(double sum, int neuronIndex, double[] input);
+        int HiddenLayerSize { get; }
+        double ForwardPropagation(double sum, int neuronIndex, double[] input, ReadData[] readData);
         void UpdateWeights(Action<Unit> updateAction);
-        void BackwardErrorPropagation(double[] hiddenLayerGradients, double[] input);
+        void BackwardErrorPropagation(double[] hiddenLayerGradients, double[] input, ReadData[] reads);
     }
 }
