@@ -22,8 +22,6 @@ namespace NTM2.Controller
         private readonly Unit[][][] _wuh1;
         //Weights from controller to output
         private readonly Unit[][] _wyh1;
-        //Weights from input to controller
-        private readonly Unit[][] _wh1x;
         //Weights from read data to controller
         private readonly Unit[][][] _wh1r;
         
@@ -62,9 +60,8 @@ namespace NTM2.Controller
             _wtm1s = BetaSimilarity.GetTensor2(headCount, memoryColumnsN);
             _memory = new NTMMemory(memoryColumnsN, memoryRowsM, _unitFactory);
             _wh1r = _unitFactory.GetTensor3(controllerSize, headCount, memoryRowsM);
-            _wh1x = _unitFactory.GetTensor2(controllerSize, inputSize);
             
-            _controller = new FeedForwardController(controllerSize, _unitFactory);
+            _controller = new FeedForwardController(controllerSize, inputSize, _unitFactory);
 
             _wyh1 = _unitFactory.GetTensor2(outputSize, controllerSize + 1);
             _wuh1 = _unitFactory.GetTensor3(headCount, headUnitSize, controllerSize + 1);
@@ -83,7 +80,6 @@ namespace NTM2.Controller
             int memoryColumnsN,
             int memoryRowsM,
             Unit[][][] wh1R,
-            Unit[][] wh1X,
             Unit[][] wyh1,
             Unit[][][] wuh1,
             int weightsCount,
@@ -99,7 +95,6 @@ namespace NTM2.Controller
             _memoryColumnsN = memoryColumnsN;
             _memoryRowsM = memoryRowsM;
             _wh1r = wh1R;
-            _wh1x = wh1X;
             _wyh1 = wyh1;
             _wuh1 = wuh1;
             _weightsCount = weightsCount;
@@ -164,7 +159,6 @@ namespace NTM2.Controller
                 _memoryColumnsN,
                 _memoryRowsM,
                 _wh1r,
-                _wh1x,
                 _wyh1,
                 _wuh1,
                 _weightsCount,
@@ -201,16 +195,9 @@ namespace NTM2.Controller
                         sum += weights[k].Value * read.Data[k].Value;
                     }
                 }
-
-                //Foreach input
-                Unit[] inputWeights = _wh1x[i];
-                for (int j = 0; j < inputWeights.Length; j++)
-                {
-                    sum += inputWeights[j].Value * input[j];
-                }
-
+                
                 //Plus threshold
-                sum = _controller.ForwardPropagation(sum, i);
+                sum = _controller.ForwardPropagation(sum, i, input);
                 
                 //Set new controller unit value
                 _hiddenLayer1[i].Value = Sigmoid.GetValue(sum);
@@ -265,53 +252,17 @@ namespace NTM2.Controller
                 }
             }
 
-            Action<Unit[][]> tensor2UpdateAction = GetTensor2UpdateAction(updateAction);
-            Action<Unit[][][]> tensor3UpdateAction = GetTensor3UpdateAction(updateAction);
+            Action<Unit[][]> tensor2UpdateAction = Unit.GetTensor2UpdateAction(updateAction);
+            Action<Unit[][][]> tensor3UpdateAction = Unit.GetTensor3UpdateAction(updateAction);
 
             tensor2UpdateAction(_memory.Data);
             tensor2UpdateAction(_wyh1);
             tensor3UpdateAction(_wuh1);
             tensor3UpdateAction(_wh1r);
-            tensor2UpdateAction(_wh1x);
             
             _controller.UpdateWeights(updateAction);
         }
-
-        private Action<Unit[]> GetVectorUpdateAction(Action<Unit> updateAction)
-        {
-            return units =>
-                {
-                    foreach (Unit unit in units)
-                    {
-                        updateAction(unit);
-                    }
-                };
-        }
-
-        private Action<Unit[][]> GetTensor2UpdateAction(Action<Unit> updateAction)
-        {
-            Action<Unit[]> vectorUpdateAction = GetVectorUpdateAction(updateAction);
-            return units =>
-                {
-                    foreach (Unit[] unit in units)
-                    {
-                        vectorUpdateAction(unit);
-                    }
-                };
-        }
-
-        private Action<Unit[][][]> GetTensor3UpdateAction(Action<Unit> updateAction)
-        {
-            Action<Unit[][]> tensor2UpdateAction = GetTensor2UpdateAction(updateAction);
-            return units =>
-                {
-                    foreach (Unit[][] unit in units)
-                    {
-                        tensor2UpdateAction(unit);
-                    }
-                };
-        }
-
+        
         public void BackwardErrorPropagation()
         {
             //Output error backpropagation
@@ -406,17 +357,7 @@ namespace NTM2.Controller
                 }
             }
 
-            for (int i = 0; i < _wh1x.Length; i++)
-            {
-                double hiddenGradient = hiddenGradients[i];
-                for (int j = 0; j < _input.Length; j++)
-                {
-                    double x = _input[j];
-                    _wh1x[i][j].Gradient += hiddenGradient * x;
-                }
-            }
-
-            _controller.BackwardErrorPropagation(hiddenGradients);
+            _controller.BackwardErrorPropagation(hiddenGradients, _input);
         }
     }
 }

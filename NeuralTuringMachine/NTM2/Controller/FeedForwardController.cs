@@ -1,47 +1,71 @@
 ﻿using System;
-using NTM2.Memory.Addressing;
 
 namespace NTM2.Controller
 {
     class FeedForwardController : IController
     {
         private readonly UnitFactory _unitFactory;
-        //Controller bias weights
-        private readonly Unit[] _wh1b;
         
-        private int ControllerSize { get { return _wh1b.Length; } }
+        //Controller hidden layer threshold weights
+        private readonly Unit[] _hiddenLayerThresholds;
 
-        public FeedForwardController(Unit[] wh1b)
-        {
-            _wh1b = wh1b;
-        }
+        //Weights from input to controller
+        private readonly Unit[][] _wh1x;
 
-        public FeedForwardController(int controllerSize, UnitFactory unitFactory)
+        private int ControllerSize { get { return _hiddenLayerThresholds.Length; } }
+        
+        public FeedForwardController(int controllerSize, int inputSize, UnitFactory unitFactory)
         {
             _unitFactory = unitFactory;
-
-            _wh1b = _unitFactory.GetVector(controllerSize);
+            
+            _wh1x = _unitFactory.GetTensor2(controllerSize, inputSize);
+            _hiddenLayerThresholds = _unitFactory.GetVector(controllerSize);
+            
         }
 
-        public double ForwardPropagation(double tempSum, int i)
+        public double ForwardPropagation(double tempSum, int i, double[] input)
         {
             double sum = tempSum;
-            sum += _wh1b[i].Value;
+
+            //Foreach input
+            Unit[] inputWeights = _wh1x[i];
+            for (int j = 0; j < inputWeights.Length; j++)
+            {
+                sum += inputWeights[j].Value * input[j];
+            }
+
+            //Plus threshold
+            sum += _hiddenLayerThresholds[i].Value;
             return sum;
         }
 
         public void UpdateWeights(Action<Unit> updateAction)
         {
             Action<Unit[]> vectorUpdateAction = Unit.GetVectorUpdateAction(updateAction);
-            vectorUpdateAction(_wh1b);
+            Action<Unit[][]> tensor2UpdateAction = Unit.GetTensor2UpdateAction(updateAction);
+
+            tensor2UpdateAction(_wh1x);
+            vectorUpdateAction(_hiddenLayerThresholds);
         }
 
-        public void BackwardErrorPropagation(double[] hiddenGradients)
+        public void BackwardErrorPropagation(double[] hiddenLayerGradients, double[] input)
         {
             int controllerSize = ControllerSize;
+
             for (int i = 0; i < controllerSize; i++)
             {
-                _wh1b[i].Gradient += hiddenGradients[i];
+                double hiddenGradient = hiddenLayerGradients[i];
+                int inputLength = input.Length;
+                Unit[] inputToHiddenNeuronWeights = _wh1x[i];
+                for (int j = 0; j < inputLength; j++)
+                {
+                    inputToHiddenNeuronWeights[j].Gradient += hiddenGradient * input[j];
+                }
+            }
+            
+            for (int i = 0; i < controllerSize; i++)
+            {
+                _hiddenLayerThresholds[i].Gradient += hiddenLayerGradients[i];
             }
         }
     }
