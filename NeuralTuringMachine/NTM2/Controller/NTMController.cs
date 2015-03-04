@@ -22,8 +22,6 @@ namespace NTM2.Controller
         private readonly Unit[][][] _wuh1;
         //Weights from controller to output
         private readonly Unit[][] _wyh1;
-        //Controller bias weights
-        private readonly Unit[] _wh1b;
         //Weights from input to controller
         private readonly Unit[][] _wh1x;
         //Weights from read data to controller
@@ -65,7 +63,9 @@ namespace NTM2.Controller
             _memory = new NTMMemory(memoryColumnsN, memoryRowsM, _unitFactory);
             _wh1r = _unitFactory.GetTensor3(controllerSize, headCount, memoryRowsM);
             _wh1x = _unitFactory.GetTensor2(controllerSize, inputSize);
-            _wh1b = _unitFactory.GetVector(controllerSize);
+            
+            _controller = new FeedForwardController(controllerSize, _unitFactory);
+
             _wyh1 = _unitFactory.GetTensor2(outputSize, controllerSize + 1);
             _wuh1 = _unitFactory.GetTensor3(headCount, headUnitSize, controllerSize + 1);
 
@@ -84,7 +84,6 @@ namespace NTM2.Controller
             int memoryRowsM,
             Unit[][][] wh1R,
             Unit[][] wh1X,
-            Unit[] wh1B,
             Unit[][] wyh1,
             Unit[][][] wuh1,
             int weightsCount,
@@ -93,14 +92,14 @@ namespace NTM2.Controller
             Unit[] hiddenLayer,
             Unit[] outputLayer,
             Head[] heads,
-            UnitFactory unitFactory)
+            UnitFactory unitFactory,
+            IController controller)
         {
             _unitFactory = unitFactory;
             _memoryColumnsN = memoryColumnsN;
             _memoryRowsM = memoryRowsM;
             _wh1r = wh1R;
             _wh1x = wh1X;
-            _wh1b = wh1B;
             _wyh1 = wyh1;
             _wuh1 = wuh1;
             _weightsCount = weightsCount;
@@ -109,6 +108,7 @@ namespace NTM2.Controller
             _hiddenLayer1 = hiddenLayer;
             _outputLayer = outputLayer;
             _heads = heads;
+            _controller = controller;
         }
 
         public TrainableNTM[] ProcessAndUpdateErrors(double[][] input, double[][] knownOutput)
@@ -165,7 +165,6 @@ namespace NTM2.Controller
                 _memoryRowsM,
                 _wh1r,
                 _wh1x,
-                _wh1b,
                 _wyh1,
                 _wuh1,
                 _weightsCount,
@@ -174,7 +173,8 @@ namespace NTM2.Controller
                 _unitFactory.GetVector(_wh1r.Length),
                 _unitFactory.GetVector(_wyh1.Length),
                 Head.GetVector(readData.Length, i => _memoryRowsM, _unitFactory),
-                _unitFactory);
+                _unitFactory,
+                _controller);
 
             newController.ForwardPropagation(readData, input);
             return newController;
@@ -210,8 +210,8 @@ namespace NTM2.Controller
                 }
 
                 //Plus threshold
-                sum += _wh1b[i].Value;
-
+                sum = _controller.ForwardPropagation(sum, i);
+                
                 //Set new controller unit value
                 _hiddenLayer1[i].Value = Sigmoid.GetValue(sum);
             }
@@ -265,7 +265,6 @@ namespace NTM2.Controller
                 }
             }
 
-            Action<Unit[]> vectorUpdateAction = GetVectorUpdateAction(updateAction);
             Action<Unit[][]> tensor2UpdateAction = GetTensor2UpdateAction(updateAction);
             Action<Unit[][][]> tensor3UpdateAction = GetTensor3UpdateAction(updateAction);
 
@@ -274,7 +273,8 @@ namespace NTM2.Controller
             tensor3UpdateAction(_wuh1);
             tensor3UpdateAction(_wh1r);
             tensor2UpdateAction(_wh1x);
-            vectorUpdateAction(_wh1b);
+            
+            _controller.UpdateWeights(updateAction);
         }
 
         private Action<Unit[]> GetVectorUpdateAction(Action<Unit> updateAction)
@@ -416,15 +416,7 @@ namespace NTM2.Controller
                 }
             }
 
-            for (int i = 0; i < hiddenGradients.Length; i++)
-            {
-                _wh1b[i].Gradient += hiddenGradients[i];
-            }
-        }
-
-        public string SerializeToString()
-        {
-            return null;
+            _controller.BackwardErrorPropagation(hiddenGradients);
         }
     }
 }
