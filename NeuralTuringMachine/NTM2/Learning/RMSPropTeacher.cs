@@ -19,7 +19,7 @@ namespace NTM2.Learning
             _delta = new double[controller.WeightsCount];
         }
 
-        public Ntm[] Train(
+        public TrainableNTM[] Train(
             double[][] input,
             double[][] knownOutput,
             double gradientMomentum,
@@ -27,7 +27,7 @@ namespace NTM2.Learning
             double changeMultiplier,
             double changeAddConstant)
         {
-            Ntm[] machines = _controller.ProcessAndUpdateErrors(input, knownOutput);
+            TrainableNTM[] machines = _controller.ProcessAndUpdateErrors(input, knownOutput);
             int i = 0;
             _controller.UpdateWeights(unit =>
                 {

@@ -7,6 +7,7 @@ namespace NTM2.Controller
     public class NTMController
     {
         private readonly UnitFactory _unitFactory;
+        
         private readonly int _memoryColumnsN;
         private readonly int _memoryRowsM;
         private readonly int _weightsCount;
@@ -27,6 +28,8 @@ namespace NTM2.Controller
         private readonly Unit[][] _wh1x;
         //Weights from read data to controller
         private readonly Unit[][][] _wh1r;
+        
+        private readonly IController _controller;
 
         //Old similarities
         private readonly BetaSimilarity[][] _wtm1s;
@@ -108,7 +111,7 @@ namespace NTM2.Controller
             _heads = heads;
         }
 
-        public Ntm[] ProcessAndUpdateErrors(double[][] input, double[][] knownOutput)
+        public TrainableNTM[] ProcessAndUpdateErrors(double[][] input, double[][] knownOutput)
         {
             //FOREACH HEAD - SET WEIGHTS TO BIAS VALUES
             ContentAddressing[] contentAddressings = ContentAddressing.GetVector(HeadCount, i => _wtm1s[i], _unitFactory);
@@ -116,21 +119,21 @@ namespace NTM2.Controller
             HeadSetting[] oldSettings = HeadSetting.GetVector(HeadCount, i => new Tuple<int, ContentAddressing>(_memory.MemoryColumnsN, contentAddressings[i]), _unitFactory);
             ReadData[] readDatas = ReadData.GetVector(HeadCount, i => new Tuple<HeadSetting, NTMMemory>(oldSettings[i], _memory));
 
-            Ntm[] machines = new Ntm[input.Length];
-            Ntm empty = new Ntm(this, new MemoryState(oldSettings, readDatas, _memory));
+            TrainableNTM[] machines = new TrainableNTM[input.Length];
+            TrainableNTM empty = new TrainableNTM(this, new MemoryState(oldSettings, readDatas, _memory));
 
             //BPTT
-            machines[0] = new Ntm(empty, input[0], _unitFactory);
+            machines[0] = new TrainableNTM(empty, input[0], _unitFactory);
             for (int i = 1; i < input.Length; i++)
             {
-                machines[i] = new Ntm(machines[i - 1], input[i], _unitFactory);
+                machines[i] = new TrainableNTM(machines[i - 1], input[i], _unitFactory);
             }
 
             UpdateWeights(unit => unit.Gradient = 0);
 
             for (int i = input.Length - 1; i >= 0; i--)
             {
-                Ntm machine = machines[i];
+                TrainableNTM machine = machines[i];
                 double[] output = knownOutput[i];
 
                 for (int j = 0; j < output.Length; j++)

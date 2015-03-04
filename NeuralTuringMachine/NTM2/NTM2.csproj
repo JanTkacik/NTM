@@ -39,8 +39,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controller\FeedForwardController.cs" />
+    <Compile Include="Controller\IController.cs" />
     <Compile Include="Controller\Sigmoid.cs" />
     <Compile Include="Controller\UnitFactory.cs" />
+    <Compile Include="INTM.cs" />
     <Compile Include="Memory\Addressing\BetaSimilarity.cs" />
     <Compile Include="Memory\Addressing\ContentAddressing.cs" />
     <Compile Include="Memory\Addressing\CosineSimilarity.cs" />
@@ -54,7 +57,7 @@
     <Compile Include="Controller\Unit.cs" />
     <Compile Include="Controller\NTMController.cs" />
     <Compile Include="Learning\RMSPropTeacher.cs" />
-    <Compile Include="NTM.cs" />
+    <Compile Include="Controller\TrainableNTM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
