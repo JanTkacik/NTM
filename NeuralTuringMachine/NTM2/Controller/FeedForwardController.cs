@@ -22,6 +22,8 @@ namespace NTM2.Controller
 
         //Weights from read data to controller
         private readonly Unit[][][] _readDataToHiddenLayerWeights;
+        
+        public readonly Unit[] _hiddenLayer1;
 
         public int HiddenLayerSize
         {
@@ -43,6 +45,26 @@ namespace NTM2.Controller
             _readDataToHiddenLayerWeights = _unitFactory.GetTensor3(controllerSize, headCount, memoryUnitSizeM);
             _inputToHiddenLayerWeights = _unitFactory.GetTensor2(controllerSize, inputSize);
             _hiddenLayerThresholds = _unitFactory.GetVector(controllerSize);
+        }
+
+        private FeedForwardController(Unit[][][] readDataToHiddenLayerWeights, Unit[][] inputToHiddenLayerWeights, Unit[] hiddenLayerThresholds, Unit[] hiddenLayer, int controllerSize, int inputSize, int headCount, int memoryUnitSizeM, UnitFactory unitFactory)
+        {
+            _readDataToHiddenLayerWeights = readDataToHiddenLayerWeights;
+            _inputToHiddenLayerWeights = inputToHiddenLayerWeights;
+            _hiddenLayerThresholds = hiddenLayerThresholds;
+            _hiddenLayer1 = hiddenLayer;
+            _controllerSize = controllerSize;
+            _inputSize = inputSize;
+            _headCount = headCount;
+            _memoryUnitSizeM = memoryUnitSizeM;
+            _unitFactory = unitFactory;
+        }
+
+        public IController Clone()
+        {
+            return new FeedForwardController(_readDataToHiddenLayerWeights, _inputToHiddenLayerWeights,
+                                             _hiddenLayerThresholds, _unitFactory.GetVector(HiddenLayerSize),
+                                             _controllerSize, _inputSize, _headCount, _memoryUnitSizeM, _unitFactory);
         }
 
         #endregion

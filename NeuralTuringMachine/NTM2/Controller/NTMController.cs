@@ -13,7 +13,6 @@ namespace NTM2.Controller
         private readonly int _weightsCount;
         private readonly Head[] _heads;
         private readonly Unit[] _outputLayer;
-        private readonly Unit[] _hiddenLayer1;
         private readonly double[] _input;
         private readonly ReadData[] _reads;
         private readonly NTMMemory _memory;
@@ -81,11 +80,10 @@ namespace NTM2.Controller
             int weightsCount,
             ReadData[] readDatas,
             double[] input,
-            Unit[] hiddenLayer,
+            IController controller,
             Unit[] outputLayer,
             Head[] heads,
-            UnitFactory unitFactory,
-            IController controller)
+            UnitFactory unitFactory)
         {
             _unitFactory = unitFactory;
             _memoryColumnsN = memoryColumnsN;
@@ -95,7 +93,6 @@ namespace NTM2.Controller
             _weightsCount = weightsCount;
             _reads = readDatas;
             _input = input;
-            _hiddenLayer1 = hiddenLayer;
             _outputLayer = outputLayer;
             _heads = heads;
             _controller = controller;
@@ -158,11 +155,10 @@ namespace NTM2.Controller
                 _weightsCount,
                 readData,
                 input,
-                _unitFactory.GetVector(_controller.HiddenLayerSize),
+                _controller.Clone(),
                 _unitFactory.GetVector(_wyh1.Length),
                 Head.GetVector(readData.Length, i => _memoryRowsM, _unitFactory),
-                _unitFactory,
-                _controller);
+                _unitFactory);
 
             newController.ForwardPropagation(readData, input);
             return newController;
@@ -179,7 +175,7 @@ namespace NTM2.Controller
                 sum = _controller.ForwardPropagation(sum, i, input, readData);
                 
                 //Set new controller unit value
-                _hiddenLayer1[i].Value = Sigmoid.GetValue(sum);
+                ((FeedForwardController)_controller)._hiddenLayer1[i].Value = Sigmoid.GetValue(sum);
             }
 
             //Foreach neuron in classic output layer
@@ -189,13 +185,13 @@ namespace NTM2.Controller
                 Unit[] weights = _wyh1[i];
 
                 //Foreach input from hidden layer
-                for (int j = 0; j < _hiddenLayer1.Length; j++)
+                for (int j = 0; j < ((FeedForwardController)_controller)._hiddenLayer1.Length; j++)
                 {
-                    sum += weights[j].Value * _hiddenLayer1[j].Value;
+                    sum += weights[j].Value * ((FeedForwardController)_controller)._hiddenLayer1[j].Value;
                 }
 
                 //Plus threshold
-                sum += weights[_hiddenLayer1.Length].Value;
+                sum += weights[((FeedForwardController)_controller)._hiddenLayer1.Length].Value;
                 _outputLayer[i].Value = Sigmoid.GetValue(sum);
             }
 
@@ -210,12 +206,12 @@ namespace NTM2.Controller
                     double sum = 0;
                     Unit[] headWeights = headsWeights[j];
                     //Foreach input from hidden layer
-                    for (int k = 0; k < _hiddenLayer1.Length; k++)
+                    for (int k = 0; k < ((FeedForwardController)_controller)._hiddenLayer1.Length; k++)
                     {
-                        sum += headWeights[k].Value * _hiddenLayer1[k].Value;
+                        sum += headWeights[k].Value * ((FeedForwardController)_controller)._hiddenLayer1[k].Value;
                     }
                     //Plus threshold
-                    sum += headWeights[_hiddenLayer1.Length].Value;
+                    sum += headWeights[((FeedForwardController)_controller)._hiddenLayer1.Length].Value;
                     head[j].Value += sum;
                 }
             }
@@ -248,9 +244,9 @@ namespace NTM2.Controller
             {
                 Unit unit = _outputLayer[j];
                 Unit[] weights = _wyh1[j];
-                for (int i = 0; i < _hiddenLayer1.Length; i++)
+                for (int i = 0; i < ((FeedForwardController)_controller)._hiddenLayer1.Length; i++)
                 {
-                    _hiddenLayer1[i].Gradient += weights[i].Value * unit.Gradient;
+                    ((FeedForwardController)_controller)._hiddenLayer1[i].Gradient += weights[i].Value * unit.Gradient;
                 }
             }
 
@@ -263,9 +259,9 @@ namespace NTM2.Controller
                 {
                     Unit unit = head[k];
                     Unit[] weightsK = weights[k];
-                    for (int i = 0; i < _hiddenLayer1.Length; i++)
+                    for (int i = 0; i < ((FeedForwardController)_controller)._hiddenLayer1.Length; i++)
                     {
-                        _hiddenLayer1[i].Gradient += unit.Gradient * weightsK[i].Value;
+                        ((FeedForwardController)_controller)._hiddenLayer1[i].Gradient += unit.Gradient * weightsK[i].Value;
                     }
                 }
             }
@@ -275,11 +271,11 @@ namespace NTM2.Controller
             {
                 Unit[] wyh1I = _wyh1[i];
                 double yGrad = _outputLayer[i].Gradient;
-                for (int j = 0; j < _hiddenLayer1.Length; j++)
+                for (int j = 0; j < ((FeedForwardController)_controller)._hiddenLayer1.Length; j++)
                 {
-                    wyh1I[j].Gradient += yGrad * _hiddenLayer1[j].Value;
+                    wyh1I[j].Gradient += yGrad * ((FeedForwardController)_controller)._hiddenLayer1[j].Value;
                 }
-                wyh1I[_hiddenLayer1.Length].Gradient += yGrad;
+                wyh1I[((FeedForwardController)_controller)._hiddenLayer1.Length].Gradient += yGrad;
             }
 
             //Wuh1 error backpropagation
@@ -289,19 +285,19 @@ namespace NTM2.Controller
                 {
                     Unit headUnit = _heads[i][j];
                     Unit[] wuh1ij = _wuh1[i][j];
-                    for (int k = 0; k < _hiddenLayer1.Length; k++)
+                    for (int k = 0; k < ((FeedForwardController)_controller)._hiddenLayer1.Length; k++)
                     {
-                        Unit unit = _hiddenLayer1[k];
+                        Unit unit = ((FeedForwardController)_controller)._hiddenLayer1[k];
                         wuh1ij[k].Gradient += headUnit.Gradient * unit.Value;
                     }
-                    wuh1ij[_hiddenLayer1.Length].Gradient += headUnit.Gradient;
+                    wuh1ij[((FeedForwardController)_controller)._hiddenLayer1.Length].Gradient += headUnit.Gradient;
                 }
             }
 
-            double[] hiddenGradients = new double[_hiddenLayer1.Length];
-            for (int i = 0; i < _hiddenLayer1.Length; i++)
+            double[] hiddenGradients = new double[((FeedForwardController)_controller)._hiddenLayer1.Length];
+            for (int i = 0; i < ((FeedForwardController)_controller)._hiddenLayer1.Length; i++)
             {
-                Unit unit = _hiddenLayer1[i];
+                Unit unit = ((FeedForwardController)_controller)._hiddenLayer1[i];
                 hiddenGradients[i] = unit.Gradient * unit.Value * (1 - unit.Value);
             }
             

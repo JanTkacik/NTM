@@ -9,5 +9,6 @@ namespace NTM2.Controller
         double ForwardPropagation(double sum, int neuronIndex, double[] input, ReadData[] readData);
         void UpdateWeights(Action<Unit> updateAction);
         void BackwardErrorPropagation(double[] hiddenLayerGradients, double[] input, ReadData[] reads);
+        IController Clone();
     }
 }
