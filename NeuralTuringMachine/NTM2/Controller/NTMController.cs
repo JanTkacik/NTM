@@ -231,34 +231,6 @@ namespace NTM2.Controller
                 }
             }
 
-            //Wyh1 error backpropagation
-            for (int i = 0; i < ((FeedForwardController)_controller).OutputLayer._wyh1.Length; i++)
-            {
-                Unit[] wyh1I = ((FeedForwardController)_controller).OutputLayer._wyh1[i];
-                double yGrad = ((FeedForwardController)_controller).OutputLayer._outputLayer[i].Gradient;
-                for (int j = 0; j < ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length; j++)
-                {
-                    wyh1I[j].Gradient += yGrad * ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons[j].Value;
-                }
-                wyh1I[((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length].Gradient += yGrad;
-            }
-
-            //Wuh1 error backpropagation
-            for (int i = 0; i < ((FeedForwardController)_controller).OutputLayer._wuh1.Length; i++)
-            {
-                for (int j = 0; j < ((FeedForwardController)_controller).OutputLayer._heads[i].GetUnitSize(); j++)
-                {
-                    Unit headUnit = ((FeedForwardController)_controller).OutputLayer._heads[i][j];
-                    Unit[] wuh1ij = ((FeedForwardController)_controller).OutputLayer._wuh1[i][j];
-                    for (int k = 0; k < ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length; k++)
-                    {
-                        Unit unit = ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons[k];
-                        wuh1ij[k].Gradient += headUnit.Gradient * unit.Value;
-                    }
-                    wuh1ij[((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length].Gradient += headUnit.Gradient;
-                }
-            }
-            
             _controller.BackwardErrorPropagation(_input, _reads);
         }
     }

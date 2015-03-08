@@ -22,6 +22,7 @@ namespace NTM2.Controller
         internal readonly Unit[] _outputLayer;
         
         internal readonly Head[] _heads;
+        private readonly int _headUnitSize;
 
         public OutputLayer(int outputSize, int controllerSize, int headCount, int memoryUnitSizeM, HiddenLayer hiddenLayer, UnitFactory unitFactory)
         {
@@ -31,13 +32,13 @@ namespace NTM2.Controller
             _memoryUnitSizeM = memoryUnitSizeM;
             _hiddenLayer = hiddenLayer;
             _unitFactory = unitFactory;
-            int headUnitSize = Head.GetUnitSize(memoryUnitSizeM);
+            _headUnitSize = Head.GetUnitSize(memoryUnitSizeM);
             _wyh1 = _unitFactory.GetTensor2(outputSize, controllerSize + 1);
-            _wuh1 = _unitFactory.GetTensor3(headCount, headUnitSize, controllerSize + 1);
+            _wuh1 = _unitFactory.GetTensor3(headCount, _headUnitSize, controllerSize + 1);
             _heads = new Head[headCount];
         }
 
-        private OutputLayer(Unit[][] wyh1, Unit[][][] wuh1, Unit[] outputLayer, Head[] heads, int headCount, int outputSize, int controllerSize, int memoryUnitSizeM, HiddenLayer hiddenLayer, UnitFactory unitFactory)
+        private OutputLayer(Unit[][] wyh1, Unit[][][] wuh1, Unit[] outputLayer, Head[] heads, int headCount, int outputSize, int controllerSize, int memoryUnitSizeM, int headUnitSize, HiddenLayer hiddenLayer, UnitFactory unitFactory)
         {
             _wyh1 = wyh1;
             _wuh1 = wuh1;
@@ -49,6 +50,7 @@ namespace NTM2.Controller
             _hiddenLayer = hiddenLayer;
             _unitFactory = unitFactory;
             _memoryUnitSizeM = memoryUnitSizeM;
+            _headUnitSize = headUnitSize;
         }
 
         public void ForwardPropagation()
@@ -76,12 +78,42 @@ namespace NTM2.Controller
             Unit[] outputLayer = _unitFactory.GetVector(_outputSize);
             Head[] heads = Head.GetVector(_headCount, i => _memoryUnitSizeM, _unitFactory);
 
-            return new OutputLayer(_wyh1, _wuh1, outputLayer, heads, _headCount, _outputSize, _controllerSize, _memoryUnitSizeM, newHiddenLayer, _unitFactory);
+            return new OutputLayer(_wyh1, _wuh1, outputLayer, heads, _headCount, _outputSize, _controllerSize, _memoryUnitSizeM, _headUnitSize, newHiddenLayer, _unitFactory);
         }
 
         public void BackwardErrorPropagation()
         {
-            
+            //Wyh1 error backpropagation
+            for (int i = 0; i < _outputSize; i++)
+            {
+                Unit[] wyh1I = _wyh1[i];
+                double yGrad = _outputLayer[i].Gradient;
+                for (int j = 0; j < _controllerSize; j++)
+                {
+                    wyh1I[j].Gradient += yGrad * _hiddenLayer.HiddenLayerNeurons[j].Value;
+                }
+                wyh1I[_controllerSize].Gradient += yGrad;
+            }
+
+            //TODO refactor names
+            //Wuh1 error backpropagation
+            for (int i = 0; i < _headCount; i++)
+            {
+                Head head = _heads[i];
+                Unit[][] units = _wuh1[i];
+                for (int j = 0; j < _headUnitSize; j++)
+                {
+                    Unit headUnit = head[j];
+                    Unit[] wuh1ij = units[j];
+
+                    for (int k = 0; k < _controllerSize; k++)
+                    {
+                        Unit unit = _hiddenLayer.HiddenLayerNeurons[k];
+                        wuh1ij[k].Gradient += headUnit.Gradient * unit.Value;
+                    }
+                    wuh1ij[_controllerSize].Gradient += headUnit.Gradient;
+                }
+            }
         }
 
         public void UpdateWeights(Action<Unit> updateAction)
