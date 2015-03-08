@@ -12,7 +12,6 @@ namespace NTM2.Controller
         private readonly int _memoryRowsM;
         private readonly int _weightsCount;
         private readonly Head[] _heads;
-        private readonly Unit[] _outputLayer;
         private readonly double[] _input;
         private readonly ReadData[] _reads;
         private readonly NTMMemory _memory;
@@ -39,7 +38,7 @@ namespace NTM2.Controller
 
         public Unit[] Output
         {
-            get { return _outputLayer; }
+            get { return ((FeedForwardController)_controller).OutputLayer._outputLayer; }
         }
 
         public NTMController(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM)
@@ -71,7 +70,6 @@ namespace NTM2.Controller
             ReadData[] readDatas,
             double[] input,
             IController controller,
-            Unit[] outputLayer,
             Head[] heads,
             UnitFactory unitFactory)
         {
@@ -81,7 +79,6 @@ namespace NTM2.Controller
             _weightsCount = weightsCount;
             _reads = readDatas;
             _input = input;
-            _outputLayer = outputLayer;
             _heads = heads;
             _controller = controller;
         }
@@ -114,7 +111,7 @@ namespace NTM2.Controller
                 for (int j = 0; j < output.Length; j++)
                 {
                     //Delta
-                    machine.Controller._outputLayer[j].Gradient = machine.Controller._outputLayer[j].Value - output[j];
+                    ((FeedForwardController)(machine.Controller._controller)).OutputLayer._outputLayer[j].Gradient = ((FeedForwardController)(machine.Controller._controller)).OutputLayer._outputLayer[j].Value - output[j];
                 }
                 machine.BackwardErrorPropagation();
             }
@@ -142,7 +139,6 @@ namespace NTM2.Controller
                 readData,
                 input,
                 _controller.Clone(),
-                _unitFactory.GetVector(((FeedForwardController)_controller).OutputLayer._wyh1.Length),
                 Head.GetVector(readData.Length, i => _memoryRowsM, _unitFactory),
                 _unitFactory);
 
@@ -169,7 +165,7 @@ namespace NTM2.Controller
 
                 //Plus threshold
                 sum += weights[((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length].Value;
-                _outputLayer[i].Value = Sigmoid.GetValue(sum);
+                ((FeedForwardController)_controller).OutputLayer._outputLayer[i].Value = Sigmoid.GetValue(sum);
             }
 
             //Foreach neuron in head output layer
@@ -205,11 +201,8 @@ namespace NTM2.Controller
             }
 
             Action<Unit[][]> tensor2UpdateAction = Unit.GetTensor2UpdateAction(updateAction);
-            Action<Unit[][][]> tensor3UpdateAction = Unit.GetTensor3UpdateAction(updateAction);
 
             tensor2UpdateAction(_memory.Data);
-            tensor2UpdateAction(((FeedForwardController)_controller).OutputLayer._wyh1);
-            tensor3UpdateAction(((FeedForwardController)_controller).OutputLayer._wuh1);
             
             _controller.UpdateWeights(updateAction);
         }
@@ -217,9 +210,9 @@ namespace NTM2.Controller
         public void BackwardErrorPropagation()
         {
             //Output error backpropagation
-            for (int j = 0; j < _outputLayer.Length; j++)
+            for (int j = 0; j < ((FeedForwardController)_controller).OutputLayer._outputLayer.Length; j++)
             {
-                Unit unit = _outputLayer[j];
+                Unit unit = ((FeedForwardController)_controller).OutputLayer._outputLayer[j];
                 Unit[] weights = ((FeedForwardController)_controller).OutputLayer._wyh1[j];
                 for (int i = 0; i < ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length; i++)
                 {
@@ -247,7 +240,7 @@ namespace NTM2.Controller
             for (int i = 0; i < ((FeedForwardController)_controller).OutputLayer._wyh1.Length; i++)
             {
                 Unit[] wyh1I = ((FeedForwardController)_controller).OutputLayer._wyh1[i];
-                double yGrad = _outputLayer[i].Gradient;
+                double yGrad = ((FeedForwardController)_controller).OutputLayer._outputLayer[i].Gradient;
                 for (int j = 0; j < ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length; j++)
                 {
                     wyh1I[j].Gradient += yGrad * ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons[j].Value;

@@ -19,7 +19,7 @@ namespace NTM2.Controller
         public FeedForwardController(int controllerSize, int inputSize, int outputSize, int headCount, int memoryUnitSizeM, UnitFactory unitFactory)
         {
             HiddenLayer = new HiddenLayer(controllerSize, inputSize, headCount, memoryUnitSizeM, unitFactory);
-            OutputLayer = new OutputLayer(outputSize, controllerSize, headCount, Head.GetUnitSize(memoryUnitSizeM), unitFactory);
+            OutputLayer = new OutputLayer(outputSize, controllerSize, headCount, Head.GetUnitSize(memoryUnitSizeM), HiddenLayer, unitFactory);
         }
 
         private FeedForwardController(HiddenLayer hiddenLayer, OutputLayer outputLayer)
