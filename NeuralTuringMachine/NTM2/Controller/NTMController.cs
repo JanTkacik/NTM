@@ -11,7 +11,6 @@ namespace NTM2.Controller
         private readonly int _memoryColumnsN;
         private readonly int _memoryRowsM;
         private readonly int _weightsCount;
-        private readonly Head[] _heads;
         private readonly double[] _input;
         private readonly ReadData[] _reads;
         private readonly NTMMemory _memory;
@@ -28,12 +27,12 @@ namespace NTM2.Controller
 
         public int HeadCount
         {
-            get { return _heads.Length; }
+            get { return ((FeedForwardController)_controller).OutputLayer._heads.Length; }
         }
 
         public Head[] Heads
         {
-            get { return _heads; }
+            get { return ((FeedForwardController)_controller).OutputLayer._heads; }
         }
 
         public Unit[] Output
@@ -47,7 +46,6 @@ namespace NTM2.Controller
             _memoryColumnsN = memoryColumnsN;
             _memoryRowsM = memoryRowsM;
             int headUnitSize = Head.GetUnitSize(memoryRowsM);
-            _heads = new Head[headCount];
             _wtm1s = BetaSimilarity.GetTensor2(headCount, memoryColumnsN);
             _memory = new NTMMemory(memoryColumnsN, memoryRowsM, _unitFactory);
             
@@ -70,7 +68,6 @@ namespace NTM2.Controller
             ReadData[] readDatas,
             double[] input,
             IController controller,
-            Head[] heads,
             UnitFactory unitFactory)
         {
             _unitFactory = unitFactory;
@@ -79,7 +76,6 @@ namespace NTM2.Controller
             _weightsCount = weightsCount;
             _reads = readDatas;
             _input = input;
-            _heads = heads;
             _controller = controller;
         }
 
@@ -139,7 +135,6 @@ namespace NTM2.Controller
                 readData,
                 input,
                 _controller.Clone(),
-                Head.GetVector(readData.Length, i => _memoryRowsM, _unitFactory),
                 _unitFactory);
 
             newController.ForwardPropagation(readData, input);
@@ -172,7 +167,7 @@ namespace NTM2.Controller
             for (int i = 0; i < ((FeedForwardController)_controller).OutputLayer._wuh1.Length; i++)
             {
                 Unit[][] headsWeights = ((FeedForwardController)_controller).OutputLayer._wuh1[i];
-                Head head = _heads[i];
+                Head head = ((FeedForwardController)_controller).OutputLayer._heads[i];
 
                 for (int j = 0; j < headsWeights.Length; j++)
                 {
@@ -221,9 +216,9 @@ namespace NTM2.Controller
             }
 
             //Heads error backpropagation
-            for (int j = 0; j < _heads.Length; j++)
+            for (int j = 0; j < ((FeedForwardController)_controller).OutputLayer._heads.Length; j++)
             {
-                Head head = _heads[j];
+                Head head = ((FeedForwardController)_controller).OutputLayer._heads[j];
                 Unit[][] weights = ((FeedForwardController)_controller).OutputLayer._wuh1[j];
                 for (int k = 0; k < head.GetUnitSize(); k++)
                 {
@@ -251,9 +246,9 @@ namespace NTM2.Controller
             //Wuh1 error backpropagation
             for (int i = 0; i < ((FeedForwardController)_controller).OutputLayer._wuh1.Length; i++)
             {
-                for (int j = 0; j < _heads[i].GetUnitSize(); j++)
+                for (int j = 0; j < ((FeedForwardController)_controller).OutputLayer._heads[i].GetUnitSize(); j++)
                 {
-                    Unit headUnit = _heads[i][j];
+                    Unit headUnit = ((FeedForwardController)_controller).OutputLayer._heads[i][j];
                     Unit[] wuh1ij = ((FeedForwardController)_controller).OutputLayer._wuh1[i][j];
                     for (int k = 0; k < ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length; k++)
                     {
