@@ -16,11 +16,6 @@ namespace NTM2.Controller
         private readonly double[] _input;
         private readonly ReadData[] _reads;
         private readonly NTMMemory _memory;
-
-        //Weights from controller to head
-        private readonly Unit[][][] _wuh1;
-        //Weights from controller to output
-        private readonly Unit[][] _wyh1;
         
         private readonly IController _controller;
 
@@ -57,11 +52,8 @@ namespace NTM2.Controller
             _wtm1s = BetaSimilarity.GetTensor2(headCount, memoryColumnsN);
             _memory = new NTMMemory(memoryColumnsN, memoryRowsM, _unitFactory);
             
-            _controller = new FeedForwardController(controllerSize, inputSize, headCount, memoryRowsM, _unitFactory);
-
-            _wyh1 = _unitFactory.GetTensor2(outputSize, controllerSize + 1);
-            _wuh1 = _unitFactory.GetTensor3(headCount, headUnitSize, controllerSize + 1);
-
+            _controller = new FeedForwardController(controllerSize, inputSize, outputSize, headCount, memoryRowsM, _unitFactory);
+            
             _weightsCount =
                 (headCount * memoryColumnsN) +
                 (memoryColumnsN * memoryRowsM) +
@@ -75,8 +67,6 @@ namespace NTM2.Controller
         private NTMController(
             int memoryColumnsN,
             int memoryRowsM,
-            Unit[][] wyh1,
-            Unit[][][] wuh1,
             int weightsCount,
             ReadData[] readDatas,
             double[] input,
@@ -88,8 +78,6 @@ namespace NTM2.Controller
             _unitFactory = unitFactory;
             _memoryColumnsN = memoryColumnsN;
             _memoryRowsM = memoryRowsM;
-            _wyh1 = wyh1;
-            _wuh1 = wuh1;
             _weightsCount = weightsCount;
             _reads = readDatas;
             _input = input;
@@ -150,13 +138,11 @@ namespace NTM2.Controller
             NTMController newController = new NTMController(
                 _memoryColumnsN,
                 _memoryRowsM,
-                _wyh1,
-                _wuh1,
                 _weightsCount,
                 readData,
                 input,
                 _controller.Clone(),
-                _unitFactory.GetVector(_wyh1.Length),
+                _unitFactory.GetVector(((FeedForwardController)_controller).OutputLayer._wyh1.Length),
                 Head.GetVector(readData.Length, i => _memoryRowsM, _unitFactory),
                 _unitFactory);
 
@@ -170,10 +156,10 @@ namespace NTM2.Controller
             _controller.ForwardPropagation(input, readData);
 
             //Foreach neuron in classic output layer
-            for (int i = 0; i < _wyh1.Length; i++)
+            for (int i = 0; i < ((FeedForwardController)_controller).OutputLayer._wyh1.Length; i++)
             {
                 double sum = 0;
-                Unit[] weights = _wyh1[i];
+                Unit[] weights = ((FeedForwardController)_controller).OutputLayer._wyh1[i];
 
                 //Foreach input from hidden layer
                 for (int j = 0; j < ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length; j++)
@@ -187,9 +173,9 @@ namespace NTM2.Controller
             }
 
             //Foreach neuron in head output layer
-            for (int i = 0; i < _wuh1.Length; i++)
+            for (int i = 0; i < ((FeedForwardController)_controller).OutputLayer._wuh1.Length; i++)
             {
-                Unit[][] headsWeights = _wuh1[i];
+                Unit[][] headsWeights = ((FeedForwardController)_controller).OutputLayer._wuh1[i];
                 Head head = _heads[i];
 
                 for (int j = 0; j < headsWeights.Length; j++)
@@ -222,8 +208,8 @@ namespace NTM2.Controller
             Action<Unit[][][]> tensor3UpdateAction = Unit.GetTensor3UpdateAction(updateAction);
 
             tensor2UpdateAction(_memory.Data);
-            tensor2UpdateAction(_wyh1);
-            tensor3UpdateAction(_wuh1);
+            tensor2UpdateAction(((FeedForwardController)_controller).OutputLayer._wyh1);
+            tensor3UpdateAction(((FeedForwardController)_controller).OutputLayer._wuh1);
             
             _controller.UpdateWeights(updateAction);
         }
@@ -234,7 +220,7 @@ namespace NTM2.Controller
             for (int j = 0; j < _outputLayer.Length; j++)
             {
                 Unit unit = _outputLayer[j];
-                Unit[] weights = _wyh1[j];
+                Unit[] weights = ((FeedForwardController)_controller).OutputLayer._wyh1[j];
                 for (int i = 0; i < ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length; i++)
                 {
                     ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons[i].Gradient += weights[i].Value * unit.Gradient;
@@ -245,7 +231,7 @@ namespace NTM2.Controller
             for (int j = 0; j < _heads.Length; j++)
             {
                 Head head = _heads[j];
-                Unit[][] weights = _wuh1[j];
+                Unit[][] weights = ((FeedForwardController)_controller).OutputLayer._wuh1[j];
                 for (int k = 0; k < head.GetUnitSize(); k++)
                 {
                     Unit unit = head[k];
@@ -258,9 +244,9 @@ namespace NTM2.Controller
             }
 
             //Wyh1 error backpropagation
-            for (int i = 0; i < _wyh1.Length; i++)
+            for (int i = 0; i < ((FeedForwardController)_controller).OutputLayer._wyh1.Length; i++)
             {
-                Unit[] wyh1I = _wyh1[i];
+                Unit[] wyh1I = ((FeedForwardController)_controller).OutputLayer._wyh1[i];
                 double yGrad = _outputLayer[i].Gradient;
                 for (int j = 0; j < ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length; j++)
                 {
@@ -270,12 +256,12 @@ namespace NTM2.Controller
             }
 
             //Wuh1 error backpropagation
-            for (int i = 0; i < _wuh1.Length; i++)
+            for (int i = 0; i < ((FeedForwardController)_controller).OutputLayer._wuh1.Length; i++)
             {
                 for (int j = 0; j < _heads[i].GetUnitSize(); j++)
                 {
                     Unit headUnit = _heads[i][j];
-                    Unit[] wuh1ij = _wuh1[i][j];
+                    Unit[] wuh1ij = ((FeedForwardController)_controller).OutputLayer._wuh1[i][j];
                     for (int k = 0; k < ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length; k++)
                     {
                         Unit unit = ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons[k];

@@ -1,5 +1,6 @@
 ﻿using System;
 using NTM2.Memory;
+using NTM2.Memory.Addressing;
 
 namespace NTM2.Controller
 {
@@ -9,24 +10,27 @@ namespace NTM2.Controller
         #region Fields and variables
         
         internal readonly HiddenLayer HiddenLayer;
+        internal readonly OutputLayer OutputLayer;
 
         #endregion
 
         #region Ctor
 
-        public FeedForwardController(int controllerSize, int inputSize, int headCount, int memoryUnitSizeM, UnitFactory unitFactory)
+        public FeedForwardController(int controllerSize, int inputSize, int outputSize, int headCount, int memoryUnitSizeM, UnitFactory unitFactory)
         {
             HiddenLayer = new HiddenLayer(controllerSize, inputSize, headCount, memoryUnitSizeM, unitFactory);
+            OutputLayer = new OutputLayer(outputSize, controllerSize, headCount, Head.GetUnitSize(memoryUnitSizeM), unitFactory);
         }
 
-        private FeedForwardController(HiddenLayer hiddenLayer)
+        private FeedForwardController(HiddenLayer hiddenLayer, OutputLayer outputLayer)
         {
             HiddenLayer = hiddenLayer;
+            OutputLayer = outputLayer;
         }
 
         public IController Clone()
         {
-            return new FeedForwardController(HiddenLayer.Clone());
+            return new FeedForwardController(HiddenLayer.Clone(), OutputLayer.Clone());
         }
 
         #endregion
@@ -36,6 +40,7 @@ namespace NTM2.Controller
         public void ForwardPropagation(double[] input, ReadData[] readData)
         {
             HiddenLayer.ForwardPropagation(input, readData);
+            OutputLayer.ForwardPropagation();
         }
 
         #endregion
@@ -44,6 +49,7 @@ namespace NTM2.Controller
 
         public void UpdateWeights(Action<Unit> updateAction)
         {
+            OutputLayer.UpdateWeights(updateAction);
             HiddenLayer.UpdateWeights(updateAction);
         }
 
@@ -53,6 +59,7 @@ namespace NTM2.Controller
 
         public void BackwardErrorPropagation(double[] input, ReadData[] reads)
         {
+            OutputLayer.BackwardErrorPropagation();
             HiddenLayer.BackwardErrorPropagation(input, reads);
         }
 

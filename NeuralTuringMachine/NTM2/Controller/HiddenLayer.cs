@@ -3,7 +3,7 @@ using NTM2.Memory;
 
 namespace NTM2.Controller
 {
-    class HiddenLayer
+    internal class HiddenLayer
     {
         #region Fields and variables
         
