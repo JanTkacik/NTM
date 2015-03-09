@@ -55,22 +55,43 @@ namespace NTM2.Controller
 
         public void ForwardPropagation()
         {
-            ////Foreach neuron in classic output layer
-            //for (int i = 0; i < _outputSize; i++)
-            //{
-            //    double sum = 0;
-            //    Unit[] weights = _wyh1[i];
+            //Foreach neuron in classic output layer
+            for (int i = 0; i < _outputSize; i++)
+            {
+                double sum = 0;
+                Unit[] weights = _wyh1[i];
 
-            //    //Foreach input from hidden layer
-            //    for (int j = 0; j < _controllerSize; j++)
-            //    {
-            //        sum += weights[j].Value * _hiddenLayer.HiddenLayerNeurons[j].Value;
-            //    }
+                //Foreach input from hidden layer
+                for (int j = 0; j < _controllerSize; j++)
+                {
+                    sum += weights[j].Value * _hiddenLayer.HiddenLayerNeurons[j].Value;
+                }
 
-            //    //Plus threshold
-            //    sum += weights[_controllerSize].Value;
-            //    _outputLayer[i].Value = Sigmoid.GetValue(sum);
-            //}
+                //Plus threshold
+                sum += weights[_controllerSize].Value;
+                _outputLayer[i].Value = Sigmoid.GetValue(sum);
+            }
+
+            //Foreach neuron in head output layer
+            for (int i = 0; i < _headCount; i++)
+            {
+                Unit[][] headsWeights = _wuh1[i];
+                Head head = _heads[i];
+
+                for (int j = 0; j < headsWeights.Length; j++)
+                {
+                    double sum = 0;
+                    Unit[] headWeights = headsWeights[j];
+                    //Foreach input from hidden layer
+                    for (int k = 0; k < _controllerSize; k++)
+                    {
+                        sum += headWeights[k].Value * _hiddenLayer.HiddenLayerNeurons[k].Value;
+                    }
+                    //Plus threshold
+                    sum += headWeights[_controllerSize].Value;
+                    head[j].Value += sum;
+                }
+            }
         }
 
         public OutputLayer Clone(HiddenLayer newHiddenLayer)
@@ -83,6 +104,33 @@ namespace NTM2.Controller
 
         public void BackwardErrorPropagation()
         {
+            //Output error backpropagation
+            for (int j = 0; j < _outputSize; j++)
+            {
+                Unit unit = _outputLayer[j];
+                Unit[] weights = _wyh1[j];
+                for (int i = 0; i < _controllerSize; i++)
+                {
+                    _hiddenLayer.HiddenLayerNeurons[i].Gradient += weights[i].Value * unit.Gradient;
+                }
+            }
+
+            //Heads error backpropagation
+            for (int j = 0; j < _headCount; j++)
+            {
+                Head head = _heads[j];
+                Unit[][] weights = _wuh1[j];
+                for (int k = 0; k < _headUnitSize; k++)
+                {
+                    Unit unit = head[k];
+                    Unit[] weightsK = weights[k];
+                    for (int i = 0; i < _controllerSize; i++)
+                    {
+                        _hiddenLayer.HiddenLayerNeurons[i].Gradient += unit.Gradient * weightsK[i].Value;
+                    }
+                }
+            }
+
             //Wyh1 error backpropagation
             for (int i = 0; i < _outputSize; i++)
             {

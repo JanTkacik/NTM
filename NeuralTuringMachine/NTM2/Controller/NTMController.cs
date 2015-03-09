@@ -140,49 +140,10 @@ namespace NTM2.Controller
             newController.ForwardPropagation(readData, input);
             return newController;
         }
-
-        //TODO readData Units are maybe not important
+        
         private void ForwardPropagation(ReadData[] readData, double[] input)
         {
             _controller.ForwardPropagation(input, readData);
-
-            //Foreach neuron in classic output layer
-            for (int i = 0; i < ((FeedForwardController)_controller).OutputLayer._wyh1.Length; i++)
-            {
-                double sum = 0;
-                Unit[] weights = ((FeedForwardController)_controller).OutputLayer._wyh1[i];
-
-                //Foreach input from hidden layer
-                for (int j = 0; j < ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length; j++)
-                {
-                    sum += weights[j].Value * ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons[j].Value;
-                }
-
-                //Plus threshold
-                sum += weights[((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length].Value;
-                ((FeedForwardController)_controller).OutputLayer._outputLayer[i].Value = Sigmoid.GetValue(sum);
-            }
-
-            //Foreach neuron in head output layer
-            for (int i = 0; i < ((FeedForwardController)_controller).OutputLayer._wuh1.Length; i++)
-            {
-                Unit[][] headsWeights = ((FeedForwardController)_controller).OutputLayer._wuh1[i];
-                Head head = ((FeedForwardController)_controller).OutputLayer._heads[i];
-
-                for (int j = 0; j < headsWeights.Length; j++)
-                {
-                    double sum = 0;
-                    Unit[] headWeights = headsWeights[j];
-                    //Foreach input from hidden layer
-                    for (int k = 0; k < ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length; k++)
-                    {
-                        sum += headWeights[k].Value * ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons[k].Value;
-                    }
-                    //Plus threshold
-                    sum += headWeights[((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length].Value;
-                    head[j].Value += sum;
-                }
-            }
         }
 
         public void UpdateWeights(Action<Unit> updateAction)
@@ -204,33 +165,6 @@ namespace NTM2.Controller
         
         public void BackwardErrorPropagation()
         {
-            //Output error backpropagation
-            for (int j = 0; j < ((FeedForwardController)_controller).OutputLayer._outputLayer.Length; j++)
-            {
-                Unit unit = ((FeedForwardController)_controller).OutputLayer._outputLayer[j];
-                Unit[] weights = ((FeedForwardController)_controller).OutputLayer._wyh1[j];
-                for (int i = 0; i < ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length; i++)
-                {
-                    ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons[i].Gradient += weights[i].Value * unit.Gradient;
-                }
-            }
-
-            //Heads error backpropagation
-            for (int j = 0; j < ((FeedForwardController)_controller).OutputLayer._heads.Length; j++)
-            {
-                Head head = ((FeedForwardController)_controller).OutputLayer._heads[j];
-                Unit[][] weights = ((FeedForwardController)_controller).OutputLayer._wuh1[j];
-                for (int k = 0; k < head.GetUnitSize(); k++)
-                {
-                    Unit unit = head[k];
-                    Unit[] weightsK = weights[k];
-                    for (int i = 0; i < ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons.Length; i++)
-                    {
-                        ((FeedForwardController)_controller).HiddenLayer.HiddenLayerNeurons[i].Gradient += unit.Gradient * weightsK[i].Value;
-                    }
-                }
-            }
-
             _controller.BackwardErrorPropagation(_input, _reads);
         }
     }
