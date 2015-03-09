@@ -101,8 +101,14 @@ namespace NTM2.Controller
             return new OutputLayer(_hiddenToOutputLayerWeights, _hiddenToHeadsWeights, outputLayer, heads, _headCount, _outputSize, _controllerSize, _memoryUnitSizeM, _headUnitSize, _unitFactory);
         }
 
-        public void BackwardErrorPropagation(HiddenLayer hiddenLayer)
+        public void BackwardErrorPropagation(double[] knownOutput, HiddenLayer hiddenLayer)
         {
+            for (int j = 0; j < _outputSize; j++)
+            {
+                //Delta
+                OutputLayerNeurons[j].Gradient = OutputLayerNeurons[j].Value - knownOutput[j];
+            }
+
             //Output error backpropagation
             for (int j = 0; j < _outputSize; j++)
             {

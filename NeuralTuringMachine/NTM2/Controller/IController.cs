@@ -7,7 +7,7 @@ namespace NTM2.Controller
     {
         void ForwardPropagation(double[] input, ReadData[] readData);
         void UpdateWeights(Action<Unit> updateAction);
-        void BackwardErrorPropagation(double[] input, ReadData[] reads);
+        void BackwardErrorPropagation(double[] knownOutput, double[] input, ReadData[] reads);
         IController Clone();
     }
 }

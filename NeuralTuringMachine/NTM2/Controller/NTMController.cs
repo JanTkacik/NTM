@@ -83,10 +83,8 @@ namespace NTM2.Controller
         {
             //FOREACH HEAD - SET WEIGHTS TO BIAS VALUES
             ContentAddressing[] contentAddressings = ContentAddressing.GetVector(HeadCount, i => _wtm1s[i], _unitFactory);
-
             HeadSetting[] oldSettings = HeadSetting.GetVector(HeadCount, i => new Tuple<int, ContentAddressing>(_memory.MemoryColumnsN, contentAddressings[i]), _unitFactory);
             ReadData[] readDatas = ReadData.GetVector(HeadCount, i => new Tuple<HeadSetting, NTMMemory>(oldSettings[i], _memory));
-
             TrainableNTM[] machines = new TrainableNTM[input.Length];
             TrainableNTM empty = new TrainableNTM(this, new MemoryState(oldSettings, readDatas, _memory));
 
@@ -101,15 +99,7 @@ namespace NTM2.Controller
 
             for (int i = input.Length - 1; i >= 0; i--)
             {
-                TrainableNTM machine = machines[i];
-                double[] output = knownOutput[i];
-
-                for (int j = 0; j < output.Length; j++)
-                {
-                    //Delta
-                    ((FeedForwardController)(machine.Controller._controller)).OutputLayer.OutputLayerNeurons[j].Gradient = ((FeedForwardController)(machine.Controller._controller)).OutputLayer.OutputLayerNeurons[j].Value - output[j];
-                }
-                machine.BackwardErrorPropagation();
+                machines[i].BackwardErrorPropagation(knownOutput[i]);
             }
 
             //Compute gradients for the bias values of internal memory and weights
@@ -163,9 +153,9 @@ namespace NTM2.Controller
             _controller.UpdateWeights(updateAction);
         }
         
-        public void BackwardErrorPropagation()
+        public void BackwardErrorPropagation(double[] knownOutput)
         {
-            _controller.BackwardErrorPropagation(_input, _reads);
+            _controller.BackwardErrorPropagation(knownOutput, _input, _reads);
         }
     }
 }

@@ -29,10 +29,10 @@ namespace NTM2
             get { return _controller; }
         }
 
-        public void BackwardErrorPropagation()
+        public void BackwardErrorPropagation(double[] knownOutput)
         {
             _memoryState.BackwardErrorPropagation();
-            _controller.BackwardErrorPropagation();
+            _controller.BackwardErrorPropagation(knownOutput);
         }
     }
 }

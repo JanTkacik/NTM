@@ -59,9 +59,9 @@ namespace NTM2.Controller
 
         #region BackwardErrorPropagation
 
-        public void BackwardErrorPropagation(double[] input, ReadData[] reads)
+        public void BackwardErrorPropagation(double[] knownOutput, double[] input, ReadData[] reads)
         {
-            OutputLayer.BackwardErrorPropagation(HiddenLayer);
+            OutputLayer.BackwardErrorPropagation(knownOutput, HiddenLayer);
             HiddenLayer.BackwardErrorPropagation(input, reads);
         }
 
