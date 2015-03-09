@@ -19,9 +19,9 @@ namespace NTM2
             _controller = oldMachine._controller.Process(oldMachine._memoryState.ReadData, input);
             for (int i = 0; i < _controller.HeadCount; i++)
             {
-                _controller.Heads[i].OldHeadSettings = oldMachine._memoryState.HeadSettings[i];
+                _controller.HeadsNeurons[i].OldHeadSettings = oldMachine._memoryState.HeadSettings[i];
             }
-            _memoryState = new MemoryState(_controller.Heads, oldMachine._memoryState.Memory, unitFactory);
+            _memoryState = new MemoryState(_controller.HeadsNeurons, oldMachine._memoryState.Memory, unitFactory);
         }
 
         public NTMController Controller

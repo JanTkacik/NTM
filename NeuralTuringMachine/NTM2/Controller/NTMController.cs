@@ -27,17 +27,17 @@ namespace NTM2.Controller
 
         public int HeadCount
         {
-            get { return ((FeedForwardController)_controller).OutputLayer._heads.Length; }
+            get { return ((FeedForwardController)_controller).OutputLayer.HeadsNeurons.Length; }
         }
 
-        public Head[] Heads
+        public Head[] HeadsNeurons
         {
-            get { return ((FeedForwardController)_controller).OutputLayer._heads; }
+            get { return ((FeedForwardController)_controller).OutputLayer.HeadsNeurons; }
         }
 
         public Unit[] Output
         {
-            get { return ((FeedForwardController)_controller).OutputLayer._outputLayer; }
+            get { return ((FeedForwardController)_controller).OutputLayer.OutputLayerNeurons; }
         }
 
         public NTMController(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM)
@@ -107,7 +107,7 @@ namespace NTM2.Controller
                 for (int j = 0; j < output.Length; j++)
                 {
                     //Delta
-                    ((FeedForwardController)(machine.Controller._controller)).OutputLayer._outputLayer[j].Gradient = ((FeedForwardController)(machine.Controller._controller)).OutputLayer._outputLayer[j].Value - output[j];
+                    ((FeedForwardController)(machine.Controller._controller)).OutputLayer.OutputLayerNeurons[j].Gradient = ((FeedForwardController)(machine.Controller._controller)).OutputLayer.OutputLayerNeurons[j].Value - output[j];
                 }
                 machine.BackwardErrorPropagation();
             }

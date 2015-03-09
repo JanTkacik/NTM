@@ -19,7 +19,7 @@ namespace NTM2.Controller
         public FeedForwardController(int controllerSize, int inputSize, int outputSize, int headCount, int memoryUnitSizeM, UnitFactory unitFactory)
         {
             HiddenLayer = new HiddenLayer(controllerSize, inputSize, headCount, memoryUnitSizeM, unitFactory);
-            OutputLayer = new OutputLayer(outputSize, controllerSize, headCount, memoryUnitSizeM, HiddenLayer, unitFactory);
+            OutputLayer = new OutputLayer(outputSize, controllerSize, headCount, memoryUnitSizeM, unitFactory);
         }
 
         private FeedForwardController(HiddenLayer hiddenLayer, OutputLayer outputLayer)
@@ -31,7 +31,7 @@ namespace NTM2.Controller
         public IController Clone()
         {
             HiddenLayer newHiddenLayer = HiddenLayer.Clone();
-            OutputLayer newOutputLayer = OutputLayer.Clone(newHiddenLayer);
+            OutputLayer newOutputLayer = OutputLayer.Clone();
             return new FeedForwardController(newHiddenLayer, newOutputLayer);
         }
 
@@ -42,7 +42,7 @@ namespace NTM2.Controller
         public void ForwardPropagation(double[] input, ReadData[] readData)
         {
             HiddenLayer.ForwardPropagation(input, readData);
-            OutputLayer.ForwardPropagation();
+            OutputLayer.ForwardPropagation(HiddenLayer);
         }
 
         #endregion
@@ -61,7 +61,7 @@ namespace NTM2.Controller
 
         public void BackwardErrorPropagation(double[] input, ReadData[] reads)
         {
-            OutputLayer.BackwardErrorPropagation();
+            OutputLayer.BackwardErrorPropagation(HiddenLayer);
             HiddenLayer.BackwardErrorPropagation(input, reads);
         }
 
