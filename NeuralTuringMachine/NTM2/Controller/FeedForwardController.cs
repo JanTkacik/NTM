@@ -1,4 +1,5 @@
 ﻿using System;
+using NTM2.Learning;
 using NTM2.Memory;
 
 namespace NTM2.Controller
@@ -51,6 +52,12 @@ namespace NTM2.Controller
         {
             OutputLayer.UpdateWeights(updateAction);
             HiddenLayer.UpdateWeights(updateAction);
+        }
+
+        public void UpdateWeights(IWeightUpdater weightUpdater)
+        {
+            OutputLayer.UpdateWeights(weightUpdater);
+            HiddenLayer.UpdateWeights(weightUpdater);
         }
 
         #endregion

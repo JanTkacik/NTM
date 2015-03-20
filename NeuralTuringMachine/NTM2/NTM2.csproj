@@ -48,6 +48,9 @@
     <Compile Include="Controller\SigmoidActivationFunction.cs" />
     <Compile Include="Controller\UnitFactory.cs" />
     <Compile Include="INTM.cs" />
+    <Compile Include="Learning\BPTTTeacher.cs" />
+    <Compile Include="Learning\INTMTeacher.cs" />
+    <Compile Include="Learning\IWeightUpdater.cs" />
     <Compile Include="Memory\Addressing\BetaSimilarity.cs" />
     <Compile Include="Memory\Addressing\ContentAddressing.cs" />
     <Compile Include="Memory\Addressing\CosineSimilarity.cs" />
@@ -60,7 +63,7 @@
     <Compile Include="Memory\ReadData.cs" />
     <Compile Include="Controller\Unit.cs" />
     <Compile Include="Controller\NTMController.cs" />
-    <Compile Include="Learning\RMSPropTeacher.cs" />
+    <Compile Include="Learning\RMSPropWeightUpdater.cs" />
     <Compile Include="Controller\TrainableNTM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

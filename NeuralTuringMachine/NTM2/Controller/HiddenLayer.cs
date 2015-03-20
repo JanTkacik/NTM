@@ -1,4 +1,5 @@
 ﻿using System;
+using NTM2.Learning;
 using NTM2.Memory;
 
 namespace NTM2.Controller
@@ -134,6 +135,14 @@ namespace NTM2.Controller
             vectorUpdateAction(_hiddenLayerThresholds);
         }
 
+
+        public void UpdateWeights(IWeightUpdater weightUpdater)
+        {
+            weightUpdater.UpdateWeight(_readDataToHiddenLayerWeights);
+            weightUpdater.UpdateWeight(_inputToHiddenLayerWeights);
+            weightUpdater.UpdateWeight(_hiddenLayerThresholds);
+        }
+
         #endregion
 
         #region BackwardErrorPropagation
@@ -211,5 +220,6 @@ namespace NTM2.Controller
         }
 
         #endregion
+
     }
 }

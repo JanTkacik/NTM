@@ -1,4 +1,5 @@
 ﻿using System;
+using NTM2.Learning;
 using NTM2.Memory;
 
 namespace NTM2.Controller
@@ -7,6 +8,7 @@ namespace NTM2.Controller
     {
         void ForwardPropagation(double[] input, ReadData[] readData);
         void UpdateWeights(Action<Unit> updateAction);
+        void UpdateWeights(IWeightUpdater weightUpdater);
         void BackwardErrorPropagation(double[] knownOutput, double[] input, ReadData[] reads);
         IController Clone();
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using NTM2.Learning;
 using NTM2.Memory.Addressing;
 
 namespace NTM2.Controller
@@ -176,6 +177,12 @@ namespace NTM2.Controller
 
             tensor2UpdateAction(_hiddenToOutputLayerWeights);
             tensor3UpdateAction(_hiddenToHeadsWeights);
+        }
+
+        public void UpdateWeights(IWeightUpdater weightUpdater)
+        {
+            weightUpdater.UpdateWeight(_hiddenToOutputLayerWeights);
+            weightUpdater.UpdateWeight(_hiddenToHeadsWeights);
         }
     }
 }

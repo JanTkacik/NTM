@@ -1,4 +1,5 @@
 ﻿using System;
+using NTM2.Learning;
 using NTM2.Memory;
 using NTM2.Memory.Addressing;
 
@@ -145,6 +146,12 @@ namespace NTM2.Controller
         public void BackwardErrorPropagation(double[] knownOutput)
         {
             _controller.BackwardErrorPropagation(knownOutput, _input, _reads);
+        }
+
+        public void UpdateWeights(IWeightUpdater weightUpdater)
+        {
+            _memory.UpdateWeights(weightUpdater);
+            _controller.UpdateWeights(weightUpdater);
         }
     }
 }

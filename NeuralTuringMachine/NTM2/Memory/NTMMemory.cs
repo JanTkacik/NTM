@@ -1,5 +1,6 @@
 ﻿using System;
 using NTM2.Controller;
+using NTM2.Learning;
 using NTM2.Memory.Addressing;
 
 namespace NTM2.Memory
@@ -228,6 +229,19 @@ namespace NTM2.Memory
             Action<Unit[][]> tensor2UpdateAction = Unit.GetTensor2UpdateAction(updateAction);
 
             tensor2UpdateAction(_data);
+        }
+
+        public void UpdateWeights(IWeightUpdater weightUpdater)
+        {
+            foreach (BetaSimilarity[] betaSimilarities in _oldSimilarities)
+            {
+                foreach (BetaSimilarity betaSimilarity in betaSimilarities)
+                {
+                    weightUpdater.UpdateWeight(betaSimilarity.Data);
+                }
+            }
+
+            weightUpdater.UpdateWeight(_data);
         }
     }
 }
