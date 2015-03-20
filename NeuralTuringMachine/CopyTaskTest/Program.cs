@@ -55,14 +55,14 @@ namespace CopyTaskTest
 
             Console.WriteLine(controller.WeightsCount);
 
-            RMSPropTeacher rmsPropTeacher = new RMSPropTeacher(controller);
+            RMSPropTeacher rmsPropTeacher = new RMSPropTeacher(controller, 0.95, 0.5, 0.001, 0.001);
             for (int i = 1; i < 10000; i++)
             {
                 Tuple<double[][], double[][]> sequence = SequenceGenerator.GenerateSequence(rand.Next(20) + 1,
                                                                                             vectorSize);
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
-                TrainableNTM[] machines = rmsPropTeacher.Train(sequence.Item1, sequence.Item2, 0.95, 0.5, 0.001, 0.001);
+                TrainableNTM[] machines = rmsPropTeacher.Train(sequence.Item1, sequence.Item2);
                 stopwatch.Stop();
                 times[i%100] = stopwatch.ElapsedMilliseconds;
 

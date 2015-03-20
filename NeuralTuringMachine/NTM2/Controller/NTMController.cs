@@ -11,8 +11,10 @@ namespace NTM2.Controller
         private readonly int _memoryColumnsN;
         private readonly int _memoryRowsM;
         private readonly int _weightsCount;
+
         private readonly double[] _input;
         private readonly ReadData[] _reads;
+
         private readonly NTMMemory _memory;
         
         private readonly IController _controller;
