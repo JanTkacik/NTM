@@ -7,6 +7,7 @@ namespace NTM2.Controller
     interface IController
     {
         void ForwardPropagation(double[] input, ReadData[] readData);
+        //TODO remove
         void UpdateWeights(Action<Unit> updateAction);
         void UpdateWeights(IWeightUpdater weightUpdater);
         void BackwardErrorPropagation(double[] knownOutput, double[] input, ReadData[] reads);

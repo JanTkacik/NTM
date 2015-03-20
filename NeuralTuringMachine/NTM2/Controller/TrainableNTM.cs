@@ -7,7 +7,9 @@ namespace NTM2.Controller
     public class TrainableNTM
     {
         private readonly NeuralTuringMachine _controller;
-        private readonly MemoryState _memoryState;
+        private readonly MemoryState _oldMemoryState;
+
+        private MemoryState _memoryState;
         private readonly ContentAddressing[] _contentAddressings;
         private readonly HeadSetting[] _headSettings;
         private readonly ReadData[] _readDatas;
@@ -24,21 +26,23 @@ namespace NTM2.Controller
             _memoryState = new MemoryState(_headSettings, _readDatas, _controller.Memory);
         }
 
-        public TrainableNTM(TrainableNTM oldMachine, double[] input)
+        public TrainableNTM(TrainableNTM oldMachine)
         {
-            _controller = oldMachine._controller.Process(oldMachine._memoryState.ReadData, input);
+            _controller = oldMachine._controller.Clone();
+            _oldMemoryState = oldMachine._memoryState;
+        }
+
+        public void ForwardPropagation(double[] input)
+        {
+            _controller.ForwardPropagation(_oldMemoryState.ReadData, input);
+
             for (int i = 0; i < _controller.HeadCount; i++)
             {
-                _controller.HeadsNeurons[i].OldHeadSettings = oldMachine._memoryState.HeadSettings[i];
+                _controller.HeadsNeurons[i].OldHeadSettings = _oldMemoryState.HeadSettings[i];
             }
-            _memoryState = new MemoryState(_controller.HeadsNeurons, oldMachine._memoryState.Memory, _controller.UnitFactory);
+            _memoryState = new MemoryState(_controller.HeadsNeurons, _oldMemoryState.Memory, _controller.UnitFactory);
         }
-
-        public NeuralTuringMachine Controller
-        {
-            get { return _controller; }
-        }
-
+        
         public void BackwardErrorPropagation(double[] knownOutput)
         {
             _memoryState.BackwardErrorPropagation();
@@ -57,6 +61,11 @@ namespace NTM2.Controller
                 }
                 _contentAddressings[i].BackwardErrorPropagation();
             }
+        }
+
+        public double[] GetOutput()
+        {
+            return _controller.GetOutput();
         }
     }
 }

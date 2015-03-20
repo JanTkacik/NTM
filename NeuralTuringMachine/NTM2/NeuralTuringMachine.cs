@@ -14,8 +14,8 @@ namespace NTM2
         private readonly int _memoryRowsM;
         private readonly int _weightsCount;
 
-        private readonly double[] _input;
-        private readonly ReadData[] _reads;
+        private double[] _input;
+        private ReadData[] _reads;
 
         internal readonly NTMMemory Memory;
         private readonly IController _controller;
@@ -59,8 +59,6 @@ namespace NTM2
             int memoryColumnsN,
             int memoryRowsM,
             int weightsCount,
-            ReadData[] readDatas,
-            double[] input,
             IController controller,
             UnitFactory unitFactory)
         {
@@ -68,28 +66,18 @@ namespace NTM2
             _memoryColumnsN = memoryColumnsN;
             _memoryRowsM = memoryRowsM;
             _weightsCount = weightsCount;
-            _reads = readDatas;
-            _input = input;
             _controller = controller;
         }
         
-        public NeuralTuringMachine Process(ReadData[] readData, double[] input)
+        public NeuralTuringMachine Clone()
         {
-            NeuralTuringMachine newController = new NeuralTuringMachine(
-                _memoryColumnsN,
-                _memoryRowsM,
-                _weightsCount,
-                readData,
-                input,
-                _controller.Clone(),
-                UnitFactory);
-
-            newController.ForwardPropagation(readData, input);
-            return newController;
+            return new NeuralTuringMachine(_memoryColumnsN, _memoryRowsM, _weightsCount, _controller.Clone(), UnitFactory);
         }
         
-        private void ForwardPropagation(ReadData[] readData, double[] input)
+        internal void ForwardPropagation(ReadData[] readData, double[] input)
         {
+            _reads = readData;
+            _input = input;
             _controller.ForwardPropagation(input, readData);
         }
 

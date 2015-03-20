@@ -1,5 +1,4 @@
-﻿using System;
-using NTM2.Controller;
+﻿using NTM2.Controller;
 
 namespace NTM2.Learning
 {
@@ -22,10 +21,12 @@ namespace NTM2.Learning
 
             //FORWARD phase
             TrainableNTM originalMachine = new TrainableNTM(_controller);
-            machines[0] = new TrainableNTM(originalMachine, input[0]);
+            machines[0] = new TrainableNTM(originalMachine);
+            machines[0].ForwardPropagation(input[0]);
             for (int i = 1; i < input.Length; i++)
             {
-                machines[i] = new TrainableNTM(machines[i - 1], input[i]);
+                machines[i] = new TrainableNTM(machines[i - 1]);
+                machines[i].ForwardPropagation(input[i]);
             }
 
             //Gradient reset
@@ -52,14 +53,9 @@ namespace NTM2.Learning
             for (int i = 0; i < machines.Length; i++)
             {
                 TrainableNTM machine = machines[i];
-                realOutputs[i] = machine.Controller.GetOutput();
+                realOutputs[i] = machine.GetOutput();
             }
             return realOutputs;
-        }
-
-        public double[][][] Train(double[][][] inputs, double[][][] knownOutputs)
-        {
-            throw new NotImplementedException();
         }
     }
 }
