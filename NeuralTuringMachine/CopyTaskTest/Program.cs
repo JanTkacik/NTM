@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using NTM2;
 using NTM2.Controller;
 using NTM2.Learning;
 using YoVisionClient;
@@ -47,7 +48,7 @@ namespace CopyTaskTest
             const int memoryN = 128;
             const int memoryM = 20;
 
-            NTMController controller = new NTMController(vectorSize + 2, vectorSize, controllerSize, headsCount,
+            NeuralTuringMachine controller = new NeuralTuringMachine(vectorSize + 2, vectorSize, controllerSize, headsCount,
                                                          memoryN, memoryM);
             //Randomize weights
             controller.UpdateWeights(unit => unit.Value = (rand.NextDouble() - 0.5));

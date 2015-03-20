@@ -1,14 +1,13 @@
-﻿using NTM2.Controller;
-using NTM2.Memory;
+﻿using NTM2.Memory;
 
-namespace NTM2
+namespace NTM2.Controller
 {
     public class TrainableNTM
     {
-        private readonly NTMController _controller;
+        private readonly NeuralTuringMachine _controller;
         private readonly MemoryState _memoryState;
 
-        public TrainableNTM(NTMController controller, MemoryState memoryState)
+        public TrainableNTM(NeuralTuringMachine controller, MemoryState memoryState)
         {
             _controller = controller;
             _memoryState = memoryState;
@@ -24,7 +23,7 @@ namespace NTM2
             _memoryState = new MemoryState(_controller.HeadsNeurons, oldMachine._memoryState.Memory, unitFactory);
         }
 
-        public NTMController Controller
+        public NeuralTuringMachine Controller
         {
             get { return _controller; }
         }

@@ -5,10 +5,10 @@ namespace NTM2.Learning
 {
     public class BPTTTeacher : INTMTeacher
     {
-        private readonly NTMController _controller;
+        private readonly NeuralTuringMachine _controller;
         private readonly IWeightUpdater _weightUpdater;
 
-        public BPTTTeacher(NTMController controller, IWeightUpdater weightUpdater)
+        public BPTTTeacher(NeuralTuringMachine controller, IWeightUpdater weightUpdater)
         {
             _controller = controller;
             _weightUpdater = weightUpdater;
@@ -32,7 +32,7 @@ namespace NTM2.Learning
 
         public double[][][] Train(double[][][] inputs, double[][][] knownOutputs)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

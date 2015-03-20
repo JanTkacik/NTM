@@ -15,7 +15,7 @@ namespace NTM2.Learning
         private readonly double[] _delta;
         private int _i;
 
-        public RMSPropWeightUpdater(NTMController controller, double gradientMomentum = 0.95, double deltaMomentum = 0.5, double changeMultiplier = 0.001, double changeAddConstant = 0.001)
+        public RMSPropWeightUpdater(NeuralTuringMachine controller, double gradientMomentum = 0.95, double deltaMomentum = 0.5, double changeMultiplier = 0.001, double changeAddConstant = 0.001)
         {
             GradientMomentum = gradientMomentum;
             DeltaMomentum = deltaMomentum;

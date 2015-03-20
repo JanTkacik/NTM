@@ -2,7 +2,7 @@
 
 namespace NTM2
 {
-    interface INTM
+    interface INeuralTuringMachine
     {
         double[] Process(double[] input);
         void Save(Stream stream);

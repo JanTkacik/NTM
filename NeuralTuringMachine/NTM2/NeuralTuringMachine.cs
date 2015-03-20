@@ -1,11 +1,12 @@
 ﻿using System;
+using NTM2.Controller;
 using NTM2.Learning;
 using NTM2.Memory;
 using NTM2.Memory.Addressing;
 
-namespace NTM2.Controller
+namespace NTM2
 {
-    public class NTMController
+    public class NeuralTuringMachine
     {
         private readonly UnitFactory _unitFactory;
         
@@ -17,7 +18,6 @@ namespace NTM2.Controller
         private readonly ReadData[] _reads;
 
         private readonly NTMMemory _memory;
-        
         private readonly IController _controller;
         
         public int WeightsCount
@@ -34,13 +34,8 @@ namespace NTM2.Controller
         {
             get { return ((FeedForwardController)_controller).OutputLayer.HeadsNeurons; }
         }
-
-        public Unit[] Output
-        {
-            get { return ((FeedForwardController)_controller).OutputLayer.OutputLayerNeurons; }
-        }
-
-        public NTMController(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM)
+        
+        public NeuralTuringMachine(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM)
         {
             _unitFactory = new UnitFactory();
             _memoryColumnsN = memoryColumnsN;
@@ -60,7 +55,7 @@ namespace NTM2.Controller
                 (headCount * headUnitSize * (controllerSize + 1));
         }
 
-        private NTMController(
+        private NeuralTuringMachine(
             int memoryColumnsN,
             int memoryRowsM,
             int weightsCount,
@@ -117,9 +112,9 @@ namespace NTM2.Controller
             return machines;
         }
 
-        public NTMController Process(ReadData[] readData, double[] input)
+        public NeuralTuringMachine Process(ReadData[] readData, double[] input)
         {
-            NTMController newController = new NTMController(
+            NeuralTuringMachine newController = new NeuralTuringMachine(
                 _memoryColumnsN,
                 _memoryRowsM,
                 _weightsCount,
