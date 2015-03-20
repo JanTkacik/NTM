@@ -38,7 +38,7 @@ namespace NTM2.Memory
                 _reads[i] = new ReadData(_headSettings[i], memory);
             }
 
-            _memory = new NTMMemory(_headSettings, heads, memory, unitFactory);
+            _memory = new NTMMemory(_headSettings, heads, memory);
         }
 
         public ReadData[] ReadData

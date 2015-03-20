@@ -16,10 +16,7 @@ namespace NTM2.Controller
         private readonly NTMMemory _memory;
         
         private readonly IController _controller;
-
-        //Old similarities
-        private readonly BetaSimilarity[][] _wtm1s;
-
+        
         public int WeightsCount
         {
             get { return _weightsCount; }
@@ -46,8 +43,7 @@ namespace NTM2.Controller
             _memoryColumnsN = memoryColumnsN;
             _memoryRowsM = memoryRowsM;
             int headUnitSize = Head.GetUnitSize(memoryRowsM);
-            _wtm1s = BetaSimilarity.GetTensor2(headCount, memoryColumnsN);
-            _memory = new NTMMemory(memoryColumnsN, memoryRowsM, _unitFactory);
+            _memory = new NTMMemory(memoryColumnsN, memoryRowsM, headCount, _unitFactory);
             
             _controller = new FeedForwardController(controllerSize, inputSize, outputSize, headCount, memoryRowsM, _unitFactory);
             
@@ -82,14 +78,16 @@ namespace NTM2.Controller
         public TrainableNTM[] ProcessAndUpdateErrors(double[][] input, double[][] knownOutput)
         {
             //FOREACH HEAD - SET WEIGHTS TO BIAS VALUES
-            ContentAddressing[] contentAddressings = ContentAddressing.GetVector(HeadCount, i => _wtm1s[i], _unitFactory);
+            ContentAddressing[] contentAddressings = _memory.GetContentAddressing();
             HeadSetting[] oldSettings = HeadSetting.GetVector(HeadCount, i => new Tuple<int, ContentAddressing>(_memory.MemoryColumnsN, contentAddressings[i]), _unitFactory);
             ReadData[] readDatas = ReadData.GetVector(HeadCount, i => new Tuple<HeadSetting, NTMMemory>(oldSettings[i], _memory));
+            
             TrainableNTM[] machines = new TrainableNTM[input.Length];
             TrainableNTM empty = new TrainableNTM(this, new MemoryState(oldSettings, readDatas, _memory));
 
             //BPTT
             machines[0] = new TrainableNTM(empty, input[0], _unitFactory);
+            
             for (int i = 1; i < input.Length; i++)
             {
                 machines[i] = new TrainableNTM(machines[i - 1], input[i], _unitFactory);
@@ -138,18 +136,7 @@ namespace NTM2.Controller
 
         public void UpdateWeights(Action<Unit> updateAction)
         {
-            foreach (BetaSimilarity[] betaSimilarities in _wtm1s)
-            {
-                foreach (BetaSimilarity betaSimilarity in betaSimilarities)
-                {
-                    updateAction(betaSimilarity.Data);
-                }
-            }
-
-            Action<Unit[][]> tensor2UpdateAction = Unit.GetTensor2UpdateAction(updateAction);
-
-            tensor2UpdateAction(_memory.Data);
-            
+            _memory.UpdateWeights(updateAction);
             _controller.UpdateWeights(updateAction);
         }
         

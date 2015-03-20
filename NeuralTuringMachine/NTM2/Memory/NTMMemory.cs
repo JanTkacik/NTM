@@ -8,8 +8,10 @@ namespace NTM2.Memory
     {
         private readonly HeadSetting[] _headSettings;
         private readonly Head[] _heads;
-        private readonly NTMMemory _oldMemory;
         private readonly Unit[][] _data;
+        
+        private readonly NTMMemory _oldMemory;
+        private readonly BetaSimilarity[][] _oldSimilarities;
 
         private readonly double[][] _erase;
         private readonly double[][] _add;
@@ -17,22 +19,29 @@ namespace NTM2.Memory
 
         private readonly int _memoryColumnsN;
         private readonly int _memoryRowsM;
+        private readonly int _headCount;
+        private readonly UnitFactory _unitFactory;
 
-        public NTMMemory(int memoryColumnsN, int memoryRowsM, UnitFactory unitFactory)
+        public NTMMemory(int memoryColumnsN, int memoryRowsM, int headCount, UnitFactory unitFactory)
         {
             _memoryColumnsN = memoryColumnsN;
             _memoryRowsM = memoryRowsM;
+            _headCount = headCount;
+            _unitFactory = unitFactory;
             _data = unitFactory.GetTensor2(memoryColumnsN, memoryRowsM);
+            _oldSimilarities = BetaSimilarity.GetTensor2(headCount, memoryColumnsN);
         }
 
-        public NTMMemory(HeadSetting[] headSettings, Head[] heads, NTMMemory memory, UnitFactory unitFactory)
+        public NTMMemory(HeadSetting[] headSettings, Head[] heads, NTMMemory memory)
         {
             _memoryColumnsN = memory._memoryColumnsN;
             _memoryRowsM = memory._memoryRowsM;
+            _headCount = memory._headCount;
+            _unitFactory = memory._unitFactory;
             _headSettings = headSettings;
             _heads = heads;
             _oldMemory = memory;
-            _data = unitFactory.GetTensor2(memory.MemoryColumnsN, memory.MemoryRowsM);
+            _data = _unitFactory.GetTensor2(memory.MemoryColumnsN, memory.MemoryRowsM);
 
             int headsCount = heads.Length;
             _erase = GetTensor2(headsCount, memory.MemoryRowsM);
@@ -199,6 +208,26 @@ namespace NTM2.Memory
                     _oldMemory._data[i][j].Gradient += gradient*_data[i][j].Gradient;
                 }
             }
+        }
+
+        public ContentAddressing[] GetContentAddressing()
+        {
+            return ContentAddressing.GetVector(_headCount, i => _oldSimilarities[i], _unitFactory);
+        }
+
+        public void UpdateWeights(Action<Unit> updateAction)
+        {
+            foreach (BetaSimilarity[] betaSimilarities in _oldSimilarities)
+            {
+                foreach (BetaSimilarity betaSimilarity in betaSimilarities)
+                {
+                    updateAction(betaSimilarity.Data);
+                }
+            }
+
+            Action<Unit[][]> tensor2UpdateAction = Unit.GetTensor2UpdateAction(updateAction);
+
+            tensor2UpdateAction(_data);
         }
     }
 }

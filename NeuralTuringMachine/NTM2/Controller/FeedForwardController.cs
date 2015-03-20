@@ -1,14 +1,12 @@
 ﻿using System;
 using NTM2.Memory;
-using NTM2.Memory.Addressing;
 
 namespace NTM2.Controller
 {
-    //TODO refactor extract layers - input, hidden and output
     class FeedForwardController : IController
     {
         #region Fields and variables
-        
+
         internal readonly HiddenLayer HiddenLayer;
         internal readonly OutputLayer OutputLayer;
 
@@ -38,7 +36,7 @@ namespace NTM2.Controller
         #endregion
 
         #region Forward propagation
-        
+
         public void ForwardPropagation(double[] input, ReadData[] readData)
         {
             HiddenLayer.ForwardPropagation(input, readData);
