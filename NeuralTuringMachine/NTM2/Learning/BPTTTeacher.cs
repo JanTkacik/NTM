@@ -4,13 +4,13 @@ namespace NTM2.Learning
 {
     public class BPTTTeacher : INTMTeacher
     {
-        private readonly NeuralTuringMachine _controller;
+        private readonly NeuralTuringMachine _machine;
         private readonly IWeightUpdater _weightUpdater;
         private readonly IWeightUpdater _gradientResetter;
 
-        public BPTTTeacher(NeuralTuringMachine controller, IWeightUpdater weightUpdater)
+        public BPTTTeacher(NeuralTuringMachine machine, IWeightUpdater weightUpdater)
         {
-            _controller = controller;
+            _machine = machine;
             _weightUpdater = weightUpdater;
             _gradientResetter = new GradientResetter();
         }
@@ -20,7 +20,7 @@ namespace NTM2.Learning
             TrainableNTM[] machines = new TrainableNTM[input.Length];
 
             //FORWARD phase
-            TrainableNTM originalMachine = new TrainableNTM(_controller);
+            TrainableNTM originalMachine = new TrainableNTM(_machine);
             machines[0] = new TrainableNTM(originalMachine);
             machines[0].ForwardPropagation(input[0]);
             for (int i = 1; i < input.Length; i++)
@@ -31,7 +31,7 @@ namespace NTM2.Learning
 
             //Gradient reset
             _gradientResetter.Reset();
-            _controller.UpdateWeights(_gradientResetter);
+            _machine.UpdateWeights(_gradientResetter);
 
             //BACKWARD phase
             for (int i = input.Length - 1; i >= 0; i--)
@@ -42,7 +42,7 @@ namespace NTM2.Learning
 
             //Weight updates
             _weightUpdater.Reset();
-            _controller.UpdateWeights(_weightUpdater);
+            _machine.UpdateWeights(_weightUpdater);
             
             return GetMachineOutputs(machines);
         }

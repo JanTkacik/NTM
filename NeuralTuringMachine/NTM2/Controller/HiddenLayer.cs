@@ -14,7 +14,6 @@ namespace NTM2.Controller
         private readonly int _inputSize;
         private readonly int _headCount;
         private readonly int _memoryUnitSizeM;
-        private readonly UnitFactory _unitFactory;
 
         //Controller hidden layer threshold weights
         private readonly Unit[] _hiddenLayerThresholds;
@@ -32,21 +31,20 @@ namespace NTM2.Controller
 
         #region Ctor
 
-        public HiddenLayer(int controllerSize, int inputSize, int headCount, int memoryUnitSizeM, UnitFactory unitFactory)
+        public HiddenLayer(int controllerSize, int inputSize, int headCount, int memoryUnitSizeM)
         {
             _controllerSize = controllerSize;
             _inputSize = inputSize;
             _headCount = headCount;
             _memoryUnitSizeM = memoryUnitSizeM;
-            _unitFactory = unitFactory;
             _activationFunction = new SigmoidActivationFunction();
 
-            _readDataToHiddenLayerWeights = _unitFactory.GetTensor3(controllerSize, headCount, memoryUnitSizeM);
-            _inputToHiddenLayerWeights = _unitFactory.GetTensor2(controllerSize, inputSize);
-            _hiddenLayerThresholds = _unitFactory.GetVector(controllerSize);
+            _readDataToHiddenLayerWeights = UnitFactory.GetTensor3(controllerSize, headCount, memoryUnitSizeM);
+            _inputToHiddenLayerWeights = UnitFactory.GetTensor2(controllerSize, inputSize);
+            _hiddenLayerThresholds = UnitFactory.GetVector(controllerSize);
         }
 
-        private HiddenLayer(Unit[][][] readDataToHiddenLayerWeights, Unit[][] inputToHiddenLayerWeights, Unit[] hiddenLayerThresholds, Unit[] hiddenLayer, int controllerSize, int inputSize, int headCount, int memoryUnitSizeM, UnitFactory unitFactory, IDifferentiableFunction activationFunction)
+        private HiddenLayer(Unit[][][] readDataToHiddenLayerWeights, Unit[][] inputToHiddenLayerWeights, Unit[] hiddenLayerThresholds, Unit[] hiddenLayer, int controllerSize, int inputSize, int headCount, int memoryUnitSizeM, IDifferentiableFunction activationFunction)
         {
             _readDataToHiddenLayerWeights = readDataToHiddenLayerWeights;
             _inputToHiddenLayerWeights = inputToHiddenLayerWeights;
@@ -56,15 +54,14 @@ namespace NTM2.Controller
             _inputSize = inputSize;
             _headCount = headCount;
             _memoryUnitSizeM = memoryUnitSizeM;
-            _unitFactory = unitFactory;
             _activationFunction = activationFunction;
         }
 
         public HiddenLayer Clone()
         {
             return new HiddenLayer(_readDataToHiddenLayerWeights, _inputToHiddenLayerWeights,
-                                   _hiddenLayerThresholds, _unitFactory.GetVector(_controllerSize),
-                                   _controllerSize, _inputSize, _headCount, _memoryUnitSizeM, _unitFactory, _activationFunction);
+                                   _hiddenLayerThresholds, UnitFactory.GetVector(_controllerSize),
+                                   _controllerSize, _inputSize, _headCount, _memoryUnitSizeM, _activationFunction);
         }
 
         #endregion

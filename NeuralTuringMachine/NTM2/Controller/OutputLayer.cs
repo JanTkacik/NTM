@@ -6,8 +6,6 @@ namespace NTM2.Controller
 {
     internal class OutputLayer
     {
-        private readonly UnitFactory _unitFactory;
-
         private readonly int _outputSize;
         private readonly int _controllerSize;
         private readonly int _headCount;
@@ -26,20 +24,19 @@ namespace NTM2.Controller
         //Heads neurons
         internal readonly Head[] HeadsNeurons;
 
-        public OutputLayer(int outputSize, int controllerSize, int headCount, int memoryUnitSizeM, UnitFactory unitFactory)
+        public OutputLayer(int outputSize, int controllerSize, int headCount, int memoryUnitSizeM)
         {
             _outputSize = outputSize;
             _controllerSize = controllerSize;
             _headCount = headCount;
             _memoryUnitSizeM = memoryUnitSizeM;
-            _unitFactory = unitFactory;
             _headUnitSize = Head.GetUnitSize(memoryUnitSizeM);
-            _hiddenToOutputLayerWeights = _unitFactory.GetTensor2(outputSize, controllerSize + 1);
-            _hiddenToHeadsWeights = _unitFactory.GetTensor3(headCount, _headUnitSize, controllerSize + 1);
+            _hiddenToOutputLayerWeights = UnitFactory.GetTensor2(outputSize, controllerSize + 1);
+            _hiddenToHeadsWeights = UnitFactory.GetTensor3(headCount, _headUnitSize, controllerSize + 1);
             HeadsNeurons = new Head[headCount];
         }
 
-        private OutputLayer(Unit[][] hiddenToOutputLayerWeights, Unit[][][] hiddenToHeadsWeights, Unit[] outputLayerNeurons, Head[] headsNeurons, int headCount, int outputSize, int controllerSize, int memoryUnitSizeM, int headUnitSize, UnitFactory unitFactory)
+        private OutputLayer(Unit[][] hiddenToOutputLayerWeights, Unit[][][] hiddenToHeadsWeights, Unit[] outputLayerNeurons, Head[] headsNeurons, int headCount, int outputSize, int controllerSize, int memoryUnitSizeM, int headUnitSize)
         {
             _hiddenToOutputLayerWeights = hiddenToOutputLayerWeights;
             _hiddenToHeadsWeights = hiddenToHeadsWeights;
@@ -48,7 +45,6 @@ namespace NTM2.Controller
             _outputSize = outputSize;
             OutputLayerNeurons = outputLayerNeurons;
             _headCount = headCount;
-            _unitFactory = unitFactory;
             _memoryUnitSizeM = memoryUnitSizeM;
             _headUnitSize = headUnitSize;
         }
@@ -96,10 +92,10 @@ namespace NTM2.Controller
 
         public OutputLayer Clone()
         {
-            Unit[] outputLayer = _unitFactory.GetVector(_outputSize);
-            Head[] heads = Head.GetVector(_headCount, i => _memoryUnitSizeM, _unitFactory);
+            Unit[] outputLayer = UnitFactory.GetVector(_outputSize);
+            Head[] heads = Head.GetVector(_headCount, i => _memoryUnitSizeM);
 
-            return new OutputLayer(_hiddenToOutputLayerWeights, _hiddenToHeadsWeights, outputLayer, heads, _headCount, _outputSize, _controllerSize, _memoryUnitSizeM, _headUnitSize, _unitFactory);
+            return new OutputLayer(_hiddenToOutputLayerWeights, _hiddenToHeadsWeights, outputLayer, heads, _headCount, _outputSize, _controllerSize, _memoryUnitSizeM, _headUnitSize);
         }
 
         public void BackwardErrorPropagation(double[] knownOutput, HiddenLayer hiddenLayer)

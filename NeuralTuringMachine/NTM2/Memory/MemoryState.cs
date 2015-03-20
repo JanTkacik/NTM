@@ -1,22 +1,26 @@
-﻿using NTM2.Controller;
+﻿using System;
+using NTM2.Controller;
 using NTM2.Memory.Addressing;
 
 namespace NTM2.Memory
 {
     public class MemoryState
     {
+        private readonly NTMMemory _memory;
         private readonly HeadSetting[] _headSettings;
         private readonly ReadData[] _reads;
-        private readonly NTMMemory _memory;
+        private readonly ContentAddressing[] _contentAddressings;
 
-        public MemoryState(HeadSetting[] headSettings, ReadData[] reads, NTMMemory memory)
+        public MemoryState(NeuralTuringMachine machine)
         {
-            _headSettings = headSettings;
-            _reads = reads;
-            _memory = memory;
+            _memory = machine.Memory;
+            //TODO refactor
+            _contentAddressings = _memory.GetContentAddressing();
+            _headSettings = HeadSetting.GetVector(machine.HeadCount, i => new Tuple<int, ContentAddressing>(_memory.MemoryColumnsN, _contentAddressings[i]));
+            _reads = ReadData.GetVector(machine.HeadCount, i => new Tuple<HeadSetting, NTMMemory>(_headSettings[i], _memory));
         }
 
-        public MemoryState(Head[] heads, NTMMemory memory, UnitFactory unitFactory)
+        public MemoryState(Head[] heads, NTMMemory memory)
         {
             _reads = new ReadData[heads.Length];
             _headSettings = new HeadSetting[heads.Length];
@@ -30,18 +34,18 @@ namespace NTM2.Memory
                     CosineSimilarity cosineSimilarity = new CosineSimilarity(head.KeyVector, memoryColumn);
                     similarities[j] = new BetaSimilarity(head.Beta, cosineSimilarity);
                 }
-                ContentAddressing ca = new ContentAddressing(similarities, unitFactory);
-                GatedAddressing ga = new GatedAddressing(head.Gate, ca, head.OldHeadSettings, unitFactory);
-                ShiftedAddressing sa = new ShiftedAddressing(head.Shift, ga, unitFactory);
+                ContentAddressing ca = new ContentAddressing(similarities);
+                GatedAddressing ga = new GatedAddressing(head.Gate, ca, head.OldHeadSettings);
+                ShiftedAddressing sa = new ShiftedAddressing(head.Shift, ga);
 
-                _headSettings[i] = new HeadSetting(head.Gamma, sa, unitFactory);
+                _headSettings[i] = new HeadSetting(head.Gamma, sa);
                 _reads[i] = new ReadData(_headSettings[i], memory);
             }
 
             _memory = new NTMMemory(_headSettings, heads, memory);
         }
 
-        public ReadData[] ReadData
+        public ReadData[] ReadDatas
         {
             get { return _reads; }
         }
@@ -76,7 +80,19 @@ namespace NTM2.Memory
                     similarity.CosineSimilarity.BackwardErrorPropagation();
                 }
             }
-            
+        }
+
+        public void BackwardErrorPropagation2()
+        {
+            for (int i = 0; i < _reads.Length; i++)
+            {
+                _reads[i].BackwardErrorPropagation();
+                for (int j = 0; j < _reads[i].HeadSetting.Data.Length; j++)
+                {
+                    _contentAddressings[i].Data[j].Gradient += _reads[i].HeadSetting.Data[j].Gradient;
+                }
+                _contentAddressings[i].BackwardErrorPropagation();
+            }
         }
     }
 }

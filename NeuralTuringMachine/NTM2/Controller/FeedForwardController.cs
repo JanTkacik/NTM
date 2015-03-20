@@ -15,10 +15,10 @@ namespace NTM2.Controller
 
         #region Ctor
 
-        public FeedForwardController(int controllerSize, int inputSize, int outputSize, int headCount, int memoryUnitSizeM, UnitFactory unitFactory)
+        public FeedForwardController(int controllerSize, int inputSize, int outputSize, int headCount, int memoryUnitSizeM)
         {
-            HiddenLayer = new HiddenLayer(controllerSize, inputSize, headCount, memoryUnitSizeM, unitFactory);
-            OutputLayer = new OutputLayer(outputSize, controllerSize, headCount, memoryUnitSizeM, unitFactory);
+            HiddenLayer = new HiddenLayer(controllerSize, inputSize, headCount, memoryUnitSizeM);
+            OutputLayer = new OutputLayer(outputSize, controllerSize, headCount, memoryUnitSizeM);
         }
 
         private FeedForwardController(HiddenLayer hiddenLayer, OutputLayer outputLayer)

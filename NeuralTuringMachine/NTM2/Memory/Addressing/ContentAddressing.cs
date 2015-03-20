@@ -10,10 +10,10 @@ namespace NTM2.Memory.Addressing
         private readonly Unit[] _data;
 
         //Implementation of focusing by content (Page 8, Unit 3.3.1 Focusing by Content)
-        public ContentAddressing(BetaSimilarity[] units, UnitFactory unitFactory)
+        public ContentAddressing(BetaSimilarity[] units)
         {
             _units = units;
-            _data = unitFactory.GetVector(units.Length);
+            _data = UnitFactory.GetVector(units.Length);
 
             //Subtracting max increase numerical stability
             double max = _units.Max(similarity => similarity.Data.Value);
@@ -43,12 +43,12 @@ namespace NTM2.Memory.Addressing
             get { return _units; }
         }
 
-        public static ContentAddressing[] GetVector(int x, Func<int,BetaSimilarity[]> paramGetter, UnitFactory unitFactory)
+        public static ContentAddressing[] GetVector(int x, Func<int,BetaSimilarity[]> paramGetter)
         {
             ContentAddressing[] vector = new ContentAddressing[x];
             for (int i = 0; i < x; i++)
             {
-                vector[i] = new ContentAddressing(paramGetter(i), unitFactory);
+                vector[i] = new ContentAddressing(paramGetter(i));
             }
             return vector;
         }

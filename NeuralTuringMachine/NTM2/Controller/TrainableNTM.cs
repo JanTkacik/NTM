@@ -1,71 +1,52 @@
-﻿using System;
-using NTM2.Memory;
-using NTM2.Memory.Addressing;
+﻿using NTM2.Memory;
 
 namespace NTM2.Controller
 {
     public class TrainableNTM
     {
-        private readonly NeuralTuringMachine _controller;
+        private readonly NeuralTuringMachine _machine;
         private readonly MemoryState _oldMemoryState;
-
         private MemoryState _memoryState;
-        private readonly ContentAddressing[] _contentAddressings;
-        private readonly HeadSetting[] _headSettings;
-        private readonly ReadData[] _readDatas;
 
-        public TrainableNTM(NeuralTuringMachine controller)
+        public TrainableNTM(NeuralTuringMachine machine)
         {
-            _controller = controller;
-
-            //FOREACH HEAD - SET WEIGHTS TO BIAS VALUES
-            _contentAddressings = _controller.Memory.GetContentAddressing();
-            _headSettings = HeadSetting.GetVector(_controller.HeadCount, i => new Tuple<int, ContentAddressing>(_controller.Memory.MemoryColumnsN, _contentAddressings[i]), _controller.UnitFactory);
-            _readDatas = ReadData.GetVector(_controller.HeadCount, i => new Tuple<HeadSetting, NTMMemory>(_headSettings[i], _controller.Memory));
-
-            _memoryState = new MemoryState(_headSettings, _readDatas, _controller.Memory);
+            _machine = machine;
+            _memoryState = new MemoryState(_machine);
+            _oldMemoryState = null;
         }
 
         public TrainableNTM(TrainableNTM oldMachine)
         {
-            _controller = oldMachine._controller.Clone();
+            _machine = oldMachine._machine.Clone();
             _oldMemoryState = oldMachine._memoryState;
         }
 
         public void ForwardPropagation(double[] input)
         {
-            _controller.ForwardPropagation(_oldMemoryState.ReadData, input);
+            _machine.ForwardPropagation(_oldMemoryState.ReadDatas, input);
 
-            for (int i = 0; i < _controller.HeadCount; i++)
+            for (int i = 0; i < _machine.HeadCount; i++)
             {
-                _controller.HeadsNeurons[i].OldHeadSettings = _oldMemoryState.HeadSettings[i];
+                _machine.HeadsNeurons[i].OldHeadSettings = _oldMemoryState.HeadSettings[i];
             }
-            _memoryState = new MemoryState(_controller.HeadsNeurons, _oldMemoryState.Memory, _controller.UnitFactory);
+
+            _memoryState = new MemoryState(_machine.HeadsNeurons, _oldMemoryState.Memory);
         }
         
         public void BackwardErrorPropagation(double[] knownOutput)
         {
             _memoryState.BackwardErrorPropagation();
-            _controller.BackwardErrorPropagation(knownOutput);
+            _machine.BackwardErrorPropagation(knownOutput);
         }
 
         public void BackwardErrorPropagation()
         {
-            //Compute gradients for the bias values of internal memory and weights
-            for (int i = 0; i < _readDatas.Length; i++)
-            {
-                _readDatas[i].BackwardErrorPropagation();
-                for (int j = 0; j < _readDatas[i].HeadSetting.Data.Length; j++)
-                {
-                    _contentAddressings[i].Data[j].Gradient += _readDatas[i].HeadSetting.Data[j].Gradient;
-                }
-                _contentAddressings[i].BackwardErrorPropagation();
-            }
+            _memoryState.BackwardErrorPropagation2();
         }
 
         public double[] GetOutput()
         {
-            return _controller.GetOutput();
+            return _machine.GetOutput();
         }
     }
 }

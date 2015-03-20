@@ -8,10 +8,6 @@ namespace NTM2
 {
     public class NeuralTuringMachine
     {
-        internal readonly UnitFactory UnitFactory;
-        
-        private readonly int _memoryColumnsN;
-        private readonly int _memoryRowsM;
         private readonly int _weightsCount;
 
         private double[] _input;
@@ -37,13 +33,10 @@ namespace NTM2
         
         public NeuralTuringMachine(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM)
         {
-            UnitFactory = new UnitFactory();
-            _memoryColumnsN = memoryColumnsN;
-            _memoryRowsM = memoryRowsM;
             int headUnitSize = Head.GetUnitSize(memoryRowsM);
-            Memory = new NTMMemory(memoryColumnsN, memoryRowsM, headCount, UnitFactory);
+            Memory = new NTMMemory(memoryColumnsN, memoryRowsM, headCount);
             
-            _controller = new FeedForwardController(controllerSize, inputSize, outputSize, headCount, memoryRowsM, UnitFactory);
+            _controller = new FeedForwardController(controllerSize, inputSize, outputSize, headCount, memoryRowsM);
             
             _weightsCount =
                 (headCount * memoryColumnsN) +
@@ -56,22 +49,16 @@ namespace NTM2
         }
 
         private NeuralTuringMachine(
-            int memoryColumnsN,
-            int memoryRowsM,
             int weightsCount,
-            IController controller,
-            UnitFactory unitFactory)
+            IController controller)
         {
-            UnitFactory = unitFactory;
-            _memoryColumnsN = memoryColumnsN;
-            _memoryRowsM = memoryRowsM;
             _weightsCount = weightsCount;
             _controller = controller;
         }
         
         public NeuralTuringMachine Clone()
         {
-            return new NeuralTuringMachine(_memoryColumnsN, _memoryRowsM, _weightsCount, _controller.Clone(), UnitFactory);
+            return new NeuralTuringMachine(_weightsCount, _controller.Clone());
         }
         
         internal void ForwardPropagation(ReadData[] readData, double[] input)

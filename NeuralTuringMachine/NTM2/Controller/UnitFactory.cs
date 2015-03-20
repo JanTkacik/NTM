@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace NTM2.Controller
+﻿namespace NTM2.Controller
 {
-    public class UnitFactory
+    public static class UnitFactory
     {
-        public Unit[] GetVector(int vectorSize)
+        public static Unit[] GetVector(int vectorSize)
         {
             Unit[] vector = new Unit[vectorSize];
             for (int i = 0; i < vectorSize; i++)
@@ -14,7 +12,7 @@ namespace NTM2.Controller
             return vector;
         }
 
-        public Unit[][] GetTensor2(int x, int y)
+        public static Unit[][] GetTensor2(int x, int y)
         {
             Unit[][] tensor = new Unit[x][];
             for (int i = 0; i < x; i++)
@@ -24,7 +22,7 @@ namespace NTM2.Controller
             return tensor;
         }
 
-        public Unit[][][] GetTensor3(int x, int y, int z)
+        public static Unit[][][] GetTensor3(int x, int y, int z)
         {
             Unit[][][] tensor = new Unit[x][][];
             for (int i = 0; i < x; i++)

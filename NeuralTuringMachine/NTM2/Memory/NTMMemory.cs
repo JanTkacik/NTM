@@ -7,29 +7,27 @@ namespace NTM2.Memory
 {
     public class NTMMemory
     {
+        private readonly Unit[][] _data;
+        
         private readonly HeadSetting[] _headSettings;
         private readonly Head[] _heads;
-        private readonly Unit[][] _data;
         
         private readonly NTMMemory _oldMemory;
         private readonly BetaSimilarity[][] _oldSimilarities;
 
         private readonly double[][] _erase;
         private readonly double[][] _add;
-        private readonly double[][] _erasures;
 
         private readonly int _memoryColumnsN;
         private readonly int _memoryRowsM;
         private readonly int _headCount;
-        private readonly UnitFactory _unitFactory;
 
-        public NTMMemory(int memoryColumnsN, int memoryRowsM, int headCount, UnitFactory unitFactory)
+        public NTMMemory(int memoryColumnsN, int memoryRowsM, int headCount)
         {
             _memoryColumnsN = memoryColumnsN;
             _memoryRowsM = memoryRowsM;
             _headCount = headCount;
-            _unitFactory = unitFactory;
-            _data = unitFactory.GetTensor2(memoryColumnsN, memoryRowsM);
+            _data = UnitFactory.GetTensor2(memoryColumnsN, memoryRowsM);
             _oldSimilarities = BetaSimilarity.GetTensor2(headCount, memoryColumnsN);
         }
 
@@ -38,16 +36,15 @@ namespace NTM2.Memory
             _memoryColumnsN = memory._memoryColumnsN;
             _memoryRowsM = memory._memoryRowsM;
             _headCount = memory._headCount;
-            _unitFactory = memory._unitFactory;
             _headSettings = headSettings;
             _heads = heads;
             _oldMemory = memory;
-            _data = _unitFactory.GetTensor2(memory.MemoryColumnsN, memory.MemoryRowsM);
+            _data = UnitFactory.GetTensor2(memory.MemoryColumnsN, memory.MemoryRowsM);
 
             int headsCount = heads.Length;
             _erase = GetTensor2(headsCount, memory.MemoryRowsM);
             _add = GetTensor2(headsCount, memory.MemoryRowsM);
-            _erasures = GetTensor2(memory.MemoryColumnsN, memory.MemoryRowsM);
+            var erasures = GetTensor2(memory.MemoryColumnsN, memory.MemoryRowsM);
 
             for (int i = 0; i < headsCount; i++)
             {
@@ -64,7 +61,7 @@ namespace NTM2.Memory
             for (int i = 0; i < _oldMemory.Data.Length; i++)
             {
                 Unit[] oldRow = _oldMemory.Data[i];
-                double[] erasure = _erasures[i];
+                double[] erasure = erasures[i];
                 Unit[] row = _data[i];
                 for (int j = 0; j < oldRow.Length; j++)
                 {
@@ -213,7 +210,7 @@ namespace NTM2.Memory
 
         public ContentAddressing[] GetContentAddressing()
         {
-            return ContentAddressing.GetVector(_headCount, i => _oldSimilarities[i], _unitFactory);
+            return ContentAddressing.GetVector(_headCount, i => _oldSimilarities[i]);
         }
 
         public void UpdateWeights(Action<Unit> updateAction)

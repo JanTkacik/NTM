@@ -12,11 +12,11 @@ namespace NTM2.Memory
         private readonly ShiftedAddressing _shiftedAddressing;
         private readonly double _gammaIndex;
 
-        public HeadSetting(Unit gamma, ShiftedAddressing shiftedAddressing, UnitFactory unitFactory)
+        public HeadSetting(Unit gamma, ShiftedAddressing shiftedAddressing)
         {
             _gamma = gamma;
             _shiftedAddressing = shiftedAddressing;
-            _data = unitFactory.GetVector(shiftedAddressing.Data.Length);
+            _data = UnitFactory.GetVector(shiftedAddressing.Data.Length);
             //NO CLUE IN PAPER HOW TO IMPLEMENT - ONLY RESTRICTION IS THAT IT HAS TO BE LARGER THAN 1
             //(Page 9, Part 3.3.2. Focusing by location)
             _gammaIndex = Math.Log(Math.Exp(gamma.Value) + 1) + 1;
@@ -38,9 +38,9 @@ namespace NTM2.Memory
             }
         }
 
-        public HeadSetting(int memoryColumnsN, ContentAddressing contentAddressing, UnitFactory unitFactory)
+        public HeadSetting(int memoryColumnsN, ContentAddressing contentAddressing)
         {
-            _data = unitFactory.GetVector(memoryColumnsN);
+            _data = UnitFactory.GetVector(memoryColumnsN);
             for (int i = 0; i < memoryColumnsN; i++)
             {
                 _data[i].Value = contentAddressing.Data[i].Value;
@@ -57,13 +57,13 @@ namespace NTM2.Memory
             get { return _shiftedAddressing; }
         }
 
-        public static HeadSetting[] GetVector(int x, Func<int, Tuple<int, ContentAddressing>> paramGetter, UnitFactory unitFactory)
+        public static HeadSetting[] GetVector(int x, Func<int, Tuple<int, ContentAddressing>> paramGetter)
         {
             HeadSetting[] vector = new HeadSetting[x];
             for (int i = 0; i < x; i++)
             {
                 Tuple<int, ContentAddressing> parameters = paramGetter(i);
-                vector[i] = new HeadSetting(parameters.Item1, parameters.Item2, unitFactory);
+                vector[i] = new HeadSetting(parameters.Item1, parameters.Item2);
             }
             return vector;
         }
