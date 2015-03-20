@@ -15,15 +15,15 @@ namespace NTM2.Learning
         private readonly double[] _delta;
         private int _i;
 
-        public RMSPropWeightUpdater(NeuralTuringMachine controller, double gradientMomentum = 0.95, double deltaMomentum = 0.5, double changeMultiplier = 0.001, double changeAddConstant = 0.001)
+        public RMSPropWeightUpdater(int weightsCount, double gradientMomentum = 0.95, double deltaMomentum = 0.5, double changeMultiplier = 0.001, double changeAddConstant = 0.001)
         {
             GradientMomentum = gradientMomentum;
             DeltaMomentum = deltaMomentum;
             ChangeMultiplier = changeMultiplier;
             ChangeAddConstant = changeAddConstant;
-            _n = new double[controller.WeightsCount];
-            _g = new double[controller.WeightsCount];
-            _delta = new double[controller.WeightsCount];
+            _n = new double[weightsCount];
+            _g = new double[weightsCount];
+            _delta = new double[weightsCount];
             _i = 0;
         }
 

@@ -2,7 +2,9 @@
 using System.Diagnostics;
 using System.Linq;
 using NTM2;
+using NTM2.Controller;
 using NTM2.Learning;
+using NTM2.Memory.Addressing;
 using YoVisionClient;
 using YoVisionCore;
 using YoVisionCore.DataTypes;
@@ -46,15 +48,28 @@ namespace CopyTaskTest
             const int headsCount = 1;
             const int memoryN = 128;
             const int memoryM = 20;
+            const int inputSize = vectorSize + 2;
+            const int outputSize = vectorSize;
 
-            NeuralTuringMachine controller = new NeuralTuringMachine(vectorSize + 2, vectorSize, controllerSize, headsCount,
-                                                         memoryN, memoryM);
+            NeuralTuringMachine controller = new NeuralTuringMachine(vectorSize + 2, vectorSize, controllerSize, headsCount, memoryN, memoryM);
             //Randomize weights
             controller.UpdateWeights(unit => unit.Value = (rand.NextDouble() - 0.5));
 
-            Console.WriteLine(controller.WeightsCount);
+            //TODO extract weight count calculation
+            int headUnitSize = Head.GetUnitSize(memoryM);
 
-            RMSPropWeightUpdater rmsPropWeightUpdater = new RMSPropWeightUpdater(controller, 0.95, 0.5, 0.001, 0.001);
+            var weightsCount =
+                (headsCount * memoryN) +
+                (memoryN * memoryM) +
+                (controllerSize * headsCount * memoryM) +
+                (controllerSize * inputSize) +
+                (controllerSize) +
+                (outputSize * (controllerSize + 1)) +
+                (headsCount * headUnitSize * (controllerSize + 1));
+
+            Console.WriteLine(weightsCount);
+
+            RMSPropWeightUpdater rmsPropWeightUpdater = new RMSPropWeightUpdater(weightsCount, 0.95, 0.5, 0.001, 0.001);
             BPTTTeacher teacher = new BPTTTeacher(controller, rmsPropWeightUpdater);
 
             for (int i = 1; i < 10000; i++)
