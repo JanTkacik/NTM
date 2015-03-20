@@ -13,7 +13,7 @@ namespace NTM2.Controller
         public TrainableNTM(NeuralTuringMachine machine)
         {
             _machine = machine;
-            _memoryState = new MemoryState(_machine);
+            _memoryState = new MemoryState(_machine.MemoryState.Memory);
             _oldMemoryState = null;
         }
 
@@ -27,20 +27,21 @@ namespace NTM2.Controller
         {
             _input = input;
             
-            _machine.ForwardPropagation(_oldMemoryState.ReadDatas, input);
+            _machine.ForwardPropagation(_oldMemoryState.ReadData, input);
 
-            for (int i = 0; i < _machine.HeadCount; i++)
+            //TODO refactor
+            for (int i = 0; i < _machine.MemoryState.Memory.HeadCount; i++)
             {
-                _machine.HeadsNeurons[i].OldHeadSettings = _oldMemoryState.HeadSettings[i];
+                _machine.Controller.OutputLayer.HeadsNeurons[i].OldHeadSettings = _oldMemoryState.HeadSettings[i];
             }
 
-            _memoryState = new MemoryState(_machine.HeadsNeurons, _oldMemoryState.Memory);
+            _memoryState = new MemoryState(_machine.Controller.OutputLayer.HeadsNeurons, _oldMemoryState.Memory);
         }
         
         public void BackwardErrorPropagation(double[] knownOutput)
         {
             _memoryState.BackwardErrorPropagation();
-            _machine.Controller.BackwardErrorPropagation(knownOutput, _input, _oldMemoryState.ReadDatas);
+            _machine.Controller.BackwardErrorPropagation(knownOutput, _input, _oldMemoryState.ReadData);
         }
 
         public void BackwardErrorPropagation()

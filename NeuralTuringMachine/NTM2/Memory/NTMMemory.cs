@@ -100,6 +100,11 @@ namespace NTM2.Memory
             get { return _headSettings; }
         }
 
+        public int HeadCount
+        {
+            get { return _headCount; }
+        }
+
         private double[][] GetTensor2(int x, int y)
         {
             double[][] tensor = new double[x][];
@@ -240,5 +245,7 @@ namespace NTM2.Memory
 
             weightUpdater.UpdateWeight(_data);
         }
+
+        
     }
 }

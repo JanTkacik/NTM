@@ -2,57 +2,47 @@
 using NTM2.Controller;
 using NTM2.Learning;
 using NTM2.Memory;
-using NTM2.Memory.Addressing;
 
 namespace NTM2
 {
     public class NeuralTuringMachine
     {
-        internal readonly NTMMemory Memory;
         internal readonly FeedForwardController Controller;
-        
-        public int HeadCount
-        {
-            get { return Controller.OutputLayer.HeadsNeurons.Length; }
-        }
+        internal readonly MemoryState MemoryState;
 
-        public Head[] HeadsNeurons
-        {
-            get { return Controller.OutputLayer.HeadsNeurons; }
-        }
-        
         public NeuralTuringMachine(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM)
         {
-            Memory = new NTMMemory(memoryColumnsN, memoryRowsM, headCount);
-            
+            MemoryState = new MemoryState(new NTMMemory(memoryColumnsN, memoryRowsM, headCount));
             Controller = new FeedForwardController(controllerSize, inputSize, outputSize, headCount, memoryRowsM);
-            
         }
 
-        private NeuralTuringMachine(FeedForwardController controller)
+        private NeuralTuringMachine(FeedForwardController controller, MemoryState memoryState)
         {
+            MemoryState = memoryState;
             Controller = controller;
         }
         
-        public NeuralTuringMachine Clone()
+        internal NeuralTuringMachine Clone()
         {
-            return new NeuralTuringMachine(Controller.Clone());
+            //TODO refactor ... clone also memory state
+            return new NeuralTuringMachine(Controller.Clone(), MemoryState);
         }
         
         internal void ForwardPropagation(ReadData[] readData, double[] input)
         {
             Controller.ForwardPropagation(input, readData);
         }
-
+        
+        //TODO replace with weight initialization in constructor
         public void UpdateWeights(Action<Unit> updateAction)
         {
-            Memory.UpdateWeights(updateAction);
+            MemoryState.Memory.UpdateWeights(updateAction);
             Controller.UpdateWeights(updateAction);
         }
         
-        public void UpdateWeights(IWeightUpdater weightUpdater)
+        internal void UpdateWeights(IWeightUpdater weightUpdater)
         {
-            Memory.UpdateWeights(weightUpdater);
+            MemoryState.Memory.UpdateWeights(weightUpdater);
             Controller.UpdateWeights(weightUpdater);
         }
 

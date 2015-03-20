@@ -51,6 +51,7 @@
     <Compile Include="Learning\GradientResetter.cs" />
     <Compile Include="Learning\INTMTeacher.cs" />
     <Compile Include="Learning\IWeightUpdater.cs" />
+    <Compile Include="Learning\RandomWeightInitialize.cs" />
     <Compile Include="Learning\WeightUpdaterBase.cs" />
     <Compile Include="Memory\Addressing\BetaSimilarity.cs" />
     <Compile Include="Memory\Addressing\ContentAddressing.cs" />

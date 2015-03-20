@@ -11,13 +11,13 @@ namespace NTM2.Memory
         private readonly ReadData[] _reads;
         private readonly ContentAddressing[] _contentAddressings;
 
-        public MemoryState(NeuralTuringMachine machine)
+        public MemoryState(NTMMemory memory)
         {
-            _memory = machine.Memory;
+            _memory = memory;
             //TODO refactor
             _contentAddressings = _memory.GetContentAddressing();
-            _headSettings = HeadSetting.GetVector(machine.HeadCount, i => new Tuple<int, ContentAddressing>(_memory.MemoryColumnsN, _contentAddressings[i]));
-            _reads = ReadData.GetVector(machine.HeadCount, i => new Tuple<HeadSetting, NTMMemory>(_headSettings[i], _memory));
+            _headSettings = HeadSetting.GetVector(_memory.HeadCount, i => new Tuple<int, ContentAddressing>(_memory.MemoryColumnsN, _contentAddressings[i]));
+            _reads = NTM2.Memory.ReadData.GetVector(_memory.HeadCount, i => new Tuple<HeadSetting, NTMMemory>(_headSettings[i], _memory));
         }
 
         public MemoryState(Head[] heads, NTMMemory memory)
@@ -45,7 +45,7 @@ namespace NTM2.Memory
             _memory = new NTMMemory(_headSettings, heads, memory);
         }
 
-        public ReadData[] ReadDatas
+        public ReadData[] ReadData
         {
             get { return _reads; }
         }
