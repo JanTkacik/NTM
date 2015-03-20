@@ -24,14 +24,14 @@ namespace NTM2.Controller
             _memoryState = new MemoryState(_headSettings, _readDatas, _controller.Memory);
         }
 
-        public TrainableNTM(TrainableNTM oldMachine, double[] input, UnitFactory unitFactory)
+        public TrainableNTM(TrainableNTM oldMachine, double[] input)
         {
             _controller = oldMachine._controller.Process(oldMachine._memoryState.ReadData, input);
             for (int i = 0; i < _controller.HeadCount; i++)
             {
                 _controller.HeadsNeurons[i].OldHeadSettings = oldMachine._memoryState.HeadSettings[i];
             }
-            _memoryState = new MemoryState(_controller.HeadsNeurons, oldMachine._memoryState.Memory, unitFactory);
+            _memoryState = new MemoryState(_controller.HeadsNeurons, oldMachine._memoryState.Memory, _controller.UnitFactory);
         }
 
         public NeuralTuringMachine Controller
@@ -45,7 +45,7 @@ namespace NTM2.Controller
             _controller.BackwardErrorPropagation(knownOutput);
         }
 
-        public void DataBackwardPropagation()
+        public void BackwardErrorPropagation()
         {
             //Compute gradients for the bias values of internal memory and weights
             for (int i = 0; i < _readDatas.Length; i++)

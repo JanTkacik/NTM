@@ -19,25 +19,27 @@ namespace NTM2.Learning
         public double[][] Train(double[][] input, double[][] knownOutput)
         {
             TrainableNTM[] machines = new TrainableNTM[input.Length];
-            TrainableNTM empty = new TrainableNTM(_controller);
 
-            machines[0] = new TrainableNTM(empty, input[0], _controller.UnitFactory);
-
+            //FORWARD phase
+            TrainableNTM originalMachine = new TrainableNTM(_controller);
+            machines[0] = new TrainableNTM(originalMachine, input[0]);
             for (int i = 1; i < input.Length; i++)
             {
-                machines[i] = new TrainableNTM(machines[i - 1], input[i], _controller.UnitFactory);
+                machines[i] = new TrainableNTM(machines[i - 1], input[i]);
             }
 
+            //Gradient reset
             _gradientResetter.Reset();
             _controller.UpdateWeights(_gradientResetter);
 
+            //BACKWARD phase
             for (int i = input.Length - 1; i >= 0; i--)
             {
                 machines[i].BackwardErrorPropagation(knownOutput[i]);
             }
+            originalMachine.BackwardErrorPropagation();
 
-            empty.DataBackwardPropagation();
-
+            //Weight updates
             _weightUpdater.Reset();
             _controller.UpdateWeights(_weightUpdater);
             
