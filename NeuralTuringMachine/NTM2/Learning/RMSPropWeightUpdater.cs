@@ -4,7 +4,7 @@ using NTM2.Controller;
 namespace NTM2.Learning
 {
     //SEE http://arxiv.org/pdf/1308.0850v5.pdf page 23
-    public class RMSPropWeightUpdater : IWeightUpdater
+    public class RMSPropWeightUpdater : WeightUpdaterBase
     {
         public double GradientMomentum { get; private set; }
         public double DeltaMomentum { get; private set; }
@@ -27,42 +27,18 @@ namespace NTM2.Learning
             _i = 0;
         }
 
-        public void Reset()
+        public override void Reset()
         {
             _i = 0;
         }
 
-        public void UpdateWeight(Unit unit)
+        public override void UpdateWeight(Unit unit)
         {
             _n[_i] = (GradientMomentum * _n[_i]) + ((1 - GradientMomentum) * unit.Gradient * unit.Gradient);
             _g[_i] = (GradientMomentum * _g[_i]) + ((1 - GradientMomentum) * unit.Gradient);
             _delta[_i] = (DeltaMomentum * _delta[_i]) - (ChangeMultiplier * (unit.Gradient / Math.Sqrt(_n[_i] - (_g[_i] * _g[_i]) + ChangeAddConstant)));
             unit.Value += _delta[_i];
             _i++;
-        }
-
-        public void UpdateWeight(Unit[] data)
-        {
-            foreach (Unit unit in data)
-            {
-                UpdateWeight(unit);
-            }
-        }
-
-        public void UpdateWeight(Unit[][] data)
-        {
-            foreach (Unit[] units in data)
-            {
-                UpdateWeight(units);
-            }
-        }
-
-        public void UpdateWeight(Unit[][][] data)
-        {
-            foreach (Unit[][] units in data)
-            {
-                UpdateWeight(units);
-            }
         }
     }
 }
