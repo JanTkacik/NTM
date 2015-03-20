@@ -153,5 +153,10 @@ namespace NTM2.Controller
             _memory.UpdateWeights(weightUpdater);
             _controller.UpdateWeights(weightUpdater);
         }
+
+        public double[] GetOutput()
+        {
+            return _controller.GetOutput();
+        }
     }
 }

@@ -10,6 +10,7 @@ namespace NTM2.Controller
         void UpdateWeights(Action<Unit> updateAction);
         void UpdateWeights(IWeightUpdater weightUpdater);
         void BackwardErrorPropagation(double[] knownOutput, double[] input, ReadData[] reads);
+        double[] GetOutput();
         IController Clone();
     }
 }

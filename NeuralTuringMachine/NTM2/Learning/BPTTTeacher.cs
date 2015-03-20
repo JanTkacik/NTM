@@ -14,15 +14,23 @@ namespace NTM2.Learning
             _weightUpdater = weightUpdater;
         }
 
-        public TrainableNTM[] Train(double[][] input, double[][] knownOutput)
+        public double[][] Train(double[][] input, double[][] knownOutput)
         {
             TrainableNTM[] machines = _controller.ProcessAndUpdateErrors(input, knownOutput);
             _weightUpdater.Reset();
             _controller.UpdateWeights(_weightUpdater);
-            return machines;
+            
+            double[][] realOutputs = new double[knownOutput.Length][];
+            for (int i = 0; i < machines.Length; i++)
+            {
+                TrainableNTM machine = machines[i];
+                realOutputs[i] = machine.Controller.GetOutput();
+            }
+
+            return realOutputs;
         }
 
-        public TrainableNTM[] Train(double[][][] inputs, double[][][] knownOutputs)
+        public double[][][] Train(double[][][] inputs, double[][][] knownOutputs)
         {
             throw new System.NotImplementedException();
         }

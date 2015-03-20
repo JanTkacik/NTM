@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using NTM2;
 using NTM2.Controller;
 using NTM2.Learning;
 using YoVisionClient;
@@ -64,11 +63,11 @@ namespace CopyTaskTest
                                                                                             vectorSize);
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
-                TrainableNTM[] machines = teacher.Train(sequence.Item1, sequence.Item2);
+                double[][] machinesOutput = teacher.Train(sequence.Item1, sequence.Item2);
                 stopwatch.Stop();
                 times[i%100] = stopwatch.ElapsedMilliseconds;
 
-                double error = CalculateLogLoss(sequence.Item2, machines);
+                double error = CalculateLogLoss(sequence.Item2, machinesOutput);
                 double averageError = error / (sequence.Item2.Length * sequence.Item2[0].Length);
 
                 errors[i % 100] = averageError;
@@ -90,7 +89,7 @@ namespace CopyTaskTest
 
         }
 
-        private static double CalculateLogLoss(double[][] knownOutput, TrainableNTM[] trainedMachines)
+        private static double CalculateLogLoss(double[][] knownOutput, double[][] machinesOutput)
         {
             double totalLoss = 0;
             int okt = knownOutput.Length - ((knownOutput.Length - 2) / 2);
@@ -99,7 +98,7 @@ namespace CopyTaskTest
                 for (int i = 0; i < knownOutput[t].Length; i++)
                 {
                     double expected = knownOutput[t][i];
-                    double real = trainedMachines[t].Controller.Output[i].Value;
+                    double real = machinesOutput[t][i];
                     if (t >= okt)
                     {
                         totalLoss += (expected * Math.Log(real, 2)) + ((1 - expected) * Math.Log(1 - real, 2));

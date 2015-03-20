@@ -27,6 +27,11 @@ namespace NTM2.Controller
             OutputLayer = outputLayer;
         }
 
+        public double[] GetOutput()
+        {
+            return OutputLayer.GetOutput();
+        }
+
         public IController Clone()
         {
             HiddenLayer newHiddenLayer = HiddenLayer.Clone();

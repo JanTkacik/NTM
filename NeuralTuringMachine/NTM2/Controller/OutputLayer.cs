@@ -184,5 +184,15 @@ namespace NTM2.Controller
             weightUpdater.UpdateWeight(_hiddenToOutputLayerWeights);
             weightUpdater.UpdateWeight(_hiddenToHeadsWeights);
         }
+
+        public double[] GetOutput()
+        {
+            double[] output = new double[OutputLayerNeurons.Length];
+            for (int i = 0; i < OutputLayerNeurons.Length; i++)
+            {
+                output[i] = OutputLayerNeurons[i].Value;
+            }
+            return output;
+        }
     }
 }
