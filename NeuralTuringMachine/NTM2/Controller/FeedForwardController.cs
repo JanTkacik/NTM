@@ -4,7 +4,7 @@ using NTM2.Memory;
 
 namespace NTM2.Controller
 {
-    class FeedForwardController : IController
+    class FeedForwardController 
     {
         #region Fields and variables
 
@@ -32,7 +32,7 @@ namespace NTM2.Controller
             return OutputLayer.GetOutput();
         }
 
-        public IController Clone()
+        public FeedForwardController Clone()
         {
             HiddenLayer newHiddenLayer = HiddenLayer.Clone();
             OutputLayer newOutputLayer = OutputLayer.Clone();

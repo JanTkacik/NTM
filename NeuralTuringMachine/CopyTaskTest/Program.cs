@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Linq;
 using NTM2;
-using NTM2.Controller;
 using NTM2.Learning;
 using NTM2.Memory.Addressing;
 using YoVisionClient;

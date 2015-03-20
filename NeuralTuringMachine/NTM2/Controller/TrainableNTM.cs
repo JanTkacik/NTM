@@ -8,6 +8,8 @@ namespace NTM2.Controller
         private readonly MemoryState _oldMemoryState;
         private MemoryState _memoryState;
 
+        private double[] _input;
+
         public TrainableNTM(NeuralTuringMachine machine)
         {
             _machine = machine;
@@ -23,6 +25,8 @@ namespace NTM2.Controller
 
         public void ForwardPropagation(double[] input)
         {
+            _input = input;
+            
             _machine.ForwardPropagation(_oldMemoryState.ReadDatas, input);
 
             for (int i = 0; i < _machine.HeadCount; i++)
@@ -36,7 +40,7 @@ namespace NTM2.Controller
         public void BackwardErrorPropagation(double[] knownOutput)
         {
             _memoryState.BackwardErrorPropagation();
-            _machine.BackwardErrorPropagation(knownOutput);
+            _machine.Controller.BackwardErrorPropagation(knownOutput, _input, _oldMemoryState.ReadDatas);
         }
 
         public void BackwardErrorPropagation()

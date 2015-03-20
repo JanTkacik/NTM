@@ -42,7 +42,6 @@
     <Compile Include="Controller\FeedForwardController.cs" />
     <Compile Include="Controller\HiddenLayer.cs" />
     <Compile Include="Controller\IDifferentiableFunction.cs" />
-    <Compile Include="Controller\IController.cs" />
     <Compile Include="Controller\OutputLayer.cs" />
     <Compile Include="Controller\Sigmoid.cs" />
     <Compile Include="Controller\SigmoidActivationFunction.cs" />

@@ -8,67 +8,57 @@ namespace NTM2
 {
     public class NeuralTuringMachine
     {
-        private double[] _input;
-        private ReadData[] _reads;
-
         internal readonly NTMMemory Memory;
-        private readonly IController _controller;
+        internal readonly FeedForwardController Controller;
         
         public int HeadCount
         {
-            get { return ((FeedForwardController)_controller).OutputLayer.HeadsNeurons.Length; }
+            get { return Controller.OutputLayer.HeadsNeurons.Length; }
         }
 
         public Head[] HeadsNeurons
         {
-            get { return ((FeedForwardController)_controller).OutputLayer.HeadsNeurons; }
+            get { return Controller.OutputLayer.HeadsNeurons; }
         }
         
         public NeuralTuringMachine(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM)
         {
             Memory = new NTMMemory(memoryColumnsN, memoryRowsM, headCount);
             
-            _controller = new FeedForwardController(controllerSize, inputSize, outputSize, headCount, memoryRowsM);
+            Controller = new FeedForwardController(controllerSize, inputSize, outputSize, headCount, memoryRowsM);
             
         }
 
-        private NeuralTuringMachine(IController controller)
+        private NeuralTuringMachine(FeedForwardController controller)
         {
-            _controller = controller;
+            Controller = controller;
         }
         
         public NeuralTuringMachine Clone()
         {
-            return new NeuralTuringMachine(_controller.Clone());
+            return new NeuralTuringMachine(Controller.Clone());
         }
         
         internal void ForwardPropagation(ReadData[] readData, double[] input)
         {
-            _reads = readData;
-            _input = input;
-            _controller.ForwardPropagation(input, readData);
+            Controller.ForwardPropagation(input, readData);
         }
 
         public void UpdateWeights(Action<Unit> updateAction)
         {
             Memory.UpdateWeights(updateAction);
-            _controller.UpdateWeights(updateAction);
+            Controller.UpdateWeights(updateAction);
         }
         
-        public void BackwardErrorPropagation(double[] knownOutput)
-        {
-            _controller.BackwardErrorPropagation(knownOutput, _input, _reads);
-        }
-
         public void UpdateWeights(IWeightUpdater weightUpdater)
         {
             Memory.UpdateWeights(weightUpdater);
-            _controller.UpdateWeights(weightUpdater);
+            Controller.UpdateWeights(weightUpdater);
         }
 
         public double[] GetOutput()
         {
-            return _controller.GetOutput();
+            return Controller.GetOutput();
         }
     }
 }
