@@ -1,4 +1,6 @@
-﻿using NTM2.Memory;
+﻿using System;
+using NTM2.Controller;
+using NTM2.Memory;
 
 namespace NTM2
 {
@@ -24,6 +26,19 @@ namespace NTM2
             _oldMemoryState = oldMachine._memoryState;
         }
 
+        public TrainableNTM(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM)
+        {
+            _machine = new NeuralTuringMachine(inputSize, outputSize, controllerSize, headCount, memoryColumnsN, memoryRowsM);
+        }
+
+        public NeuralTuringMachine Machine
+        {
+            get
+            {
+                return _machine;
+            }
+        }
+
         public void ForwardPropagation(double[] input)
         {
             _input = input;
@@ -47,6 +62,12 @@ namespace NTM2
         public double[] GetOutput()
         {
             return _machine.GetOutput();
+        }
+
+        //TODO replace with weight initialization in constructor
+        public void UpdateWeights(Action<Unit> updateAction)
+        {
+            _machine.UpdateWeights(updateAction);
         }
     }
 }

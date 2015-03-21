@@ -50,9 +50,8 @@ namespace CopyTaskTest
             const int inputSize = vectorSize + 2;
             const int outputSize = vectorSize;
 
-            NeuralTuringMachine controller = new NeuralTuringMachine(vectorSize + 2, vectorSize, controllerSize, headsCount, memoryN, memoryM);
-            //Randomize weights
-            controller.UpdateWeights(unit => unit.Value = (rand.NextDouble() - 0.5));
+            TrainableNTM machine = new TrainableNTM(vectorSize + 2, vectorSize, controllerSize, headsCount, memoryN, memoryM);
+            machine.UpdateWeights(unit => unit.Value = (rand.NextDouble() - 0.5));
 
             //TODO extract weight count calculation
             int headUnitSize = Head.GetUnitSize(memoryM);
@@ -69,7 +68,7 @@ namespace CopyTaskTest
             Console.WriteLine(weightsCount);
 
             RMSPropWeightUpdater rmsPropWeightUpdater = new RMSPropWeightUpdater(weightsCount, 0.95, 0.5, 0.001, 0.001);
-            BPTTTeacher teacher = new BPTTTeacher(controller, rmsPropWeightUpdater);
+            BPTTTeacher teacher = new BPTTTeacher(machine.Machine, rmsPropWeightUpdater);
 
             for (int i = 1; i < 10000; i++)
             {
