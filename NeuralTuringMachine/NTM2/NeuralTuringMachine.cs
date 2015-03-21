@@ -34,10 +34,11 @@ namespace NTM2
             }
         }
 
-        public NeuralTuringMachine(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM)
+        public NeuralTuringMachine(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM, IWeightUpdater initializer)
         {
             Memory = new NTMMemory(memoryColumnsN, memoryRowsM, headCount);
             Controller = new FeedForwardController(controllerSize, inputSize, outputSize, headCount, memoryRowsM);
+            UpdateWeights(initializer);
         }
         
         public void Process(double[] input)

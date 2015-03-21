@@ -50,8 +50,8 @@ namespace CopyTaskTest
             const int inputSize = vectorSize + 2;
             const int outputSize = vectorSize;
 
-            NeuralTuringMachine machine = new NeuralTuringMachine(vectorSize + 2, vectorSize, controllerSize, headsCount, memoryN, memoryM);
-            machine.UpdateWeights(unit => unit.Value = (rand.NextDouble() - 0.5));
+            //TODO remove rand
+            NeuralTuringMachine machine = new NeuralTuringMachine(vectorSize + 2, vectorSize, controllerSize, headsCount, memoryN, memoryM, new RandomWeightInitializer(rand));
 
             //TODO extract weight count calculation
             int headUnitSize = Head.GetUnitSize(memoryM);
@@ -72,8 +72,7 @@ namespace CopyTaskTest
 
             for (int i = 1; i < 10000; i++)
             {
-                Tuple<double[][], double[][]> sequence = SequenceGenerator.GenerateSequence(rand.Next(20) + 1,
-                                                                                            vectorSize);
+                Tuple<double[][], double[][]> sequence = SequenceGenerator.GenerateSequence(rand.Next(20) + 1, vectorSize);
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
                 double[][] machinesOutput = teacher.Train(sequence.Item1, sequence.Item2);
