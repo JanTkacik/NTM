@@ -5,11 +5,11 @@ namespace NTM2.Memory.Addressing
     internal class GatedAddressing
     {
         private readonly Unit _gate;
-        private readonly ContentAddressing _contentAddressing;
+        private readonly ContentAddressing.ContentAddressing _contentAddressing;
         private readonly HeadSetting _oldHeadSettings;
         private readonly Unit[] _data;
 
-        public GatedAddressing(Unit gate, ContentAddressing contentAddressing, HeadSetting oldHeadSettings)
+        public GatedAddressing(Unit gate, ContentAddressing.ContentAddressing contentAddressing, HeadSetting oldHeadSettings)
         {
             _gate = gate;
             _contentAddressing = contentAddressing;
@@ -29,7 +29,7 @@ namespace NTM2.Memory.Addressing
             get { return _data; }
         }
 
-        public ContentAddressing ContentAddressing
+        public ContentAddressing.ContentAddressing ContentAddressing
         {
             get { return _contentAddressing; }
         }

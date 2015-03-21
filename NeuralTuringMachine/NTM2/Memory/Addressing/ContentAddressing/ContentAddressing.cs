@@ -2,7 +2,7 @@
 using System.Linq;
 using NTM2.Controller;
 
-namespace NTM2.Memory.Addressing
+namespace NTM2.Memory.Addressing.ContentAddressing
 {
     internal class ContentAddressing
     {

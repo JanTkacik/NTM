@@ -1,6 +1,7 @@
 ﻿using System;
 using NTM2.Controller;
 using NTM2.Memory.Addressing;
+using NTM2.Memory.Addressing.ContentAddressing;
 
 namespace NTM2.Memory
 {
@@ -52,7 +53,7 @@ namespace NTM2.Memory
                 foreach (BetaSimilarity similarity in headSetting.ShiftedAddressing.GatedAddressing.ContentAddressing.BetaSimilarities)
                 {
                     similarity.BackwardErrorPropagation();
-                    similarity.CosineSimilarity.BackwardErrorPropagation();
+                    similarity.Similarity.BackwardErrorPropagation();
                 }
             }
         }
@@ -85,8 +86,8 @@ namespace NTM2.Memory
                 for (int j = 0; j < memoryColumnsN; j++)
                 {
                     Unit[] memoryColumn = _memory.Data[j];
-                    CosineSimilarity cosineSimilarity = CosineSimilarity.Calculate(head.KeyVector, memoryColumn);
-                    similarities[j] = new BetaSimilarity(head.Beta, cosineSimilarity);
+                    SimilarityMeasure similarity = new SimilarityMeasure(new CosineSimilarityFunction(), head.KeyVector, memoryColumn);
+                    similarities[j] = new BetaSimilarity(head.Beta, similarity);
                 }
                 ContentAddressing ca = new ContentAddressing(similarities);
                 GatedAddressing ga = new GatedAddressing(head.Gate, ca, _headSettings[i]);
