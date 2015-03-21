@@ -1,14 +1,12 @@
-﻿using NTM2.Controller;
-
-namespace NTM2.Learning
+﻿namespace NTM2.Learning
 {
     public class BPTTTeacher : INTMTeacher
     {
-        private readonly NeuralTuringMachine _machine;
+        private readonly TrainableNTM _machine;
         private readonly IWeightUpdater _weightUpdater;
         private readonly IWeightUpdater _gradientResetter;
 
-        public BPTTTeacher(NeuralTuringMachine machine, IWeightUpdater weightUpdater)
+        public BPTTTeacher(TrainableNTM machine, IWeightUpdater weightUpdater)
         {
             _machine = machine;
             _weightUpdater = weightUpdater;
@@ -20,7 +18,7 @@ namespace NTM2.Learning
             TrainableNTM[] machines = new TrainableNTM[input.Length];
 
             //FORWARD phase
-            TrainableNTM originalMachine = new TrainableNTM(_machine);
+            TrainableNTM originalMachine = new TrainableNTM(_machine.Machine);
             machines[0] = new TrainableNTM(originalMachine);
             machines[0].ForwardPropagation(input[0]);
             for (int i = 1; i < input.Length; i++)

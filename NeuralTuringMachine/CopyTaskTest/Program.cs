@@ -68,7 +68,7 @@ namespace CopyTaskTest
             Console.WriteLine(weightsCount);
 
             RMSPropWeightUpdater rmsPropWeightUpdater = new RMSPropWeightUpdater(weightsCount, 0.95, 0.5, 0.001, 0.001);
-            BPTTTeacher teacher = new BPTTTeacher(machine.Machine, rmsPropWeightUpdater);
+            BPTTTeacher teacher = new BPTTTeacher(machine, rmsPropWeightUpdater);
 
             for (int i = 1; i < 10000; i++)
             {

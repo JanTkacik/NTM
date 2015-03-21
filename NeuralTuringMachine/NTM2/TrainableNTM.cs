@@ -1,5 +1,6 @@
 ﻿using System;
 using NTM2.Controller;
+using NTM2.Learning;
 using NTM2.Memory;
 
 namespace NTM2
@@ -68,6 +69,11 @@ namespace NTM2
         public void UpdateWeights(Action<Unit> updateAction)
         {
             _machine.UpdateWeights(updateAction);
+        }
+
+        public void UpdateWeights(IWeightUpdater weightUpdater)
+        {
+            _machine.UpdateWeights(weightUpdater);
         }
     }
 }
