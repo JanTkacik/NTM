@@ -15,7 +15,7 @@ namespace NTM2.Memory.Addressing.ContentAddressing
             _beta = beta;
             _similarity = similarity;
             _b = Math.Exp(_beta.Value);
-            _data = new Unit(_b * _similarity.Data.Value);
+            _data = new Unit(_b * _similarity.Similarity.Value);
         }
 
         public BetaSimilarity()
@@ -56,8 +56,8 @@ namespace NTM2.Memory.Addressing.ContentAddressing
 
         public void BackwardErrorPropagation()
         {
-            _beta.Gradient += _similarity.Data.Value*_b*_data.Gradient;
-            _similarity.Data.Gradient += _b*_data.Gradient;
+            _beta.Gradient += _similarity.Similarity.Value*_b*_data.Gradient;
+            _similarity.Similarity.Gradient += _b*_data.Gradient;
         }
     }
 }

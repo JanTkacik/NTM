@@ -7,19 +7,19 @@ namespace NTM2.Memory.Addressing.ContentAddressing
         private readonly ISimilarityFunction _similarityFunction;
         private readonly Unit[] _u;
         private readonly Unit[] _v;
-        internal readonly Unit Data;
+        internal readonly Unit Similarity;
 
         internal SimilarityMeasure(ISimilarityFunction similarityFunction, Unit[] u, Unit[] v)
         {
             _similarityFunction = similarityFunction;
             _u = u;
             _v = v;
-            Data = similarityFunction.Calculate(u, v);
+            Similarity = similarityFunction.Calculate(u, v);
         }
 
         internal void BackwardErrorPropagation()
         {
-            _similarityFunction.Differentiate(Data, _u, _v);
+            _similarityFunction.Differentiate(Similarity, _u, _v);
         }
     }
 }
