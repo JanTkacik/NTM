@@ -18,7 +18,7 @@
             TrainableNTM[] machines = new TrainableNTM[input.Length];
 
             //FORWARD phase
-            TrainableNTM originalMachine = new TrainableNTM(_machine.Machine);
+            TrainableNTM originalMachine = new TrainableNTM(_machine, false);
             machines[0] = new TrainableNTM(originalMachine);
             machines[0].ForwardPropagation(input[0]);
             for (int i = 1; i < input.Length; i++)

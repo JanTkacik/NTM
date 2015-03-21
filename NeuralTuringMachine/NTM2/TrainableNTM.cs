@@ -12,34 +12,28 @@ namespace NTM2
         private MemoryState _memoryState;
 
         private double[] _input;
-
-        public TrainableNTM(NeuralTuringMachine machine)
+        
+        public TrainableNTM(TrainableNTM oldMachine, bool refactorShit = true)
         {
-            _machine = machine;
-            _memoryState = new MemoryState(_machine.MemoryState.Memory);
-            _memoryState.DoInitialReading();
-            _oldMemoryState = null;
-        }
-
-        public TrainableNTM(TrainableNTM oldMachine)
-        {
-            _machine = oldMachine._machine.Clone();
-            _oldMemoryState = oldMachine._memoryState;
+            if (!refactorShit)
+            {
+                _machine = oldMachine._machine;
+                _memoryState = new MemoryState(_machine.MemoryState.Memory);
+                _memoryState.DoInitialReading();
+                _oldMemoryState = null;
+            }
+            else
+            {
+                _machine = oldMachine._machine.Clone();
+                _oldMemoryState = oldMachine._memoryState;
+            }
         }
 
         public TrainableNTM(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM)
         {
             _machine = new NeuralTuringMachine(inputSize, outputSize, controllerSize, headCount, memoryColumnsN, memoryRowsM);
         }
-
-        public NeuralTuringMachine Machine
-        {
-            get
-            {
-                return _machine;
-            }
-        }
-
+        
         public void ForwardPropagation(double[] input)
         {
             _input = input;
