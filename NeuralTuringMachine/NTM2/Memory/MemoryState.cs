@@ -85,7 +85,7 @@ namespace NTM2.Memory
                 for (int j = 0; j < memoryColumnsN; j++)
                 {
                     Unit[] memoryColumn = _memory.Data[j];
-                    CosineSimilarity cosineSimilarity = new CosineSimilarity(head.KeyVector, memoryColumn);
+                    CosineSimilarity cosineSimilarity = CosineSimilarity.Calculate(head.KeyVector, memoryColumn);
                     similarities[j] = new BetaSimilarity(head.Beta, cosineSimilarity);
                 }
                 ContentAddressing ca = new ContentAddressing(similarities);

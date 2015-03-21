@@ -6,39 +6,39 @@ namespace NTM2.Memory
 {
     internal class NTMMemory
     {
-        private readonly Unit[][] _data;
-        
-        private readonly HeadSetting[] _headSettings;
+        internal readonly Unit[][] Data;
+
+        internal readonly HeadSetting[] HeadSettings;
         private readonly Head[] _heads;
-        
+
         private readonly NTMMemory _oldMemory;
         private readonly BetaSimilarity[][] _oldSimilarities;
 
         private readonly double[][] _erase;
         private readonly double[][] _add;
 
-        private readonly int _memoryColumnsN;
-        private readonly int _memoryRowsM;
-        private readonly int _headCount;
+        internal readonly int MemoryColumnsN;
+        internal readonly int MemoryRowsM;
+        internal readonly int HeadCount;
 
-        public NTMMemory(int memoryColumnsN, int memoryRowsM, int headCount)
+        internal NTMMemory(int memoryColumnsN, int memoryRowsM, int headCount)
         {
-            _memoryColumnsN = memoryColumnsN;
-            _memoryRowsM = memoryRowsM;
-            _headCount = headCount;
-            _data = UnitFactory.GetTensor2(memoryColumnsN, memoryRowsM);
+            MemoryColumnsN = memoryColumnsN;
+            MemoryRowsM = memoryRowsM;
+            HeadCount = headCount;
+            Data = UnitFactory.GetTensor2(memoryColumnsN, memoryRowsM);
             _oldSimilarities = BetaSimilarity.GetTensor2(headCount, memoryColumnsN);
         }
 
-        public NTMMemory(HeadSetting[] headSettings, Head[] heads, NTMMemory memory)
+        internal NTMMemory(HeadSetting[] headSettings, Head[] heads, NTMMemory memory)
         {
-            _memoryColumnsN = memory._memoryColumnsN;
-            _memoryRowsM = memory._memoryRowsM;
-            _headCount = memory._headCount;
-            _headSettings = headSettings;
+            MemoryColumnsN = memory.MemoryColumnsN;
+            MemoryRowsM = memory.MemoryRowsM;
+            HeadCount = memory.HeadCount;
+            HeadSettings = headSettings;
             _heads = heads;
             _oldMemory = memory;
-            _data = UnitFactory.GetTensor2(memory.MemoryColumnsN, memory.MemoryRowsM);
+            Data = UnitFactory.GetTensor2(memory.MemoryColumnsN, memory.MemoryRowsM);
 
             int headsCount = heads.Length;
             _erase = GetTensor2(headsCount, memory.MemoryRowsM);
@@ -61,15 +61,15 @@ namespace NTM2.Memory
             {
                 Unit[] oldRow = _oldMemory.Data[i];
                 double[] erasure = erasures[i];
-                Unit[] row = _data[i];
+                Unit[] row = Data[i];
                 for (int j = 0; j < oldRow.Length; j++)
                 {
                     Unit oldCell = oldRow[j];
                     double erase = 1;
                     double add = 0;
-                    for (int k = 0; k < _headSettings.Length; k++)
+                    for (int k = 0; k < HeadSettings.Length; k++)
                     {
-                        HeadSetting headSetting = _headSettings[k];
+                        HeadSetting headSetting = HeadSettings[k];
                         erase *= (1 - (headSetting.Data[i].Value*_erase[k][j]));
                         add += headSetting.Data[i].Value*_add[k][j];
                     }
@@ -78,32 +78,7 @@ namespace NTM2.Memory
                 }
             }
         }
-
-        public Unit[][] Data
-        {
-            get { return _data; }
-        }
-
-        public int MemoryColumnsN
-        {
-            get { return _memoryColumnsN; }
-        }
-
-        public int MemoryRowsM
-        {
-            get { return _memoryRowsM; }
-        }
-
-        public HeadSetting[] HeadSettings
-        {
-            get { return _headSettings; }
-        }
-
-        public int HeadCount
-        {
-            get { return _headCount; }
-        }
-
+        
         private double[][] GetTensor2(int x, int y)
         {
             double[][] tensor = new double[x][];
@@ -117,27 +92,27 @@ namespace NTM2.Memory
         public void BackwardErrorPropagation()
         {
             //Gradient of head settings
-            for (int i = 0; i < _headSettings.Length; i++)
+            for (int i = 0; i < HeadSettings.Length; i++)
             {
-                HeadSetting headSetting = _headSettings[i];
+                HeadSetting headSetting = HeadSettings[i];
                 double[] erase = _erase[i];
                 double[] add = _add[i];
-                for (int j = 0; j < _data.Length; j++)
+                for (int j = 0; j < Data.Length; j++)
                 {
-                    Unit[] row = _data[j];
-                    Unit[] oldRow = _oldMemory._data[j];
+                    Unit[] row = Data[j];
+                    Unit[] oldRow = _oldMemory.Data[j];
                     double gradient = 0;
                     for (int k = 0; k < row.Length; k++)
                     {
                         Unit data = row[k];
                         double oldDataValue = oldRow[k].Value;
-                        for (int q = 0; q < _headSettings.Length; q++)
+                        for (int q = 0; q < HeadSettings.Length; q++)
                         {
                             if (q == i)
                             {
                                 continue; 
                             }
-                            HeadSetting setting = _headSettings[q];
+                            HeadSetting setting = HeadSettings[q];
                             oldDataValue *= (1 - (setting.Data[j].Value*_erase[q][k]));
                         }
                         gradient += ((oldDataValue*(-erase[k])) + add[k])*data.Gradient;
@@ -152,22 +127,22 @@ namespace NTM2.Memory
                 Head head = _heads[k];
                 Unit[] headErase = head.EraseVector;
                 double[] erase = _erase[k];
-                HeadSetting headSetting = _headSettings[k];
+                HeadSetting headSetting = HeadSettings[k];
 
                 for (int i = 0; i < headErase.Length; i++)
                 {
                     double gradient = 0;
-                    for (int j = 0; j < _data.Length; j++)
+                    for (int j = 0; j < Data.Length; j++)
                     {
-                        Unit[] row = _data[j];
-                        double gradientErase = _oldMemory._data[j][i].Value;
-                        for (int q = 0; q < _headSettings.Length; q++)
+                        Unit[] row = Data[j];
+                        double gradientErase = _oldMemory.Data[j][i].Value;
+                        for (int q = 0; q < HeadSettings.Length; q++)
                         {
                             if (q == k)
                             {
                                 continue;
                             }
-                            gradientErase *= 1 - (_headSettings[q].Data[j].Value * _erase[q][i]);
+                            gradientErase *= 1 - (HeadSettings[q].Data[j].Value * _erase[q][i]);
                         }
                         gradient += row[i].Gradient * gradientErase * (-headSetting.Data[j].Value);
                     }
@@ -181,15 +156,15 @@ namespace NTM2.Memory
             {
                 Head head = _heads[k];
                 double[] add = _add[k];
-                HeadSetting headSetting = _headSettings[k];
+                HeadSetting headSetting = HeadSettings[k];
                 Unit[] addVector = head.AddVector;
 
                 for (int i = 0; i < addVector.Length; i++)
                 {
                     double gradient = 0;
-                    for (int j = 0; j < _data.Length; j++)
+                    for (int j = 0; j < Data.Length; j++)
                     {
-                        Unit[] row = _data[j];
+                        Unit[] row = Data[j];
                         gradient += row[i].Gradient*headSetting.Data[j].Value;
                     }
                     double a = add[i];
@@ -198,23 +173,23 @@ namespace NTM2.Memory
             }
 
             //Gradient memory
-            for (int i = 0; i < _oldMemory._memoryColumnsN; i++)
+            for (int i = 0; i < _oldMemory.MemoryColumnsN; i++)
             {
                 for (int j = 0; j < _oldMemory.MemoryRowsM; j++)
                 {
                     double gradient = 1;
-                    for (int q = 0; q < _headSettings.Length; q++)
+                    for (int q = 0; q < HeadSettings.Length; q++)
                     {
-                        gradient *= 1 - (_headSettings[q].Data[i].Value*_erase[q][j]);
+                        gradient *= 1 - (HeadSettings[q].Data[i].Value*_erase[q][j]);
                     }
-                    _oldMemory._data[i][j].Gradient += gradient*_data[i][j].Gradient;
+                    _oldMemory.Data[i][j].Gradient += gradient*Data[i][j].Gradient;
                 }
             }
         }
 
         public ContentAddressing[] GetContentAddressing()
         {
-            return ContentAddressing.GetVector(_headCount, i => _oldSimilarities[i]);
+            return ContentAddressing.GetVector(HeadCount, i => _oldSimilarities[i]);
         }
         
         public void UpdateWeights(IWeightUpdater weightUpdater)
@@ -227,7 +202,7 @@ namespace NTM2.Memory
                 }
             }
 
-            weightUpdater.UpdateWeight(_data);
+            weightUpdater.UpdateWeight(Data);
         }
 
         

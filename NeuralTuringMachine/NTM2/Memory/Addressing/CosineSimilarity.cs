@@ -11,30 +11,17 @@ namespace NTM2.Memory.Addressing
         private readonly double _uv;
         private readonly double _normalizedU;
         private readonly double _normalizedV;
-
-        //Implementation of cosine similarity (Page 8, Unit 3.3.1 Focusing by Content)
-        internal CosineSimilarity(Unit[] u, Unit[] v)
+        
+        private CosineSimilarity(Unit[] u, Unit[] v, double uv, double normalizedU, double normalizedV, Unit data)
         {
             _u = u;
             _v = v;
-            
-            for (int i = 0; i < u.Length; i++)
-            {
-                _uv += u[i].Value*v[i].Value;
-                _normalizedU += u[i].Value * u[i].Value;
-                _normalizedV += v[i].Value * v[i].Value;
-            }
-
-            _normalizedU = Math.Sqrt(_normalizedU);
-            _normalizedV = Math.Sqrt(_normalizedV);
-
-            _data = new Unit(_uv / (_normalizedU * _normalizedV));
-            if (double.IsNaN(_data.Value))
-            {
-                throw new Exception("Cosine similarity is nan -> error");
-            }
+            _uv = uv;
+            _data = data;
+            _normalizedU = normalizedU;
+            _normalizedV = normalizedV;
         }
-        
+
         internal Unit Data
         {
             get { return _data; }
@@ -53,6 +40,32 @@ namespace NTM2.Memory.Addressing
                 _u[i].Gradient += (v - (u*uvuu))*uvg;
                 _v[i].Gradient += (u - (v*uvvv))*uvg;
             }
+        }
+
+        //Implementation of cosine similarity (Page 8, Unit 3.3.1 Focusing by Content)
+        public static CosineSimilarity Calculate(Unit[] u, Unit[] v)
+        {
+            double normalizedU = 0;
+            double normalizedV = 0;
+            double uv = 0;
+
+            for (int i = 0; i < u.Length; i++)
+            {
+                uv += u[i].Value * v[i].Value;
+                normalizedU += u[i].Value * u[i].Value;
+                normalizedV += v[i].Value * v[i].Value;
+            }
+
+            normalizedU = Math.Sqrt(normalizedU);
+            normalizedV = Math.Sqrt(normalizedV);
+
+            Unit data = new Unit(uv / (normalizedU * normalizedV));
+            if (double.IsNaN(data.Value))
+            {
+                throw new Exception("Cosine similarity is nan -> error");
+            }
+
+            return new CosineSimilarity(u, v, uv, normalizedU, normalizedV, data);
         }
     }
 }
