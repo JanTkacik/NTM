@@ -50,7 +50,7 @@ namespace CopyTaskTest
             const int inputSize = vectorSize + 2;
             const int outputSize = vectorSize;
 
-            TrainableNTM machine = new TrainableNTM(vectorSize + 2, vectorSize, controllerSize, headsCount, memoryN, memoryM);
+            NeuralTuringMachine machine = new NeuralTuringMachine(vectorSize + 2, vectorSize, controllerSize, headsCount, memoryN, memoryM);
             machine.UpdateWeights(unit => unit.Value = (rand.NextDouble() - 0.5));
 
             //TODO extract weight count calculation

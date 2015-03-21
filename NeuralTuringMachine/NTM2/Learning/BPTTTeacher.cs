@@ -2,11 +2,11 @@
 {
     public class BPTTTeacher : INTMTeacher
     {
-        private readonly TrainableNTM _machine;
+        private readonly NeuralTuringMachine _machine;
         private readonly IWeightUpdater _weightUpdater;
         private readonly IWeightUpdater _gradientResetter;
 
-        public BPTTTeacher(TrainableNTM machine, IWeightUpdater weightUpdater)
+        public BPTTTeacher(NeuralTuringMachine machine, IWeightUpdater weightUpdater)
         {
             _machine = machine;
             _weightUpdater = weightUpdater;
@@ -15,15 +15,15 @@
 
         public double[][] Train(double[][] input, double[][] knownOutput)
         {
-            TrainableNTM[] machines = new TrainableNTM[input.Length];
+            NeuralTuringMachine[] machines = new NeuralTuringMachine[input.Length];
 
             //FORWARD phase
-            TrainableNTM originalMachine = new TrainableNTM(_machine, false);
-            machines[0] = new TrainableNTM(originalMachine);
+            NeuralTuringMachine originalMachine = new NeuralTuringMachine(_machine, false);
+            machines[0] = new NeuralTuringMachine(originalMachine);
             machines[0].ForwardPropagation(input[0]);
             for (int i = 1; i < input.Length; i++)
             {
-                machines[i] = new TrainableNTM(machines[i - 1]);
+                machines[i] = new NeuralTuringMachine(machines[i - 1]);
                 machines[i].ForwardPropagation(input[i]);
             }
 
@@ -45,12 +45,12 @@
             return GetMachineOutputs(machines);
         }
 
-        private double[][] GetMachineOutputs(TrainableNTM[] machines)
+        private double[][] GetMachineOutputs(NeuralTuringMachine[] machines)
         {
             double[][] realOutputs = new double[machines.Length][];
             for (int i = 0; i < machines.Length; i++)
             {
-                TrainableNTM machine = machines[i];
+                NeuralTuringMachine machine = machines[i];
                 realOutputs[i] = machine.GetOutput();
             }
             return realOutputs;
