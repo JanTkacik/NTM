@@ -10,14 +10,14 @@ namespace NTM2
         internal readonly FeedForwardController Controller;
         internal readonly NTMMemory Memory;
 
-        private readonly MemoryState _oldMemoryState;
+        private MemoryState _oldMemoryState;
         private MemoryState _newMemoryState;
 
-        private double[] _input;
+        private double[] _lastInput;
         
-        public NeuralTuringMachine(NeuralTuringMachine oldMachine, bool refactorShit = true)
+        public NeuralTuringMachine(NeuralTuringMachine oldMachine, bool clone = true)
         {
-            if (!refactorShit)
+            if (!clone)
             {
                 Controller = oldMachine.Controller;
                 Memory = oldMachine.Memory;
@@ -30,7 +30,7 @@ namespace NTM2
             {
                 Controller = oldMachine.Controller.Clone();
                 Memory = oldMachine.Memory;
-                _oldMemoryState = oldMachine._newMemoryState;
+                _newMemoryState = oldMachine._newMemoryState;
             }
         }
 
@@ -40,9 +40,10 @@ namespace NTM2
             Controller = new FeedForwardController(controllerSize, inputSize, outputSize, headCount, memoryRowsM);
         }
         
-        public void ForwardPropagation(double[] input)
+        public void Process(double[] input)
         {
-            _input = input;
+            _lastInput = input;
+            _oldMemoryState = _newMemoryState;
 
             Controller.ForwardPropagation(input, _oldMemoryState.ReadData);
 
@@ -57,7 +58,7 @@ namespace NTM2
         public void BackwardErrorPropagation(double[] knownOutput)
         {
             _newMemoryState.BackwardErrorPropagation();
-            Controller.BackwardErrorPropagation(knownOutput, _input, _oldMemoryState.ReadData);
+            Controller.BackwardErrorPropagation(knownOutput, _lastInput, _oldMemoryState.ReadData);
         }
 
         public void BackwardErrorPropagation()

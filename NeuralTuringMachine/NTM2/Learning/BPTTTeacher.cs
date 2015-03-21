@@ -20,11 +20,11 @@
             //FORWARD phase
             NeuralTuringMachine originalMachine = new NeuralTuringMachine(_machine, false);
             machines[0] = new NeuralTuringMachine(originalMachine);
-            machines[0].ForwardPropagation(input[0]);
+            machines[0].Process(input[0]);
             for (int i = 1; i < input.Length; i++)
             {
                 machines[i] = new NeuralTuringMachine(machines[i - 1]);
-                machines[i].ForwardPropagation(input[i]);
+                machines[i].Process(input[i]);
             }
 
             //Gradient reset
