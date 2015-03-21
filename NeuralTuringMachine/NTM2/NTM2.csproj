@@ -66,7 +66,7 @@
     <Compile Include="Controller\Unit.cs" />
     <Compile Include="NeuralTuringMachine.cs" />
     <Compile Include="Learning\RMSPropWeightUpdater.cs" />
-    <Compile Include="Controller\TrainableNTM.cs" />
+    <Compile Include="TrainableNTM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

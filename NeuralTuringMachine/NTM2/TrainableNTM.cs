@@ -1,6 +1,6 @@
 ﻿using NTM2.Memory;
 
-namespace NTM2.Controller
+namespace NTM2
 {
     public class TrainableNTM
     {
