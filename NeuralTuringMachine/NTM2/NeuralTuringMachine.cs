@@ -13,6 +13,7 @@ namespace NTM2
         public NeuralTuringMachine(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM)
         {
             MemoryState = new MemoryState(new NTMMemory(memoryColumnsN, memoryRowsM, headCount));
+            MemoryState.DoInitialReading();
             Controller = new FeedForwardController(controllerSize, inputSize, outputSize, headCount, memoryRowsM);
         }
 
@@ -27,10 +28,15 @@ namespace NTM2
             //TODO refactor ... clone also memory state
             return new NeuralTuringMachine(Controller.Clone(), MemoryState);
         }
-        
-        internal void ForwardPropagation(ReadData[] readData, double[] input)
+
+        internal void ForwardPropagation(MemoryState oldMemoryState, double[] input)
         {
-            Controller.ForwardPropagation(input, readData);
+            Controller.ForwardPropagation(input, oldMemoryState.ReadData);
+
+            for (int i = 0; i < MemoryState.Memory.HeadCount; i++)
+            {
+                Controller.OutputLayer.HeadsNeurons[i].OldHeadSettings = oldMemoryState.HeadSettings[i];
+            }
         }
         
         //TODO replace with weight initialization in constructor

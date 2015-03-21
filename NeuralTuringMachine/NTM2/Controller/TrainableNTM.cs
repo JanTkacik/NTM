@@ -14,6 +14,7 @@ namespace NTM2.Controller
         {
             _machine = machine;
             _memoryState = new MemoryState(_machine.MemoryState.Memory);
+            _memoryState.DoInitialReading();
             _oldMemoryState = null;
         }
 
@@ -27,13 +28,7 @@ namespace NTM2.Controller
         {
             _input = input;
             
-            _machine.ForwardPropagation(_oldMemoryState.ReadData, input);
-
-            //TODO refactor
-            for (int i = 0; i < _machine.MemoryState.Memory.HeadCount; i++)
-            {
-                _machine.Controller.OutputLayer.HeadsNeurons[i].OldHeadSettings = _oldMemoryState.HeadSettings[i];
-            }
+            _machine.ForwardPropagation(_oldMemoryState, input);
 
             _memoryState = new MemoryState(_machine.Controller.OutputLayer.HeadsNeurons, _oldMemoryState.Memory);
         }

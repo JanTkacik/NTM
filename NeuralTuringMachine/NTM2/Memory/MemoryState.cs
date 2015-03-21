@@ -7,14 +7,17 @@ namespace NTM2.Memory
     public class MemoryState
     {
         private readonly NTMMemory _memory;
-        private readonly HeadSetting[] _headSettings;
-        private readonly ReadData[] _reads;
-        private readonly ContentAddressing[] _contentAddressings;
+        private HeadSetting[] _headSettings;
+        private ReadData[] _reads;
+        private ContentAddressing[] _contentAddressings;
 
         public MemoryState(NTMMemory memory)
         {
             _memory = memory;
-            //TODO refactor
+        }
+
+        internal void DoInitialReading()
+        {
             _contentAddressings = _memory.GetContentAddressing();
             _headSettings = HeadSetting.GetVector(_memory.HeadCount, i => new Tuple<int, ContentAddressing>(_memory.MemoryColumnsN, _contentAddressings[i]));
             _reads = NTM2.Memory.ReadData.GetVector(_memory.HeadCount, i => new Tuple<HeadSetting, NTMMemory>(_headSettings[i], _memory));
