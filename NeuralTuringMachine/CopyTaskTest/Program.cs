@@ -30,7 +30,6 @@ namespace CopyTaskTest
                 Console.WriteLine(ex.Message);
             }
             
-            
             double[] errors = new double[100];
             long[] times = new long[100];
             for (int i = 0; i < 100; i++)

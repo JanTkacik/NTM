@@ -217,22 +217,7 @@ namespace NTM2.Memory
         {
             return ContentAddressing.GetVector(_headCount, i => _oldSimilarities[i]);
         }
-
-        public void UpdateWeights(Action<Unit> updateAction)
-        {
-            foreach (BetaSimilarity[] betaSimilarities in _oldSimilarities)
-            {
-                foreach (BetaSimilarity betaSimilarity in betaSimilarities)
-                {
-                    updateAction(betaSimilarity.Data);
-                }
-            }
-
-            Action<Unit[][]> tensor2UpdateAction = Unit.GetTensor2UpdateAction(updateAction);
-
-            tensor2UpdateAction(_data);
-        }
-
+        
         public void UpdateWeights(IWeightUpdater weightUpdater)
         {
             foreach (BetaSimilarity[] betaSimilarities in _oldSimilarities)

@@ -1,5 +1,6 @@
 ﻿using System;
 using NTM2.Learning;
+using NTM2.Memory;
 using NTM2.Memory.Addressing;
 
 namespace NTM2.Controller
@@ -49,7 +50,7 @@ namespace NTM2.Controller
             _headUnitSize = headUnitSize;
         }
 
-        public void ForwardPropagation(HiddenLayer hiddenLayer)
+        public void ForwardPropagation(HiddenLayer hiddenLayer, HeadSetting[] oldHeadSettings)
         {
             //Foreach neuron in classic output layer
             for (int i = 0; i < _outputSize; i++)
@@ -87,6 +88,12 @@ namespace NTM2.Controller
                     sum += headWeights[_controllerSize].Value;
                     head[j].Value += sum;
                 }
+            }
+
+            //TODO refactor
+            for (int i = 0; i < _headCount; i++)
+            {
+                HeadsNeurons[i].OldHeadSettings = oldHeadSettings[i];
             }
         }
 

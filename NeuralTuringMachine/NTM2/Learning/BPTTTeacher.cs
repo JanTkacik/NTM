@@ -18,8 +18,8 @@
             NeuralTuringMachine[] machines = new NeuralTuringMachine[input.Length];
 
             //FORWARD phase
-            NeuralTuringMachine originalMachine = new NeuralTuringMachine(_machine, false);
-            machines[0] = new NeuralTuringMachine(originalMachine);
+            _machine.InitializeMemoryState();
+            machines[0] = new NeuralTuringMachine(_machine);
             machines[0].Process(input[0]);
             for (int i = 1; i < input.Length; i++)
             {
@@ -36,7 +36,7 @@
             {
                 machines[i].BackwardErrorPropagation(knownOutput[i]);
             }
-            originalMachine.BackwardErrorPropagation();
+            _machine.BackwardErrorPropagation();
 
             //Weight updates
             _weightUpdater.Reset();

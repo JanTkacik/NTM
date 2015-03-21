@@ -43,21 +43,15 @@ namespace NTM2.Controller
 
         #region Forward propagation
 
-        public void ForwardPropagation(double[] input, ReadData[] readData)
+        public void ForwardPropagation(double[] input, MemoryState memoryState)
         {
-            HiddenLayer.ForwardPropagation(input, readData);
-            OutputLayer.ForwardPropagation(HiddenLayer);
+            HiddenLayer.ForwardPropagation(input, memoryState.ReadData);
+            OutputLayer.ForwardPropagation(HiddenLayer, memoryState.HeadSettings);
         }
 
         #endregion
 
         #region Update weights
-
-        public void UpdateWeights(Action<Unit> updateAction)
-        {
-            OutputLayer.UpdateWeights(updateAction);
-            HiddenLayer.UpdateWeights(updateAction);
-        }
 
         public void UpdateWeights(IWeightUpdater weightUpdater)
         {
