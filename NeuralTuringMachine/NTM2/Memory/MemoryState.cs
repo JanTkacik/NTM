@@ -4,47 +4,37 @@ using NTM2.Memory.Addressing;
 
 namespace NTM2.Memory
 {
-    public class MemoryState
+    internal class MemoryState
     {
         private readonly NTMMemory _memory;
         private HeadSetting[] _headSettings;
         private ReadData[] _reads;
         private ContentAddressing[] _contentAddressings;
 
-        public MemoryState(NTMMemory memory)
+        internal MemoryState(NTMMemory memory)
         {
             _memory = memory;
         }
 
-        internal void DoInitialReading()
-        {
-            _contentAddressings = _memory.GetContentAddressing();
-            _headSettings = HeadSetting.GetVector(_memory.HeadCount, i => new Tuple<int, ContentAddressing>(_memory.MemoryColumnsN, _contentAddressings[i]));
-            _reads = NTM2.Memory.ReadData.GetVector(_memory.HeadCount, i => new Tuple<HeadSetting, NTMMemory>(_headSettings[i], _memory));
-        }
-
-        public MemoryState(NTMMemory memory, HeadSetting[] headSettings, ReadData[] readDatas)
+        internal MemoryState(NTMMemory memory, HeadSetting[] headSettings, ReadData[] readDatas)
         {
             _memory = memory;
             _headSettings = headSettings;
             _reads = readDatas;
         }
 
+        internal void DoInitialReading()
+        {
+            _contentAddressings = _memory.GetContentAddressing();
+            _headSettings = HeadSetting.GetVector(_memory.HeadCount, i => new Tuple<int, ContentAddressing>(_memory.MemoryColumnsN, _contentAddressings[i]));
+            _reads = Memory.ReadData.GetVector(_memory.HeadCount, i => new Tuple<HeadSetting, NTMMemory>(_headSettings[i], _memory));
+        }
+
         public ReadData[] ReadData
         {
             get { return _reads; }
         }
-
-        public HeadSetting[] HeadSettings
-        {
-            get { return _headSettings; }
-        }
-
-        public NTMMemory Memory
-        {
-            get { return _memory; }
-        }
-
+        
         public void BackwardErrorPropagation()
         {
             foreach (ReadData readData in _reads)
@@ -95,7 +85,7 @@ namespace NTM2.Memory
                     similarities[j] = new BetaSimilarity(head.Beta, cosineSimilarity);
                 }
                 ContentAddressing ca = new ContentAddressing(similarities);
-                GatedAddressing ga = new GatedAddressing(head.Gate, ca, HeadSettings[i]);
+                GatedAddressing ga = new GatedAddressing(head.Gate, ca, _headSettings[i]);
                 ShiftedAddressing sa = new ShiftedAddressing(head.Shift, ga);
 
                 newHeadSettings[i] = new HeadSetting(head.Gamma, sa);
