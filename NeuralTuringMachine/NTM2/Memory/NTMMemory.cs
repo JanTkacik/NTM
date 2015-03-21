@@ -1,5 +1,4 @@
-﻿using System;
-using NTM2.Controller;
+﻿using NTM2.Controller;
 using NTM2.Learning;
 using NTM2.Memory.Addressing;
 

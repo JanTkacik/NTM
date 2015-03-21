@@ -4,67 +4,82 @@ using NTM2.Memory;
 
 namespace NTM2
 {
-    public class NeuralTuringMachine
+    //TODO add saving and loading from file
+    public sealed class NeuralTuringMachine
     {
-        internal readonly FeedForwardController Controller;
-        internal readonly NTMMemory Memory;
+        #region Fiels
+        private readonly FeedForwardController _controller;
+        private readonly NTMMemory _memory;
 
         private MemoryState _oldMemoryState;
         private MemoryState _newMemoryState;
 
-        private double[] _lastInput;
+        private double[] _lastInput; 
+        #endregion
+        
+        #region Ctors
 
-        public NeuralTuringMachine(NeuralTuringMachine oldMachine)
+        internal NeuralTuringMachine(NeuralTuringMachine oldMachine)
         {
-            Controller = oldMachine.Controller.Clone();
-            Memory = oldMachine.Memory;
+            _controller = oldMachine._controller.Clone();
+            _memory = oldMachine._memory;
             _newMemoryState = oldMachine._newMemoryState;
             _oldMemoryState = oldMachine._oldMemoryState;
         }
 
         public NeuralTuringMachine(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM, IWeightUpdater initializer)
         {
-            Memory = new NTMMemory(memoryColumnsN, memoryRowsM, headCount);
-            Controller = new FeedForwardController(controllerSize, inputSize, outputSize, headCount, memoryRowsM);
+            _memory = new NTMMemory(memoryColumnsN, memoryRowsM, headCount);
+            _controller = new FeedForwardController(controllerSize, inputSize, outputSize, headCount, memoryRowsM);
             UpdateWeights(initializer);
         }
 
-        internal void InitializeMemoryState()
-        {
-            _newMemoryState = new MemoryState(Memory);
-            _newMemoryState.DoInitialReading();
-            _oldMemoryState = null;
-        }
+        #endregion
+
+        #region Public Methods
 
         public void Process(double[] input)
         {
             _lastInput = input;
             _oldMemoryState = _newMemoryState;
 
-            Controller.ForwardPropagation(input, _oldMemoryState);
-            _newMemoryState = new MemoryState(Controller.OutputLayer.HeadsNeurons, _oldMemoryState.Memory);
-        }
-
-        public void BackwardErrorPropagation(double[] knownOutput)
-        {
-            _newMemoryState.BackwardErrorPropagation();
-            Controller.BackwardErrorPropagation(knownOutput, _lastInput, _oldMemoryState.ReadData);
-        }
-
-        public void BackwardErrorPropagation()
-        {
-            _newMemoryState.BackwardErrorPropagation2();
+            _controller.ForwardPropagation(input, _oldMemoryState);
+            _newMemoryState = new MemoryState(_controller.OutputLayer.HeadsNeurons, _oldMemoryState.Memory);
         }
 
         public double[] GetOutput()
         {
-            return Controller.GetOutput();
+            return _controller.GetOutput();
+        } 
+
+        #endregion
+        
+        #region Internal Methods
+
+        internal void InitializeMemoryState()
+        {
+            _newMemoryState = new MemoryState(_memory);
+            _newMemoryState.DoInitialReading();
+            _oldMemoryState = null;
         }
 
-        public void UpdateWeights(IWeightUpdater weightUpdater)
+        internal void BackwardErrorPropagation(double[] knownOutput)
         {
-            Memory.UpdateWeights(weightUpdater);
-            Controller.UpdateWeights(weightUpdater);
+            _newMemoryState.BackwardErrorPropagation();
+            _controller.BackwardErrorPropagation(knownOutput, _lastInput, _oldMemoryState.ReadData);
         }
+
+        internal void BackwardErrorPropagation()
+        {
+            _newMemoryState.BackwardErrorPropagation2();
+        }
+
+        internal void UpdateWeights(IWeightUpdater weightUpdater)
+        {
+            _memory.UpdateWeights(weightUpdater);
+            _controller.UpdateWeights(weightUpdater);
+        } 
+
+        #endregion
     }
 }

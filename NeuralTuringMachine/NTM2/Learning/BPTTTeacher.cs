@@ -15,6 +15,17 @@
 
         public double[][] Train(double[][] input, double[][] knownOutput)
         {
+            var machines = TrainInternal(input, knownOutput);
+            return GetMachineOutputs(machines);
+        }
+
+        public void TrainFast(double[][] input, double[][] knownOutput)
+        {
+            TrainInternal(input, knownOutput);
+        }
+
+        private NeuralTuringMachine[] TrainInternal(double[][] input, double[][] knownOutput)
+        {
             NeuralTuringMachine[] machines = new NeuralTuringMachine[input.Length];
 
             //FORWARD phase
@@ -41,8 +52,7 @@
             //Weight updates
             _weightUpdater.Reset();
             _machine.UpdateWeights(_weightUpdater);
-            
-            return GetMachineOutputs(machines);
+            return machines;
         }
 
         private double[][] GetMachineOutputs(NeuralTuringMachine[] machines)

@@ -51,7 +51,7 @@ namespace CopyTaskTest
 
             //TODO remove rand
             NeuralTuringMachine machine = new NeuralTuringMachine(vectorSize + 2, vectorSize, controllerSize, headsCount, memoryN, memoryM, new RandomWeightInitializer(rand));
-
+            
             //TODO extract weight count calculation
             int headUnitSize = Head.GetUnitSize(memoryM);
 
