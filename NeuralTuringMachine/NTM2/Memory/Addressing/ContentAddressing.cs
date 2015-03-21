@@ -4,7 +4,7 @@ using NTM2.Controller;
 
 namespace NTM2.Memory.Addressing
 {
-    public class ContentAddressing
+    internal class ContentAddressing
     {
         private readonly BetaSimilarity[] _units;
         private readonly Unit[] _data;

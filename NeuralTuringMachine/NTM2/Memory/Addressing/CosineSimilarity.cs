@@ -3,7 +3,7 @@ using NTM2.Controller;
 
 namespace NTM2.Memory.Addressing
 {
-    public class CosineSimilarity
+    internal class CosineSimilarity
     {
         private readonly Unit[] _u;
         private readonly Unit[] _v;
@@ -13,7 +13,7 @@ namespace NTM2.Memory.Addressing
         private readonly double _normalizedV;
 
         //Implementation of cosine similarity (Page 8, Unit 3.3.1 Focusing by Content)
-        public CosineSimilarity(Unit[] u, Unit[] v)
+        internal CosineSimilarity(Unit[] u, Unit[] v)
         {
             _u = u;
             _v = v;
@@ -34,37 +34,13 @@ namespace NTM2.Memory.Addressing
                 throw new Exception("Cosine similarity is nan -> error");
             }
         }
-
-        public CosineSimilarity()
-        {
-        }
-
-        public Unit Data
+        
+        internal Unit Data
         {
             get { return _data; }
         }
-
-        public static CosineSimilarity[] GetVector(int x)
-        {
-            CosineSimilarity[] vector = new CosineSimilarity[x];
-            for (int i = 0; i < x; i++)
-            {
-                vector[i] = new CosineSimilarity();
-            }
-            return vector;
-        }
-
-        public static CosineSimilarity[][] GetTensor2(int x, int y)
-        {
-            CosineSimilarity[][] tensor = new CosineSimilarity[x][];
-            for (int i = 0; i < x; i++)
-            {
-                tensor[i] = GetVector(y);
-            }
-            return tensor;
-        }
-
-        public void BackwardErrorPropagation()
+        
+        internal void BackwardErrorPropagation()
         {
             double uvuu = _uv/(_normalizedU*_normalizedU);
             double uvvv = _uv/(_normalizedV*_normalizedV);

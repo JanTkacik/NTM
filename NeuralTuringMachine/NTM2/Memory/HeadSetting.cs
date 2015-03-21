@@ -4,7 +4,7 @@ using NTM2.Memory.Addressing;
 
 namespace NTM2.Memory
 {
-    public class HeadSetting
+    internal class HeadSetting
     {
         private readonly Unit[] _data;
         private readonly Unit _gamma;

@@ -72,13 +72,17 @@ namespace NTM2.Memory
 
         internal MemoryState Process(Head[] heads)
         {
-            ReadData[] newReadDatas = new ReadData[heads.Length];
-            HeadSetting[] newHeadSettings = new HeadSetting[heads.Length];
-            for (int i = 0; i < heads.Length; i++)
+            int headCount = heads.Length;
+            int memoryColumnsN = _memory.MemoryColumnsN;
+
+            ReadData[] newReadDatas = new ReadData[headCount];
+            HeadSetting[] newHeadSettings = new HeadSetting[headCount];
+            for (int i = 0; i < headCount; i++)
             {
                 Head head = heads[i];
                 BetaSimilarity[] similarities = new BetaSimilarity[_memory.MemoryColumnsN];
-                for (int j = 0; j < _memory.Data.Length; j++)
+
+                for (int j = 0; j < memoryColumnsN; j++)
                 {
                     Unit[] memoryColumn = _memory.Data[j];
                     CosineSimilarity cosineSimilarity = new CosineSimilarity(head.KeyVector, memoryColumn);

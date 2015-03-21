@@ -4,7 +4,7 @@ using NTM2.Memory.Addressing;
 
 namespace NTM2.Memory
 {
-    public class NTMMemory
+    internal class NTMMemory
     {
         private readonly Unit[][] _data;
         

@@ -3,7 +3,7 @@ using NTM2.Controller;
 
 namespace NTM2.Memory.Addressing
 {
-    public class ShiftedAddressing
+    internal class ShiftedAddressing
     {
         private readonly Unit _shift;
         private readonly double _convolution;

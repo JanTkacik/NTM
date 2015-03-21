@@ -3,7 +3,7 @@ using NTM2.Controller;
 
 namespace NTM2.Memory.Addressing
 {
-    public class BetaSimilarity
+    internal class BetaSimilarity
     {
         private readonly Unit _beta;
         private readonly CosineSimilarity _similarity;

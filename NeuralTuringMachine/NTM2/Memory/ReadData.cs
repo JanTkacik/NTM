@@ -3,7 +3,7 @@ using NTM2.Controller;
 
 namespace NTM2.Memory
 {
-    public class ReadData
+    internal class ReadData
     {
         private readonly HeadSetting _headSettings;
         private readonly NTMMemory _controllerMemory;

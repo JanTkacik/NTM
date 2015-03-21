@@ -2,7 +2,7 @@
 
 namespace NTM2.Memory.Addressing
 {
-    public class GatedAddressing
+    internal class GatedAddressing
     {
         private readonly Unit _gate;
         private readonly ContentAddressing _contentAddressing;
