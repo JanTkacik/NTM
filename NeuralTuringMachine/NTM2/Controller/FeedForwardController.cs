@@ -1,5 +1,4 @@
-﻿using System;
-using NTM2.Learning;
+﻿using NTM2.Learning;
 using NTM2.Memory;
 
 namespace NTM2.Controller
@@ -43,7 +42,7 @@ namespace NTM2.Controller
 
         #region Forward propagation
 
-        public void ForwardPropagation(double[] input, ReadData[] readDatas)
+        public void Process(double[] input, ReadData[] readDatas)
         {
             HiddenLayer.ForwardPropagation(input, readDatas);
             OutputLayer.ForwardPropagation(HiddenLayer);

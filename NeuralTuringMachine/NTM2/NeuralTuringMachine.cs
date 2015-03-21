@@ -1,6 +1,7 @@
 ﻿using NTM2.Controller;
 using NTM2.Learning;
 using NTM2.Memory;
+using NTM2.Memory.Addressing;
 
 namespace NTM2
 {
@@ -43,10 +44,10 @@ namespace NTM2
             _lastInput = input;
             _oldMemoryState = _newMemoryState;
 
-            _controller.ForwardPropagation(input, _oldMemoryState.ReadData);
-            _newMemoryState = new MemoryState(_controller.OutputLayer.HeadsNeurons, _oldMemoryState);
+            _controller.Process(input, _oldMemoryState.ReadData);
+            _newMemoryState = _oldMemoryState.Process(GetHeads());
         }
-
+        
         public double[] GetOutput()
         {
             return _controller.GetOutput();
@@ -55,6 +56,11 @@ namespace NTM2
         #endregion
         
         #region Internal Methods
+        
+        internal Head[] GetHeads()
+        {
+            return _controller.OutputLayer.HeadsNeurons;
+        }
 
         internal void InitializeMemoryState()
         {

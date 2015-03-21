@@ -23,30 +23,11 @@ namespace NTM2.Memory
             _reads = NTM2.Memory.ReadData.GetVector(_memory.HeadCount, i => new Tuple<HeadSetting, NTMMemory>(_headSettings[i], _memory));
         }
 
-        public MemoryState(Head[] heads, MemoryState memoryState)
+        public MemoryState(NTMMemory memory, HeadSetting[] headSettings, ReadData[] readDatas)
         {
-            NTMMemory memory = memoryState.Memory;
-            _reads = new ReadData[heads.Length];
-            _headSettings = new HeadSetting[heads.Length];
-            for (int i = 0; i < heads.Length; i++)
-            {
-                Head head = heads[i];
-                BetaSimilarity[] similarities = new BetaSimilarity[memory.MemoryColumnsN];
-                for (int j = 0; j < memory.Data.Length; j++)
-                {
-                    Unit[] memoryColumn = memory.Data[j];
-                    CosineSimilarity cosineSimilarity = new CosineSimilarity(head.KeyVector, memoryColumn);
-                    similarities[j] = new BetaSimilarity(head.Beta, cosineSimilarity);
-                }
-                ContentAddressing ca = new ContentAddressing(similarities);
-                GatedAddressing ga = new GatedAddressing(head.Gate, ca, memoryState.HeadSettings[i]);
-                ShiftedAddressing sa = new ShiftedAddressing(head.Shift, ga);
-
-                _headSettings[i] = new HeadSetting(head.Gamma, sa);
-                _reads[i] = new ReadData(_headSettings[i], memory);
-            }
-
-            _memory = new NTMMemory(_headSettings, heads, memory);
+            _memory = memory;
+            _headSettings = headSettings;
+            _reads = readDatas;
         }
 
         public ReadData[] ReadData
@@ -97,6 +78,33 @@ namespace NTM2.Memory
                 }
                 _contentAddressings[i].BackwardErrorPropagation();
             }
+        }
+
+        internal MemoryState Process(Head[] heads)
+        {
+            ReadData[] newReadDatas = new ReadData[heads.Length];
+            HeadSetting[] newHeadSettings = new HeadSetting[heads.Length];
+            for (int i = 0; i < heads.Length; i++)
+            {
+                Head head = heads[i];
+                BetaSimilarity[] similarities = new BetaSimilarity[_memory.MemoryColumnsN];
+                for (int j = 0; j < _memory.Data.Length; j++)
+                {
+                    Unit[] memoryColumn = _memory.Data[j];
+                    CosineSimilarity cosineSimilarity = new CosineSimilarity(head.KeyVector, memoryColumn);
+                    similarities[j] = new BetaSimilarity(head.Beta, cosineSimilarity);
+                }
+                ContentAddressing ca = new ContentAddressing(similarities);
+                GatedAddressing ga = new GatedAddressing(head.Gate, ca, HeadSettings[i]);
+                ShiftedAddressing sa = new ShiftedAddressing(head.Shift, ga);
+
+                newHeadSettings[i] = new HeadSetting(head.Gamma, sa);
+                newReadDatas[i] = new ReadData(newHeadSettings[i], _memory);
+            }
+
+            NTMMemory newMemory = new NTMMemory(newHeadSettings, heads, _memory);
+
+            return new MemoryState(newMemory, newHeadSettings, newReadDatas);
         }
     }
 }
