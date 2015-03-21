@@ -8,10 +8,10 @@ namespace NTM2
     public class NeuralTuringMachine
     {
         internal readonly FeedForwardController Controller;
-        internal readonly MemoryState MemoryState;
+        internal readonly NTMMemory Memory;
 
         private readonly MemoryState _oldMemoryState;
-        private MemoryState _memoryStateShit;
+        private MemoryState _newMemoryState;
 
         private double[] _input;
         
@@ -20,24 +20,23 @@ namespace NTM2
             if (!refactorShit)
             {
                 Controller = oldMachine.Controller;
-                MemoryState = oldMachine.MemoryState;
+                Memory = oldMachine.Memory;
 
-                _memoryStateShit = new MemoryState(MemoryState.Memory);
-                _memoryStateShit.DoInitialReading();
+                _newMemoryState = new MemoryState(Memory);
+                _newMemoryState.DoInitialReading();
                 _oldMemoryState = null;
             }
             else
             {
                 Controller = oldMachine.Controller.Clone();
-                MemoryState = oldMachine.MemoryState;
-                _oldMemoryState = oldMachine._memoryStateShit;
+                Memory = oldMachine.Memory;
+                _oldMemoryState = oldMachine._newMemoryState;
             }
         }
 
         public NeuralTuringMachine(int inputSize, int outputSize, int controllerSize, int headCount, int memoryColumnsN, int memoryRowsM)
         {
-            MemoryState = new MemoryState(new NTMMemory(memoryColumnsN, memoryRowsM, headCount));
-            MemoryState.DoInitialReading();
+            Memory = new NTMMemory(memoryColumnsN, memoryRowsM, headCount);
             Controller = new FeedForwardController(controllerSize, inputSize, outputSize, headCount, memoryRowsM);
         }
         
@@ -47,23 +46,23 @@ namespace NTM2
 
             Controller.ForwardPropagation(input, _oldMemoryState.ReadData);
 
-            for (int i = 0; i < MemoryState.Memory.HeadCount; i++)
+            for (int i = 0; i < Memory.HeadCount; i++)
             {
                 Controller.OutputLayer.HeadsNeurons[i].OldHeadSettings = _oldMemoryState.HeadSettings[i];
             }
             
-            _memoryStateShit = new MemoryState(Controller.OutputLayer.HeadsNeurons, _oldMemoryState.Memory);
+            _newMemoryState = new MemoryState(Controller.OutputLayer.HeadsNeurons, _oldMemoryState.Memory);
         }
         
         public void BackwardErrorPropagation(double[] knownOutput)
         {
-            _memoryStateShit.BackwardErrorPropagation();
+            _newMemoryState.BackwardErrorPropagation();
             Controller.BackwardErrorPropagation(knownOutput, _input, _oldMemoryState.ReadData);
         }
 
         public void BackwardErrorPropagation()
         {
-            _memoryStateShit.BackwardErrorPropagation2();
+            _newMemoryState.BackwardErrorPropagation2();
         }
 
         public double[] GetOutput()
@@ -74,13 +73,13 @@ namespace NTM2
         //TODO replace with weight initialization in constructor
         public void UpdateWeights(Action<Unit> updateAction)
         {
-            MemoryState.Memory.UpdateWeights(updateAction);
+            Memory.UpdateWeights(updateAction);
             Controller.UpdateWeights(updateAction);
         }
 
         public void UpdateWeights(IWeightUpdater weightUpdater)
         {
-            MemoryState.Memory.UpdateWeights(weightUpdater);
+            Memory.UpdateWeights(weightUpdater);
             Controller.UpdateWeights(weightUpdater);
         }
     }
