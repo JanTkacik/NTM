@@ -43,8 +43,8 @@ namespace NTM2
             _lastInput = input;
             _oldMemoryState = _newMemoryState;
 
-            _controller.ForwardPropagation(input, _oldMemoryState);
-            _newMemoryState = new MemoryState(_controller.OutputLayer.HeadsNeurons, _oldMemoryState.Memory);
+            _controller.ForwardPropagation(input, _oldMemoryState.ReadData);
+            _newMemoryState = new MemoryState(_controller.OutputLayer.HeadsNeurons, _oldMemoryState);
         }
 
         public double[] GetOutput()

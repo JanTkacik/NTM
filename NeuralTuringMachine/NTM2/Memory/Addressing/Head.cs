@@ -13,10 +13,7 @@ namespace NTM2.Memory.Addressing
         private readonly Unit _shift;
         private readonly Unit _gama;
         private readonly int _memoryRowSize; //M
-        //NEEDED FOR GATE CALCULATION
-        //TODO remove
-        public HeadSetting OldHeadSettings { get; set; }
-
+        
         public Unit[] KeyVector
         {
             get { return _keyVector; }

@@ -23,8 +23,9 @@ namespace NTM2.Memory
             _reads = NTM2.Memory.ReadData.GetVector(_memory.HeadCount, i => new Tuple<HeadSetting, NTMMemory>(_headSettings[i], _memory));
         }
 
-        public MemoryState(Head[] heads, NTMMemory memory)
+        public MemoryState(Head[] heads, MemoryState memoryState)
         {
+            NTMMemory memory = memoryState.Memory;
             _reads = new ReadData[heads.Length];
             _headSettings = new HeadSetting[heads.Length];
             for (int i = 0; i < heads.Length; i++)
@@ -38,7 +39,7 @@ namespace NTM2.Memory
                     similarities[j] = new BetaSimilarity(head.Beta, cosineSimilarity);
                 }
                 ContentAddressing ca = new ContentAddressing(similarities);
-                GatedAddressing ga = new GatedAddressing(head.Gate, ca, head.OldHeadSettings);
+                GatedAddressing ga = new GatedAddressing(head.Gate, ca, memoryState.HeadSettings[i]);
                 ShiftedAddressing sa = new ShiftedAddressing(head.Shift, ga);
 
                 _headSettings[i] = new HeadSetting(head.Gamma, sa);

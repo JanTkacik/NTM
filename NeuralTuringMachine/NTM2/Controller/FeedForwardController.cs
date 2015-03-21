@@ -43,10 +43,10 @@ namespace NTM2.Controller
 
         #region Forward propagation
 
-        public void ForwardPropagation(double[] input, MemoryState memoryState)
+        public void ForwardPropagation(double[] input, ReadData[] readDatas)
         {
-            HiddenLayer.ForwardPropagation(input, memoryState.ReadData);
-            OutputLayer.ForwardPropagation(HiddenLayer, memoryState.HeadSettings);
+            HiddenLayer.ForwardPropagation(input, readDatas);
+            OutputLayer.ForwardPropagation(HiddenLayer);
         }
 
         #endregion
