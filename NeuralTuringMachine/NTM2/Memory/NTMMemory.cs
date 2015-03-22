@@ -18,33 +18,33 @@ namespace NTM2.Memory
         private readonly double[][] _erase;
         private readonly double[][] _add;
 
-        internal readonly int MemoryColumnsN;
-        internal readonly int MemoryRowsM;
+        internal readonly int CellCountN;
+        internal readonly int CellSizeM;
         internal readonly int HeadCount;
 
-        internal NTMMemory(int memoryColumnsN, int memoryRowsM, int headCount)
+        internal NTMMemory(int cellCountN, int cellSizeM, int headCount)
         {
-            MemoryColumnsN = memoryColumnsN;
-            MemoryRowsM = memoryRowsM;
+            CellCountN = cellCountN;
+            CellSizeM = cellSizeM;
             HeadCount = headCount;
-            Data = UnitFactory.GetTensor2(memoryColumnsN, memoryRowsM);
-            _oldSimilarities = BetaSimilarity.GetTensor2(headCount, memoryColumnsN);
+            Data = UnitFactory.GetTensor2(cellCountN, cellSizeM);
+            _oldSimilarities = BetaSimilarity.GetTensor2(headCount, cellCountN);
         }
 
         internal NTMMemory(HeadSetting[] headSettings, Head[] heads, NTMMemory memory)
         {
-            MemoryColumnsN = memory.MemoryColumnsN;
-            MemoryRowsM = memory.MemoryRowsM;
+            CellCountN = memory.CellCountN;
+            CellSizeM = memory.CellSizeM;
             HeadCount = memory.HeadCount;
             HeadSettings = headSettings;
             _heads = heads;
             _oldMemory = memory;
-            Data = UnitFactory.GetTensor2(memory.MemoryColumnsN, memory.MemoryRowsM);
+            Data = UnitFactory.GetTensor2(memory.CellCountN, memory.CellSizeM);
 
             int headsCount = heads.Length;
-            _erase = GetTensor2(headsCount, memory.MemoryRowsM);
-            _add = GetTensor2(headsCount, memory.MemoryRowsM);
-            var erasures = GetTensor2(memory.MemoryColumnsN, memory.MemoryRowsM);
+            _erase = GetTensor2(headsCount, memory.CellSizeM);
+            _add = GetTensor2(headsCount, memory.CellSizeM);
+            var erasures = GetTensor2(memory.CellCountN, memory.CellSizeM);
 
             for (int i = 0; i < headsCount; i++)
             {
@@ -174,9 +174,9 @@ namespace NTM2.Memory
             }
 
             //Gradient memory
-            for (int i = 0; i < _oldMemory.MemoryColumnsN; i++)
+            for (int i = 0; i < _oldMemory.CellCountN; i++)
             {
-                for (int j = 0; j < _oldMemory.MemoryRowsM; j++)
+                for (int j = 0; j < _oldMemory.CellSizeM; j++)
                 {
                     double gradient = 1;
                     for (int q = 0; q < HeadSettings.Length; q++)

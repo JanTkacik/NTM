@@ -95,7 +95,7 @@ namespace NTM2.Controller
 
                 for (int memoryCellIndex = 0; memoryCellIndex < _memoryUnitSizeM; memoryCellIndex++)
                 {
-                    tempSum += headWeights[memoryCellIndex].Value * read.Data[memoryCellIndex].Value;
+                    tempSum += headWeights[memoryCellIndex].Value * read.ReadVector[memoryCellIndex].Value;
                 }
             }
             return tempSum;
@@ -181,9 +181,9 @@ namespace NTM2.Controller
                     Unit[] neuronToHeadReadDataWeights = neuronToReadDataWeights[headIndex];
                     for (int memoryCellIndex = 0; memoryCellIndex < _memoryUnitSizeM; memoryCellIndex++)
                     {
-                        readData.Data[memoryCellIndex].Gradient += hiddenLayerGradient * neuronToHeadReadDataWeights[memoryCellIndex].Value;
+                        readData.ReadVector[memoryCellIndex].Gradient += hiddenLayerGradient * neuronToHeadReadDataWeights[memoryCellIndex].Value;
 
-                        neuronToHeadReadDataWeights[memoryCellIndex].Gradient += hiddenLayerGradient * readData.Data[memoryCellIndex].Value;
+                        neuronToHeadReadDataWeights[memoryCellIndex].Gradient += hiddenLayerGradient * readData.ReadVector[memoryCellIndex].Value;
                     }
                 }
             }

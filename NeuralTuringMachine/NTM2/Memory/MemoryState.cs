@@ -27,7 +27,7 @@ namespace NTM2.Memory
         internal void DoInitialReading()
         {
             _contentAddressings = _memory.GetContentAddressing();
-            _headSettings = HeadSetting.GetVector(_memory.HeadCount, i => new Tuple<int, ContentAddressing>(_memory.MemoryColumnsN, _contentAddressings[i]));
+            _headSettings = HeadSetting.GetVector(_memory.HeadCount, i => new Tuple<int, ContentAddressing>(_memory.CellCountN, _contentAddressings[i]));
             ReadData = Memory.ReadData.GetVector(_memory.HeadCount, i => new Tuple<HeadSetting, NTMMemory>(_headSettings[i], _memory));
         }
         
@@ -69,14 +69,14 @@ namespace NTM2.Memory
         internal MemoryState Process(Head[] heads)
         {
             int headCount = heads.Length;
-            int memoryColumnsN = _memory.MemoryColumnsN;
+            int memoryColumnsN = _memory.CellCountN;
 
             ReadData[] newReadDatas = new ReadData[headCount];
             HeadSetting[] newHeadSettings = new HeadSetting[headCount];
             for (int i = 0; i < headCount; i++)
             {
                 Head head = heads[i];
-                BetaSimilarity[] similarities = new BetaSimilarity[_memory.MemoryColumnsN];
+                BetaSimilarity[] similarities = new BetaSimilarity[_memory.CellCountN];
 
                 for (int j = 0; j < memoryColumnsN; j++)
                 {

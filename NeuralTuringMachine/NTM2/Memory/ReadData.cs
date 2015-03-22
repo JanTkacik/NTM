@@ -5,42 +5,59 @@ namespace NTM2.Memory
 {
     internal class ReadData
     {
-        private readonly HeadSetting _headSettings;
-        private readonly NTMMemory _controllerMemory;
-        private readonly Unit[] _data;
+        internal readonly HeadSetting HeadSetting;
+        internal readonly Unit[] ReadVector;
 
-        public ReadData(HeadSetting headSettings, NTMMemory controllerMemory)
+        private readonly NTMMemory _controllerMemory;
+        private readonly int _cellSize;
+        private readonly int _cellCount;
+
+        internal ReadData(HeadSetting headSetting, NTMMemory controllerMemory)
         {
-            _headSettings = headSettings;
+            HeadSetting = headSetting;
             _controllerMemory = controllerMemory;
-            _data = new Unit[controllerMemory.Data[0].Length];
-            
-            for (int i = 0; i < _data.Length; i++)
+            _cellSize = _controllerMemory.CellSizeM;
+            _cellCount = _controllerMemory.CellCountN;
+
+            ReadVector = new Unit[_cellSize];
+
+            for (int i = 0; i < _cellSize; i++)
             {
                 double temp = 0;
-                for (int j = 0; j < headSettings.AddressingVector.Length; j++)
+                for (int j = 0; j < _cellCount; j++)
                 {
-                    temp += headSettings.AddressingVector[j].Value * controllerMemory.Data[j][i].Value;
+                    temp += headSetting.AddressingVector[j].Value * controllerMemory.Data[j][i].Value;
                     if (double.IsNaN(temp))
                     {
                         throw new Exception("Memory error");
                     }
                 }
-                _data[i] = new Unit(temp);
+                ReadVector[i] = new Unit(temp);
             }
         }
 
-        public Unit[] Data
+        public void BackwardErrorPropagation()
         {
-            get { return _data; }
+            for (int i = 0; i < _cellCount; i++)
+            {
+                double gradient = 0;
+                Unit[] dataVector = _controllerMemory.Data[i];
+                Unit addressingVectorUnit = HeadSetting.AddressingVector[i];
+                for (int j = 0; j < _cellSize; j++)
+                {
+                    double readUnitGradient = ReadVector[j].Gradient;
+                    Unit dataUnit = dataVector[j];
+
+                    gradient += readUnitGradient * dataUnit.Value;
+                    dataUnit.Gradient += readUnitGradient * addressingVectorUnit.Value;
+                }
+                addressingVectorUnit.Gradient += gradient;
+            }
         }
 
-        public HeadSetting HeadSetting
-        {
-            get { return _headSettings; }
-        }
+        #region Factory method
 
-        public static ReadData[] GetVector(int x, Func<int,Tuple<HeadSetting, NTMMemory>> paramGetters)
+        public static ReadData[] GetVector(int x, Func<int, Tuple<HeadSetting, NTMMemory>> paramGetters)
         {
             ReadData[] vector = new ReadData[x];
             for (int i = 0; i < x; i++)
@@ -51,25 +68,7 @@ namespace NTM2.Memory
             return vector;
         }
 
-        public void BackwardErrorPropagation()
-        {
-            for (int i = 0; i < _headSettings.AddressingVector.Length; i++)
-            {
-                double gradient = 0;
-                for (int j = 0; j < _data.Length; j++)
-                {
-                    gradient += _data[j].Gradient*_controllerMemory.Data[i][j].Value;
-                }
-                _headSettings.AddressingVector[i].Gradient += gradient;
-            }
+        #endregion
 
-            for (int i = 0; i < _controllerMemory.Data.Length; i++)
-            {
-                for (int j = 0; j < _controllerMemory.Data[i].Length; j++)
-                {
-                    _controllerMemory.Data[i][j].Gradient += _data[j].Gradient * _headSettings.AddressingVector[i].Value;
-                }
-            }
-        }
     }
 }
