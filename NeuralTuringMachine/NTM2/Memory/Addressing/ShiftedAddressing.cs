@@ -17,7 +17,6 @@ namespace NTM2.Memory.Addressing
             _gatedAddressing = gatedAddressing;
             _data = UnitFactory.GetVector(_gatedAddressing.GatedVector.Length);
 
-            //WTF
             double length = _gatedAddressing.GatedVector.Length;
             double maxShift = ((2*Sigmoid.GetValue(_shift.Value)) - 1);
             _convolution = (maxShift + length) % length;

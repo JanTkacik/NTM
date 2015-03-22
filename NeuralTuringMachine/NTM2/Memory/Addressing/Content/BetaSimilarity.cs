@@ -29,8 +29,11 @@ namespace NTM2.Memory.Addressing.Content
         
         internal void BackwardErrorPropagation()
         {
-            _beta.Gradient += Similarity.Similarity.Value * _b * BetaSimilarityMeasure.Gradient;
-            Similarity.Similarity.Gradient += _b * BetaSimilarityMeasure.Gradient;
+            Unit similarity = Similarity.Similarity;
+            double betaGradient = BetaSimilarityMeasure.Gradient;
+
+            _beta.Gradient += similarity.Value * _b * betaGradient;
+            similarity.Gradient += _b * betaGradient;
         }
 
         #region Factory methods
