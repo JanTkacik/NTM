@@ -17,7 +17,7 @@ namespace NTM2.Memory
         {
             _gamma = gamma;
             _shiftedAddressing = shiftedAddressing;
-            _data = UnitFactory.GetVector(shiftedAddressing.Data.Length);
+            _data = UnitFactory.GetVector(shiftedAddressing.ShiftedVector.Length);
             //NO CLUE IN PAPER HOW TO IMPLEMENT - ONLY RESTRICTION IS THAT IT HAS TO BE LARGER THAN 1
             //(Page 9, Part 3.3.2. Focusing by location)
             _gammaIndex = Math.Log(Math.Exp(gamma.Value) + 1) + 1;
@@ -25,7 +25,7 @@ namespace NTM2.Memory
             double sum = 0;
             for (int i = 0; i < _data.Length; i++){
                 Unit unit = _data[i];
-                unit.Value = Math.Pow(_shiftedAddressing.Data[i].Value, _gammaIndex);
+                unit.Value = Math.Pow(_shiftedAddressing.ShiftedVector[i].Value, _gammaIndex);
                 sum += unit.Value;
             }
 
@@ -72,7 +72,7 @@ namespace NTM2.Memory
         public void BackwardErrorPropagation()
         {
             //TODO replace by constant
-            Unit[] shiftedAddressingData = _shiftedAddressing.Data;
+            Unit[] shiftedAddressingData = _shiftedAddressing.ShiftedVector;
             int shiftedAddressingDataLength = shiftedAddressingData.Length;
 
             for (int i = 0; i < shiftedAddressingDataLength; i++)

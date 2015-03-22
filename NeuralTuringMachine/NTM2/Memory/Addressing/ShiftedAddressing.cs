@@ -7,64 +7,59 @@ namespace NTM2.Memory.Addressing
     {
         private readonly Unit _shift;
         private readonly double _convolution;
-        private readonly GatedAddressing _gatedAddressing;
-        private readonly Unit[] _data;
+        private readonly int _cellCount;
+        private readonly double _simj;
+        private readonly double _oneMinusSimj;
+        
+        internal readonly GatedAddressing GatedAddressing;
+        internal readonly Unit[] ShiftedVector;
 
         //IMPLEMENTATION OF SHIFT - page 9
-        public ShiftedAddressing(Unit shift, GatedAddressing gatedAddressing)
+        internal ShiftedAddressing(Unit shift, GatedAddressing gatedAddressing)
         {
             _shift = shift;
-            _gatedAddressing = gatedAddressing;
-            _data = UnitFactory.GetVector(_gatedAddressing.GatedVector.Length);
-
-            double length = _gatedAddressing.GatedVector.Length;
-            double maxShift = ((2*Sigmoid.GetValue(_shift.Value)) - 1);
-            _convolution = (maxShift + length) % length;
-
-            double simj = 1 - (_convolution - Math.Floor(_convolution));
+            GatedAddressing = gatedAddressing;
+            _cellCount = GatedAddressing.GatedVector.Length;
             
-            int n = _gatedAddressing.GatedVector.Length;
-            for (int i = 0; i < _data.Length; i++)
+            ShiftedVector = UnitFactory.GetVector(_cellCount);
+            double cellCountDbl = _cellCount;
+
+            //Max shift is from range -1 to 1
+            double maxShift = ((2 * Sigmoid.GetValue(_shift.Value)) - 1);
+            _convolution = (maxShift + cellCountDbl) % cellCountDbl;
+
+            _simj = 1 - (_convolution - Math.Floor(_convolution));
+            _oneMinusSimj = (1 - _simj);
+            
+            int convolution = (int)_convolution;
+            
+            for (int i = 0; i < _cellCount; i++)
             {
-                int imj = (i + (int) _convolution) % n;
-                _data[i].Value = (_gatedAddressing.GatedVector[imj].Value*simj) +
-                                 (_gatedAddressing.GatedVector[(imj + 1)%n].Value*(1 - simj));
-                if (_data[i].Value < 0 || double.IsNaN(_data[i].Value))
+                int imj = (i + convolution) % _cellCount;
+                
+                ShiftedVector[i].Value = (GatedAddressing.GatedVector[imj].Value * _simj) +
+                                 (GatedAddressing.GatedVector[(imj + 1) % _cellCount].Value * _oneMinusSimj);
+                if (ShiftedVector[i].Value < 0 || double.IsNaN(ShiftedVector[i].Value))
                 {
                     throw new Exception("Error - weight should not be smaller than zero or nan");
                 }
             }
         }
 
-        public Unit[] Data
-        {
-            get { return _data; }
-        }
-
-        public GatedAddressing GatedAddressing
-        {
-            get { return _gatedAddressing; }
-        }
-
-        public void BackwardErrorPropagation()
+        internal void BackwardErrorPropagation()
         {
             double gradient = 0;
-            int n = _gatedAddressing.GatedVector.Length;
-            for (int i = 0; i < _data.Length; i++)
+            for (int i = 0; i < _cellCount; i++)
             {
-                int imj = (i + ((int)_convolution)) % n;
-                gradient += ((-_gatedAddressing.GatedVector[imj].Value) + _gatedAddressing.GatedVector[(imj + 1)%n].Value) * _data[i].Gradient;
+                int imj = (i + ((int)_convolution)) % _cellCount;
+                gradient += ((-GatedAddressing.GatedVector[imj].Value) + GatedAddressing.GatedVector[(imj + 1) % _cellCount].Value) * ShiftedVector[i].Gradient;
+                int j = (i - ((int)_convolution) + _cellCount) % _cellCount;
+                GatedAddressing.GatedVector[i].Gradient += (ShiftedVector[i].Gradient * _simj) + (ShiftedVector[(j - 1 + _cellCount) % _cellCount].Gradient * _oneMinusSimj);
             }
+            
             double sig = Sigmoid.GetValue(_shift.Value);
             gradient = gradient * 2 * sig * (1 - sig);
             _shift.Gradient += gradient;
-
-            double simj = 1 - (_convolution - Math.Floor(_convolution));
-            for (int i = 0; i < _gatedAddressing.GatedVector.Length; i++)
-            {
-                int j = (i - ((int) _convolution) + n) % n;
-                _gatedAddressing.GatedVector[i].Gradient += (_data[i].Gradient * simj) + (_data[(j-1+n)%n].Gradient * (1-simj));
-            }
         }
     }
 }
