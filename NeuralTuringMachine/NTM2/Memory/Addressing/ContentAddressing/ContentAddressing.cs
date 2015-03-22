@@ -6,44 +6,50 @@ namespace NTM2.Memory.Addressing.ContentAddressing
 {
     internal class ContentAddressing
     {
-        private readonly BetaSimilarity[] _units;
-        private readonly Unit[] _data;
+        internal readonly BetaSimilarity[] BetaSimilarities;
+        internal readonly Unit[] Data;
 
         //Implementation of focusing by content (Page 8, Unit 3.3.1 Focusing by Content)
-        public ContentAddressing(BetaSimilarity[] units)
+        internal ContentAddressing(BetaSimilarity[] betaSimilarities)
         {
-            _units = units;
-            _data = UnitFactory.GetVector(units.Length);
+            BetaSimilarities = betaSimilarities;
+            Data = UnitFactory.GetVector(betaSimilarities.Length);
 
             //Subtracting max increase numerical stability
-            double max = _units.Max(similarity => similarity.BetaSimilarityMeasure.Value);
+            double max = BetaSimilarities.Max(similarity => similarity.BetaSimilarityMeasure.Value);
             double sum = 0;
 
-            for (int i = 0; i < _units.Length; i++)
+            for (int i = 0; i < BetaSimilarities.Length; i++)
             {
-                BetaSimilarity unit = _units[i];
+                BetaSimilarity unit = BetaSimilarities[i];
                 double weight = Math.Exp(unit.BetaSimilarityMeasure.Value - max);
-                _data[i].Value = weight;
+                Data[i].Value = weight;
                 sum += weight;
             }
             
-            foreach (Unit unit in _data)
+            foreach (Unit unit in Data)
             {
                 unit.Value = unit.Value/sum;
             }
         }
 
-        public Unit[] Data
+        internal void BackwardErrorPropagation()
         {
-            get { return _data; }
+            double gradient = 0;
+            foreach (Unit unit in Data)
+            {
+                gradient += unit.Gradient*unit.Value;
+            }
+
+            for (int i = 0; i < Data.Length; i++)
+            {
+                BetaSimilarities[i].BetaSimilarityMeasure.Gradient += (Data[i].Gradient - gradient)*Data[i].Value;
+            }
         }
 
-        public BetaSimilarity[] BetaSimilarities
-        {
-            get { return _units; }
-        }
+        #region Factory method
 
-        public static ContentAddressing[] GetVector(int x, Func<int,BetaSimilarity[]> paramGetter)
+        internal static ContentAddressing[] GetVector(int x, Func<int, BetaSimilarity[]> paramGetter)
         {
             ContentAddressing[] vector = new ContentAddressing[x];
             for (int i = 0; i < x; i++)
@@ -51,20 +57,8 @@ namespace NTM2.Memory.Addressing.ContentAddressing
                 vector[i] = new ContentAddressing(paramGetter(i));
             }
             return vector;
-        }
+        } 
 
-        public void BackwardErrorPropagation()
-        {
-            double gradient = 0;
-            foreach (Unit unit in _data)
-            {
-                gradient += unit.Gradient*unit.Value;
-            }
-
-            for (int i = 0; i < _data.Length; i++)
-            {
-                _units[i].BetaSimilarityMeasure.Gradient += (_data[i].Gradient - gradient)*_data[i].Value;
-            }
-        }
+        #endregion
     }
 }
