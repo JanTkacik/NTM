@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.Serialization;
 using NTM2.Controller;
 
 namespace NTM2.Memory.Addressing.Content
 {
+    [DataContract]
     internal class ContentAddressing
     {
+        [DataMember]
         internal readonly BetaSimilarity[] BetaSimilarities;
+        [DataMember]
         internal readonly Unit[] ContentVector;
 
         //Implementation of focusing by content (Page 8, Unit 3.3.1 Focusing by Content)
@@ -31,6 +35,11 @@ namespace NTM2.Memory.Addressing.Content
             {
                 unit.Value = unit.Value/sum;
             }
+        }
+
+        private ContentAddressing()
+        {
+            
         }
 
         internal void BackwardErrorPropagation()

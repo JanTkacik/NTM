@@ -1,13 +1,17 @@
-﻿using NTM2.Learning;
+﻿using System.Runtime.Serialization;
+using NTM2.Learning;
 using NTM2.Memory;
 
 namespace NTM2.Controller
 {
+    [DataContract]
     class FeedForwardController 
     {
         #region Fields and variables
 
+        [DataMember]
         internal readonly HiddenLayer HiddenLayer;
+        [DataMember]
         internal readonly OutputLayer OutputLayer;
 
         #endregion
@@ -25,7 +29,7 @@ namespace NTM2.Controller
             HiddenLayer = hiddenLayer;
             OutputLayer = outputLayer;
         }
-
+        
         public double[] GetOutput()
         {
             return OutputLayer.GetOutput();

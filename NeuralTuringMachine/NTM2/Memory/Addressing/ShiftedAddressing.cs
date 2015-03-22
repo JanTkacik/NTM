@@ -1,19 +1,30 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using NTM2.Controller;
 
 namespace NTM2.Memory.Addressing
 {
+    [DataContract]
     internal class ShiftedAddressing
     {
+        [DataMember]
         private readonly Unit _shift;
+        [DataMember]
         private readonly Unit[] _gatedVector;
+        [DataMember]
         private readonly int _convolution;
+        [DataMember]
         private readonly int _cellCount;
+        [DataMember]
         private readonly double _simj;
+        [DataMember]
         private readonly double _oneMinusSimj;
+        [DataMember]
         private readonly double _shiftWeight;
-        
+
+        [DataMember]
         internal readonly GatedAddressing GatedAddressing;
+        [DataMember]
         internal readonly Unit[] ShiftedVector;
 
         //IMPLEMENTATION OF SHIFT - page 9
@@ -49,6 +60,11 @@ namespace NTM2.Memory.Addressing
                     throw new Exception("Error - weight should not be smaller than zero or nan");
                 }
             }
+        }
+
+        private ShiftedAddressing()
+        {
+            
         }
 
         internal void BackwardErrorPropagation()

@@ -1,30 +1,42 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using NTM2.Learning;
 using NTM2.Memory;
 
 namespace NTM2.Controller
 {
+    [KnownType(typeof(SigmoidActivationFunction))]
+    [DataContract]
     internal class HiddenLayer
     {
         #region Fields and variables
         
+        [DataMember]
         private readonly IDifferentiableFunction _activationFunction;
 
+        [DataMember]
         private readonly int _controllerSize;
+        [DataMember]
         private readonly int _inputSize;
+        [DataMember]
         private readonly int _headCount;
+        [DataMember]
         private readonly int _memoryUnitSizeM;
 
         //Controller hidden layer threshold weights
+        [DataMember]
         private readonly Unit[] _hiddenLayerThresholds;
 
         //Weights from input to controller
+        [DataMember]
         private readonly Unit[][] _inputToHiddenLayerWeights;
 
         //Weights from read data to controller
+        [DataMember]
         private readonly Unit[][][] _readDataToHiddenLayerWeights;
 
         //Hidden layer weights
+        [DataMember]
         internal readonly Unit[] HiddenLayerNeurons;
 
         #endregion
@@ -56,7 +68,7 @@ namespace NTM2.Controller
             _memoryUnitSizeM = memoryUnitSizeM;
             _activationFunction = activationFunction;
         }
-
+        
         public HiddenLayer Clone()
         {
             return new HiddenLayer(_readDataToHiddenLayerWeights, _inputToHiddenLayerWeights,

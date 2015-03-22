@@ -3,6 +3,7 @@ using NTM2.Controller;
 
 namespace NTM2.Memory.Addressing
 {
+    [Serializable]
     public class Head
     {
         private readonly Unit[] _eraseVector;
@@ -59,6 +60,11 @@ namespace NTM2.Memory.Addressing
             _gate = new Unit();
             _shift = new Unit();
             _gama = new Unit();
+        }
+
+        private Head()
+        {
+            
         }
 
         public static int GetUnitSize(int memoryRowsM)

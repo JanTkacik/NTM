@@ -1,17 +1,26 @@
-﻿using NTM2.Controller;
+﻿using System.Runtime.Serialization;
+using NTM2.Controller;
 using NTM2.Memory.Addressing.Content;
 
 namespace NTM2.Memory.Addressing
 {
+    [DataContract]
     internal class GatedAddressing
     {
+        [DataMember]
         private readonly Unit _gate;
+        [DataMember]
         private readonly HeadSetting _oldHeadSettings;
+        [DataMember]
         internal readonly ContentAddressing ContentVector;
+        [DataMember]
         internal readonly Unit[] GatedVector;
+        [DataMember]
         private readonly int _memoryCellCount;
         //Interpolation gate
+        [DataMember]
         private readonly double _gt;
+        [DataMember]
         private readonly double _oneminusgt;
 
         internal GatedAddressing(Unit gate, ContentAddressing contentAddressing, HeadSetting oldHeadSettings)
@@ -31,6 +40,11 @@ namespace NTM2.Memory.Addressing
             {
                 GatedVector[i].Value = (_gt * contentVector[i].Value) + (_oneminusgt * _oldHeadSettings.AddressingVector[i].Value);
             }
+        }
+
+        private GatedAddressing()
+        {
+            
         }
 
         internal void BackwardErrorPropagation()

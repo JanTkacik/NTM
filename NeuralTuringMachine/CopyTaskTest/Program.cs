@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using NTM2;
 using NTM2.Learning;
@@ -67,6 +68,9 @@ namespace CopyTaskTest
             Console.WriteLine(weightsCount);
 
             RMSPropWeightUpdater rmsPropWeightUpdater = new RMSPropWeightUpdater(weightsCount, 0.95, 0.5, 0.001, 0.001);
+
+            //NeuralTuringMachine machine2 = NeuralTuringMachine.Load(@"NTM2015-03-22T210312");
+
             BPTTTeacher teacher = new BPTTTeacher(machine, rmsPropWeightUpdater);
 
             for (int i = 1; i < 10000; i++)
@@ -95,9 +99,11 @@ namespace CopyTaskTest
                 if (i % 100 == 0)
                 {
                     Console.WriteLine("Iteration: {0}, average error: {1}, iterations per second: {2:0.0}", i, errors.Average(), 1000/times.Average());
+                   
                 }
             }
 
+            machine.Save("NTM"+DateTime.Now.ToString("s").Replace(":",""));
         }
 
         private static double CalculateLogLoss(double[][] knownOutput, double[][] machinesOutput)

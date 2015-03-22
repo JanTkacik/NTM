@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.Serialization;
 
 namespace NTM2.Controller
 {
+    [DataContract]
     class SigmoidActivationFunction : IDifferentiableFunction
     {
+        [DataMember]
         private readonly double _alpha;
 
         public SigmoidActivationFunction(double alpha = 1)

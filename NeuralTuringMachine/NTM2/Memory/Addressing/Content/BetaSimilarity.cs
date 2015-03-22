@@ -1,15 +1,21 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using NTM2.Controller;
 
 namespace NTM2.Memory.Addressing.Content
 {
     //This class implements equation from page 8 - _b i exped to ensure that it will be positive
+    [DataContract]
     internal class BetaSimilarity
     {
+        [DataMember]
         private readonly Unit _beta;
+        [DataMember]
         internal readonly SimilarityMeasure Similarity;
+        [DataMember]
         internal readonly Unit BetaSimilarityMeasure;
         //Key strength beta
+        [DataMember]
         private readonly double _b;
 
         internal BetaSimilarity(Unit beta, SimilarityMeasure similarity)

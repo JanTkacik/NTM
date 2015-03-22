@@ -1,17 +1,21 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
+using System.Runtime.Serialization;
 using NTM2.Controller;
 using NTM2.Memory.Addressing;
 using NTM2.Memory.Addressing.Content;
 
 namespace NTM2.Memory
 {
+    [DataContract]
     internal class MemoryState
     {
+        [DataMember]
         private readonly NTMMemory _memory;
+        [DataMember]
         private HeadSetting[] _headSettings;
+        [DataMember]
         internal ReadData[] ReadData;
+        [DataMember]
         private ContentAddressing[] _contentAddressings;
 
         internal MemoryState(NTMMemory memory)

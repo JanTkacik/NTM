@@ -3,6 +3,7 @@ using NTM2.Controller;
 
 namespace NTM2.Memory.Addressing.Content
 {
+    [Serializable]
     class CosineSimilarityFunction : ISimilarityFunction
     {
         private double _uv;

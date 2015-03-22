@@ -1,27 +1,38 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using NTM2.Learning;
 using NTM2.Memory.Addressing;
 
 namespace NTM2.Controller
 {
+    [DataContract]
     internal class OutputLayer
     {
+        [DataMember]
         private readonly int _outputSize;
+        [DataMember]
         private readonly int _controllerSize;
+        [DataMember]
         private readonly int _headCount;
+        [DataMember]
         private readonly int _memoryUnitSizeM;
+        [DataMember]
         private readonly int _headUnitSize;
 
         //Weights from controller to output
+        [DataMember]
         private readonly Unit[][] _hiddenToOutputLayerWeights;
 
         //Weights from controller to head
+        [DataMember]
         private readonly Unit[][][] _hiddenToHeadsWeights;
         
         //Output layer neurons
+        [DataMember]
         internal readonly Unit[] OutputLayerNeurons;
         
         //Heads neurons
+        [DataMember]
         internal readonly Head[] HeadsNeurons;
 
         public OutputLayer(int outputSize, int controllerSize, int headCount, int memoryUnitSizeM)
@@ -48,7 +59,7 @@ namespace NTM2.Controller
             _memoryUnitSizeM = memoryUnitSizeM;
             _headUnitSize = headUnitSize;
         }
-
+        
         public void ForwardPropagation(HiddenLayer hiddenLayer)
         {
             //Foreach neuron in classic output layer

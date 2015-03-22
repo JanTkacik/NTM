@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace NTM2.Controller
 {
+    [DataContract]
     public class Unit 
     {
+        [DataMember(Name = "V")]
         public double Value;
+        [DataMember(Name = "G")]
         public double Gradient;
         
         public Unit(double value = 0)

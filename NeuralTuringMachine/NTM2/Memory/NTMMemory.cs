@@ -1,25 +1,38 @@
-﻿using NTM2.Controller;
+﻿using System.Runtime.Serialization;
+using NTM2.Controller;
 using NTM2.Learning;
 using NTM2.Memory.Addressing;
 using NTM2.Memory.Addressing.Content;
 
 namespace NTM2.Memory
 {
+    [DataContract]
     internal class NTMMemory
     {
+        [DataMember]
         internal readonly Unit[][] Data;
 
+        [DataMember]
         internal readonly HeadSetting[] HeadSettings;
+
+        [DataMember]
         private readonly Head[] _heads;
 
+        [DataMember]
         private readonly NTMMemory _oldMemory;
+        [DataMember]
         private readonly BetaSimilarity[][] _oldSimilarities;
 
+        [DataMember]
         private readonly double[][] _erase;
+        [DataMember]
         private readonly double[][] _add;
 
+        [DataMember]
         internal readonly int CellCountN;
+        [DataMember]
         internal readonly int CellSizeM;
+        [DataMember]
         internal readonly int HeadCount;
 
         internal NTMMemory(int cellCountN, int cellSizeM, int headCount)

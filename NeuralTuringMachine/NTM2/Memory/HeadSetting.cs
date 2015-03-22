@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using NTM2.Controller;
 using NTM2.Memory.Addressing;
@@ -6,14 +7,21 @@ using NTM2.Memory.Addressing.Content;
 
 namespace NTM2.Memory
 {
+    [DataContract]
     internal class HeadSetting
     {
+        [DataMember]
         internal readonly Unit[] AddressingVector;
+        [DataMember]
         internal readonly ShiftedAddressing ShiftedVector;
 
+        [DataMember]
         private readonly Unit _gamma;
+        [DataMember]
         private readonly double _gammaIndex;
+        [DataMember]
         private readonly int _cellCount;
+        [DataMember]
         private readonly Unit[] _shiftedVector;
 
         internal HeadSetting(Unit gamma, ShiftedAddressing shiftedVector)
@@ -53,6 +61,11 @@ namespace NTM2.Memory
             {
                 AddressingVector[i].Value = contentAddressing.ContentVector[i].Value;
             }
+        }
+
+        private HeadSetting()
+        {
+            
         }
 
         public void BackwardErrorPropagation()

@@ -1,18 +1,24 @@
-﻿using NTM2.Controller;
+﻿using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
+using NTM2.Controller;
 using NTM2.Learning;
 using NTM2.Memory;
 using NTM2.Memory.Addressing;
 
 namespace NTM2
 {
-    //TODO add saving and loading from file
-    public sealed class NeuralTuringMachine
+    [DataContract]
+    public sealed class NeuralTuringMachine : INeuralTuringMachine
     {
         #region Fiels
+        [DataMember(Name = "Controller")]
         private readonly FeedForwardController _controller;
+        [DataMember(Name = "Memory")]
         private readonly NTMMemory _memory;
-
+        [DataMember(Name = "OldMemoryState")]
         private MemoryState _oldMemoryState;
+        [DataMember(Name = "NewMemoryState")]
         private MemoryState _newMemoryState;
 
         private double[] _lastInput; 
@@ -34,7 +40,7 @@ namespace NTM2
             _controller = new FeedForwardController(controllerSize, inputSize, outputSize, headCount, memoryRowsM);
             UpdateWeights(initializer);
         }
-
+        
         #endregion
 
         #region Public Methods
@@ -51,7 +57,35 @@ namespace NTM2
         public double[] GetOutput()
         {
             return _controller.GetOutput();
-        } 
+        }
+
+        public void Save(Stream stream)
+        {
+            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(NeuralTuringMachine));
+            serializer.WriteObject(stream, this);
+        }
+
+        public void Save(string path)
+        {
+            FileStream stream = File.Create(path);
+            Save(stream);
+            stream.Close();
+        }
+
+        public static NeuralTuringMachine Load(string path)
+        {
+            FileStream stream = File.OpenRead(path);
+            NeuralTuringMachine machine = Load(stream);
+            stream.Close();
+            return machine;
+        }
+
+        public static NeuralTuringMachine Load(Stream stream)
+        {
+            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(NeuralTuringMachine));
+            object machine = serializer.ReadObject(stream);
+            return (NeuralTuringMachine)machine;
+        }
 
         #endregion
         

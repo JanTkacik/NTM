@@ -1,15 +1,21 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using NTM2.Controller;
 
 namespace NTM2.Memory
 {
+    [DataContract]
     internal class ReadData
     {
+        [DataMember]
         internal readonly HeadSetting HeadSetting;
+        [DataMember]
         internal readonly Unit[] ReadVector;
-
+        [DataMember]
         private readonly NTMMemory _controllerMemory;
+        [DataMember]
         private readonly int _cellSize;
+        [DataMember]
         private readonly int _cellCount;
 
         internal ReadData(HeadSetting headSetting, NTMMemory controllerMemory)
@@ -34,6 +40,11 @@ namespace NTM2.Memory
                 }
                 ReadVector[i] = new Unit(temp);
             }
+        }
+
+        private ReadData()
+        {
+            
         }
 
         public void BackwardErrorPropagation()
