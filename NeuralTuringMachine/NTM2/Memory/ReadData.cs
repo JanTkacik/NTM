@@ -20,17 +20,17 @@ namespace NTM2.Memory
             _cellCount = _controllerMemory.CellCountN;
 
             ReadVector = new Unit[_cellSize];
-
+            
             for (int i = 0; i < _cellSize; i++)
             {
                 double temp = 0;
                 for (int j = 0; j < _cellCount; j++)
                 {
                     temp += headSetting.AddressingVector[j].Value * controllerMemory.Data[j][i].Value;
-                    if (double.IsNaN(temp))
-                    {
-                        throw new Exception("Memory error");
-                    }
+                    //if (double.IsNaN(temp))
+                    //{
+                    //    throw new Exception("Memory error");
+                    //}
                 }
                 ReadVector[i] = new Unit(temp);
             }

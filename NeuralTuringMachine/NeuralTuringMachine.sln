@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTM2", "NTM2\NTM2.csproj", "{F278510E-04AC-4C11-8CE2-7B561B822070}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CopyTaskTest", "CopyTaskTest\CopyTaskTest.csproj", "{E97783CD-2A6E-474E-96D4-61F134EF4279}"

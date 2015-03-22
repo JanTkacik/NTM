@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using NTM2.Controller;
 using NTM2.Memory.Addressing;
 using NTM2.Memory.Addressing.Content;
@@ -77,13 +79,14 @@ namespace NTM2.Memory
             {
                 Head head = heads[i];
                 BetaSimilarity[] similarities = new BetaSimilarity[_memory.CellCountN];
-
+                
                 for (int j = 0; j < memoryColumnsN; j++)
                 {
                     Unit[] memoryColumn = _memory.Data[j];
                     SimilarityMeasure similarity = new SimilarityMeasure(new CosineSimilarityFunction(), head.KeyVector, memoryColumn);
                     similarities[j] = new BetaSimilarity(head.Beta, similarity);
                 }
+
                 ContentAddressing ca = new ContentAddressing(similarities);
                 GatedAddressing ga = new GatedAddressing(head.Gate, ca, _headSettings[i]);
                 ShiftedAddressing sa = new ShiftedAddressing(head.Shift, ga);

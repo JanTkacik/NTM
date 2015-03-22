@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NTM2.Controller;
 using NTM2.Memory.Addressing;
 using NTM2.Memory.Addressing.Content;
@@ -22,7 +23,7 @@ namespace NTM2.Memory
             _shiftedVector = ShiftedVector.ShiftedVector;
             _cellCount = _shiftedVector.Length;
             AddressingVector = UnitFactory.GetVector(_cellCount);
-            
+
             //NO CLUE IN PAPER HOW TO IMPLEMENT - ONLY RESTRICTION IS THAT IT HAS TO BE LARGER THAN 1
             //(Page 9, Part 3.3.2. Focusing by location)
             _gammaIndex = Math.Log(Math.Exp(gamma.Value) + 1) + 1;
@@ -53,48 +54,55 @@ namespace NTM2.Memory
                 AddressingVector[i].Value = contentAddressing.ContentVector[i].Value;
             }
         }
-        
+
         public void BackwardErrorPropagation()
         {
             double[] lns = new double[_cellCount];
+            double[] temps = new double[_cellCount];
+
             double lnexp = 0;
             double s = 0;
             double gradient2 = 0;
+            
+            Parallel.For(0, _cellCount, ParallelSettings.Options,
+                i =>
+                {
+                    Unit weight = _shiftedVector[i];
+                    double weightValue = weight.Value;
 
+                    if (weightValue < double.Epsilon)
+                    {
+                        return;
+                    }
+                    double gradient = 0;
+                    for (int j = 0; j < _cellCount; j++)
+                    {
+                        Unit dataWeight = AddressingVector[j];
+                        double dataWeightValue = dataWeight.Value;
+                        double dataWeightGradient = dataWeight.Gradient;
+
+                        if (i == j)
+                        {
+                            gradient += dataWeightGradient * (1 - dataWeightValue);
+                        }
+                        else
+                        {
+                            gradient -= dataWeightGradient * dataWeightValue;
+                        }
+                    }
+
+                    gradient = ((gradient * _gammaIndex) / weightValue) * AddressingVector[i].Value;
+                    weight.Gradient += gradient;
+
+                    //******************************************************************
+                    lns[i] = Math.Log(weightValue);
+                    temps[i] = Math.Pow(weightValue, _gammaIndex);
+                });
+            
             for (int i = 0; i < _cellCount; i++)
             {
-                Unit weight = _shiftedVector[i];
-                double weightValue = weight.Value;
-
-                if (weightValue < double.Epsilon)
-                {
-                    continue;
-                }
-                double gradient = 0;
-                for (int j = 0; j < _cellCount; j++)
-                {
-                    Unit dataWeight = AddressingVector[j];
-                    double dataWeightValue = dataWeight.Value;
-                    double dataWeightGradient = dataWeight.Gradient;
-
-                    if (i == j)
-                    {
-                        gradient += dataWeightGradient * (1 - dataWeightValue);
-                    }
-                    else
-                    {
-                        gradient -= dataWeightGradient * dataWeightValue;
-                    }
-                }
-                
-                gradient = ((gradient * _gammaIndex) / weightValue) * AddressingVector[i].Value;
-                weight.Gradient += gradient;
-                
-                //******************************************************************
-                lns[i] = Math.Log(weightValue);
-                double pow = Math.Pow(weightValue, _gammaIndex);
-                lnexp += lns[i] * pow;
-                s += pow;
+                lnexp += lns[i] * temps[i];
+                s += temps[i];
             }
 
             double lnexps = lnexp / s;
@@ -112,6 +120,7 @@ namespace NTM2.Memory
             _gamma.Gradient += gradient2;
         }
 
+
         #region Factory method
 
         public static HeadSetting[] GetVector(int x, Func<int, Tuple<int, ContentAddressing>> paramGetter)
@@ -123,7 +132,7 @@ namespace NTM2.Memory
                 vector[i] = new HeadSetting(parameters.Item1, parameters.Item2);
             }
             return vector;
-        } 
+        }
 
         #endregion
     }
