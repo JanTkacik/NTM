@@ -1,7 +1,7 @@
 ﻿using System;
 using NTM2.Controller;
 
-namespace NTM2.Memory.Addressing.ContentAddressing
+namespace NTM2.Memory.Addressing.Content
 {
     class CosineSimilarityFunction : ISimilarityFunction
     {

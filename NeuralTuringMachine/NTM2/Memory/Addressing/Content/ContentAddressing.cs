@@ -2,18 +2,18 @@
 using System.Linq;
 using NTM2.Controller;
 
-namespace NTM2.Memory.Addressing.ContentAddressing
+namespace NTM2.Memory.Addressing.Content
 {
     internal class ContentAddressing
     {
         internal readonly BetaSimilarity[] BetaSimilarities;
-        internal readonly Unit[] Data;
+        internal readonly Unit[] ContentVector;
 
         //Implementation of focusing by content (Page 8, Unit 3.3.1 Focusing by Content)
         internal ContentAddressing(BetaSimilarity[] betaSimilarities)
         {
             BetaSimilarities = betaSimilarities;
-            Data = UnitFactory.GetVector(betaSimilarities.Length);
+            ContentVector = UnitFactory.GetVector(betaSimilarities.Length);
 
             //Subtracting max increase numerical stability
             double max = BetaSimilarities.Max(similarity => similarity.BetaSimilarityMeasure.Value);
@@ -23,11 +23,11 @@ namespace NTM2.Memory.Addressing.ContentAddressing
             {
                 BetaSimilarity unit = BetaSimilarities[i];
                 double weight = Math.Exp(unit.BetaSimilarityMeasure.Value - max);
-                Data[i].Value = weight;
+                ContentVector[i].Value = weight;
                 sum += weight;
             }
             
-            foreach (Unit unit in Data)
+            foreach (Unit unit in ContentVector)
             {
                 unit.Value = unit.Value/sum;
             }
@@ -36,14 +36,14 @@ namespace NTM2.Memory.Addressing.ContentAddressing
         internal void BackwardErrorPropagation()
         {
             double gradient = 0;
-            foreach (Unit unit in Data)
+            foreach (Unit unit in ContentVector)
             {
                 gradient += unit.Gradient*unit.Value;
             }
 
-            for (int i = 0; i < Data.Length; i++)
+            for (int i = 0; i < ContentVector.Length; i++)
             {
-                BetaSimilarities[i].BetaSimilarityMeasure.Gradient += (Data[i].Gradient - gradient)*Data[i].Value;
+                BetaSimilarities[i].BetaSimilarityMeasure.Gradient += (ContentVector[i].Gradient - gradient)*ContentVector[i].Value;
             }
         }
 

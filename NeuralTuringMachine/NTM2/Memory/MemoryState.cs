@@ -1,7 +1,7 @@
 ﻿using System;
 using NTM2.Controller;
 using NTM2.Memory.Addressing;
-using NTM2.Memory.Addressing.ContentAddressing;
+using NTM2.Memory.Addressing.Content;
 
 namespace NTM2.Memory
 {
@@ -49,8 +49,8 @@ namespace NTM2.Memory
                 headSetting.BackwardErrorPropagation();
                 headSetting.ShiftedAddressing.BackwardErrorPropagation();
                 headSetting.ShiftedAddressing.GatedAddressing.BackwardErrorPropagation();
-                headSetting.ShiftedAddressing.GatedAddressing.ContentAddressing.BackwardErrorPropagation();
-                foreach (BetaSimilarity similarity in headSetting.ShiftedAddressing.GatedAddressing.ContentAddressing.BetaSimilarities)
+                headSetting.ShiftedAddressing.GatedAddressing.ContentVector.BackwardErrorPropagation();
+                foreach (BetaSimilarity similarity in headSetting.ShiftedAddressing.GatedAddressing.ContentVector.BetaSimilarities)
                 {
                     similarity.BackwardErrorPropagation();
                     similarity.Similarity.BackwardErrorPropagation();
@@ -65,7 +65,7 @@ namespace NTM2.Memory
                 _reads[i].BackwardErrorPropagation();
                 for (int j = 0; j < _reads[i].HeadSetting.Data.Length; j++)
                 {
-                    _contentAddressings[i].Data[j].Gradient += _reads[i].HeadSetting.Data[j].Gradient;
+                    _contentAddressings[i].ContentVector[j].Gradient += _reads[i].HeadSetting.Data[j].Gradient;
                 }
                 _contentAddressings[i].BackwardErrorPropagation();
             }

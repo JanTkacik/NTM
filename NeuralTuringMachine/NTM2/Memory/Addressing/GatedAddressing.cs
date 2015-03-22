@@ -1,59 +1,55 @@
 ﻿using NTM2.Controller;
+using NTM2.Memory.Addressing.Content;
 
 namespace NTM2.Memory.Addressing
 {
     internal class GatedAddressing
     {
         private readonly Unit _gate;
-        private readonly ContentAddressing.ContentAddressing _contentAddressing;
         private readonly HeadSetting _oldHeadSettings;
-        private readonly Unit[] _data;
+        internal readonly ContentAddressing ContentVector;
+        internal readonly Unit[] GatedVector;
+        private readonly int _memoryCellCount;
+        //Interpolation gate
+        private readonly double _gt;
+        private readonly double _oneminusgt;
 
-        public GatedAddressing(Unit gate, ContentAddressing.ContentAddressing contentAddressing, HeadSetting oldHeadSettings)
+        internal GatedAddressing(Unit gate, ContentAddressing contentAddressing, HeadSetting oldHeadSettings)
         {
             _gate = gate;
-            _contentAddressing = contentAddressing;
+            ContentVector = contentAddressing;
             _oldHeadSettings = oldHeadSettings;
-            _data = UnitFactory.GetVector(_contentAddressing.Data.Length);
+            Unit[] contentVector = ContentVector.ContentVector;
+            _memoryCellCount = contentVector.Length;
+            GatedVector = UnitFactory.GetVector(_memoryCellCount);
 
             //Implementation of focusing by location - page 8 part 3.3.2. Focusing by Location
-            double g = Sigmoid.GetValue(_gate.Value);
-            for (int i = 0; i < _data.Length; i++)
+            _gt = Sigmoid.GetValue(_gate.Value);
+            _oneminusgt = (1 - _gt);
+
+            for (int i = 0; i < _memoryCellCount; i++)
             {
-                _data[i].Value = (g * _contentAddressing.Data[i].Value) + ((1 - g) * _oldHeadSettings.Data[i].Value);
+                GatedVector[i].Value = (_gt * contentVector[i].Value) + (_oneminusgt * _oldHeadSettings.Data[i].Value);
             }
         }
 
-        public Unit[] Data
+        internal void BackwardErrorPropagation()
         {
-            get { return _data; }
-        }
-
-        public ContentAddressing.ContentAddressing ContentAddressing
-        {
-            get { return _contentAddressing; }
-        }
-
-        public void BackwardErrorPropagation()
-        {
-            double gt = Sigmoid.GetValue(_gate.Value);
+            Unit[] contentVector = ContentVector.ContentVector;
 
             double gradient = 0;
-            for (int i = 0; i < _data.Length; i++)
+            for (int i = 0; i < _memoryCellCount; i++)
             {
-                gradient += (_contentAddressing.Data[i].Value - _oldHeadSettings.Data[i].Value)*_data[i].Gradient;
-            }
-            _gate.Gradient += gradient*gt*(1 - gt);
+                Unit oldHeadSetting = _oldHeadSettings.Data[i];
+                Unit contentVectorItem = contentVector[i];
+                Unit gatedVectorItem = GatedVector[i];
 
-            for (int i = 0; i < _contentAddressing.Data.Length; i++)
-            {
-                _contentAddressing.Data[i].Gradient += gt*_data[i].Gradient;
+                gradient += (contentVectorItem.Value - oldHeadSetting.Value) * gatedVectorItem.Gradient;
+                contentVectorItem.Gradient += _gt * gatedVectorItem.Gradient;
+                oldHeadSetting.Gradient += _oneminusgt * gatedVectorItem.Gradient;
             }
 
-            for (int i = 0; i < _oldHeadSettings.Data.Length; i++)
-            {
-                _oldHeadSettings.Data[i].Gradient += (1 - gt)*_data[i].Gradient;
-            }
+            _gate.Gradient += gradient * _gt * _oneminusgt;
         }
     }
 }

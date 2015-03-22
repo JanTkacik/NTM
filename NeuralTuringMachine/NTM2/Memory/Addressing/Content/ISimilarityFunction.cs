@@ -1,6 +1,6 @@
 ﻿using NTM2.Controller;
 
-namespace NTM2.Memory.Addressing.ContentAddressing
+namespace NTM2.Memory.Addressing.Content
 {
     interface ISimilarityFunction
     {

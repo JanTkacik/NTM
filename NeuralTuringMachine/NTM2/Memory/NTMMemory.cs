@@ -1,7 +1,7 @@
 ﻿using NTM2.Controller;
 using NTM2.Learning;
 using NTM2.Memory.Addressing;
-using NTM2.Memory.Addressing.ContentAddressing;
+using NTM2.Memory.Addressing.Content;
 
 namespace NTM2.Memory
 {

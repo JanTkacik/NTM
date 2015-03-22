@@ -1,7 +1,7 @@
 ﻿using System;
 using NTM2.Controller;
 using NTM2.Memory.Addressing;
-using NTM2.Memory.Addressing.ContentAddressing;
+using NTM2.Memory.Addressing.Content;
 
 namespace NTM2.Memory
 {
@@ -44,7 +44,7 @@ namespace NTM2.Memory
             _data = UnitFactory.GetVector(memoryColumnsN);
             for (int i = 0; i < memoryColumnsN; i++)
             {
-                _data[i].Value = contentAddressing.Data[i].Value;
+                _data[i].Value = contentAddressing.ContentVector[i].Value;
             }
         }
 

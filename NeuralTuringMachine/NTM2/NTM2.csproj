@@ -46,8 +46,8 @@
     <Compile Include="Controller\Sigmoid.cs" />
     <Compile Include="Controller\SigmoidActivationFunction.cs" />
     <Compile Include="Controller\UnitFactory.cs" />
-    <Compile Include="Memory\Addressing\ContentAddressing\CosineSimilarityFunction.cs" />
-    <Compile Include="Memory\Addressing\ContentAddressing\ISimilarityFunction.cs" />
+    <Compile Include="Memory\Addressing\Content\CosineSimilarityFunction.cs" />
+    <Compile Include="Memory\Addressing\Content\ISimilarityFunction.cs" />
     <Compile Include="INeuralTuringMachine.cs" />
     <Compile Include="Learning\BPTTTeacher.cs" />
     <Compile Include="Learning\GradientResetter.cs" />
@@ -55,9 +55,9 @@
     <Compile Include="Learning\IWeightUpdater.cs" />
     <Compile Include="Learning\RandomWeightInitialize.cs" />
     <Compile Include="Learning\WeightUpdaterBase.cs" />
-    <Compile Include="Memory\Addressing\ContentAddressing\BetaSimilarity.cs" />
-    <Compile Include="Memory\Addressing\ContentAddressing\ContentAddressing.cs" />
-    <Compile Include="Memory\Addressing\ContentAddressing\SimilarityMeasure.cs" />
+    <Compile Include="Memory\Addressing\Content\BetaSimilarity.cs" />
+    <Compile Include="Memory\Addressing\Content\ContentAddressing.cs" />
+    <Compile Include="Memory\Addressing\Content\SimilarityMeasure.cs" />
     <Compile Include="Memory\Addressing\GatedAddressing.cs" />
     <Compile Include="Memory\Addressing\ShiftedAddressing.cs" />
     <Compile Include="Memory\MemoryState.cs" />

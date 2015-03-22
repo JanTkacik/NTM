@@ -1,7 +1,7 @@
 ﻿using System;
 using NTM2.Controller;
 
-namespace NTM2.Memory.Addressing.ContentAddressing
+namespace NTM2.Memory.Addressing.Content
 {
     //This class implements equation from page 8 - _b i exped to ensure that it will be positive
     internal class BetaSimilarity
