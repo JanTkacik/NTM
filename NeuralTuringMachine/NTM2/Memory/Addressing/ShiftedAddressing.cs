@@ -6,10 +6,12 @@ namespace NTM2.Memory.Addressing
     internal class ShiftedAddressing
     {
         private readonly Unit _shift;
-        private readonly double _convolution;
+        private readonly Unit[] _gatedVector;
+        private readonly int _convolution;
         private readonly int _cellCount;
         private readonly double _simj;
         private readonly double _oneMinusSimj;
+        private readonly double _shiftWeight;
         
         internal readonly GatedAddressing GatedAddressing;
         internal readonly Unit[] ShiftedVector;
@@ -19,27 +21,30 @@ namespace NTM2.Memory.Addressing
         {
             _shift = shift;
             GatedAddressing = gatedAddressing;
-            _cellCount = GatedAddressing.GatedVector.Length;
+            _gatedVector = GatedAddressing.GatedVector;
+            _cellCount = _gatedVector.Length;
             
             ShiftedVector = UnitFactory.GetVector(_cellCount);
             double cellCountDbl = _cellCount;
 
             //Max shift is from range -1 to 1
-            double maxShift = ((2 * Sigmoid.GetValue(_shift.Value)) - 1);
-            _convolution = (maxShift + cellCountDbl) % cellCountDbl;
+            _shiftWeight = Sigmoid.GetValue(_shift.Value);
+            double maxShift = ((2 * _shiftWeight) - 1);
+            double convolutionDbl = (maxShift + cellCountDbl) % cellCountDbl;
 
-            _simj = 1 - (_convolution - Math.Floor(_convolution));
+            _simj = 1 - (convolutionDbl - Math.Floor(convolutionDbl));
             _oneMinusSimj = (1 - _simj);
-            
-            int convolution = (int)_convolution;
+            _convolution = (int)convolutionDbl;
             
             for (int i = 0; i < _cellCount; i++)
             {
-                int imj = (i + convolution) % _cellCount;
-                
-                ShiftedVector[i].Value = (GatedAddressing.GatedVector[imj].Value * _simj) +
-                                 (GatedAddressing.GatedVector[(imj + 1) % _cellCount].Value * _oneMinusSimj);
-                if (ShiftedVector[i].Value < 0 || double.IsNaN(ShiftedVector[i].Value))
+                int imj = (i + _convolution) % _cellCount;
+
+                Unit vectorItem = ShiftedVector[i];
+
+                vectorItem.Value = (_gatedVector[imj].Value * _simj) +
+                                   (_gatedVector[(imj + 1) % _cellCount].Value * _oneMinusSimj);
+                if (vectorItem.Value < 0 || double.IsNaN(vectorItem.Value))
                 {
                     throw new Exception("Error - weight should not be smaller than zero or nan");
                 }
@@ -51,14 +56,14 @@ namespace NTM2.Memory.Addressing
             double gradient = 0;
             for (int i = 0; i < _cellCount; i++)
             {
-                int imj = (i + ((int)_convolution)) % _cellCount;
-                gradient += ((-GatedAddressing.GatedVector[imj].Value) + GatedAddressing.GatedVector[(imj + 1) % _cellCount].Value) * ShiftedVector[i].Gradient;
-                int j = (i - ((int)_convolution) + _cellCount) % _cellCount;
-                GatedAddressing.GatedVector[i].Gradient += (ShiftedVector[i].Gradient * _simj) + (ShiftedVector[(j - 1 + _cellCount) % _cellCount].Gradient * _oneMinusSimj);
+                Unit vectorItem = ShiftedVector[i];
+                int imj = (i + (_convolution)) % _cellCount;
+                gradient += ((-_gatedVector[imj].Value) + _gatedVector[(imj + 1) % _cellCount].Value) * vectorItem.Gradient;
+                int j = (i - (_convolution) + _cellCount) % _cellCount;
+                _gatedVector[i].Gradient += (vectorItem.Gradient * _simj) + (ShiftedVector[(j - 1 + _cellCount) % _cellCount].Gradient * _oneMinusSimj);
             }
-            
-            double sig = Sigmoid.GetValue(_shift.Value);
-            gradient = gradient * 2 * sig * (1 - sig);
+
+            gradient = gradient * 2 * _shiftWeight * (1 - _shiftWeight);
             _shift.Gradient += gradient;
         }
     }
