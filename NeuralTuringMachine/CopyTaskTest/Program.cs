@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using NTM2;
 using NTM2.Learning;
 using NTM2.Memory.Addressing;

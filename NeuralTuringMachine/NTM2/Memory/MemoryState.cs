@@ -9,7 +9,7 @@ namespace NTM2.Memory
     {
         private readonly NTMMemory _memory;
         private HeadSetting[] _headSettings;
-        private ReadData[] _reads;
+        internal ReadData[] ReadData;
         private ContentAddressing[] _contentAddressings;
 
         internal MemoryState(NTMMemory memory)
@@ -21,24 +21,19 @@ namespace NTM2.Memory
         {
             _memory = memory;
             _headSettings = headSettings;
-            _reads = readDatas;
+            ReadData = readDatas;
         }
 
         internal void DoInitialReading()
         {
             _contentAddressings = _memory.GetContentAddressing();
             _headSettings = HeadSetting.GetVector(_memory.HeadCount, i => new Tuple<int, ContentAddressing>(_memory.MemoryColumnsN, _contentAddressings[i]));
-            _reads = Memory.ReadData.GetVector(_memory.HeadCount, i => new Tuple<HeadSetting, NTMMemory>(_headSettings[i], _memory));
-        }
-
-        public ReadData[] ReadData
-        {
-            get { return _reads; }
+            ReadData = Memory.ReadData.GetVector(_memory.HeadCount, i => new Tuple<HeadSetting, NTMMemory>(_headSettings[i], _memory));
         }
         
-        public void BackwardErrorPropagation()
+        internal void BackwardErrorPropagation()
         {
-            foreach (ReadData readData in _reads)
+            foreach (ReadData readData in ReadData)
             {
                 readData.BackwardErrorPropagation();
             }
@@ -47,10 +42,10 @@ namespace NTM2.Memory
             foreach (HeadSetting headSetting in _memory.HeadSettings)
             {
                 headSetting.BackwardErrorPropagation();
-                headSetting.ShiftedAddressing.BackwardErrorPropagation();
-                headSetting.ShiftedAddressing.GatedAddressing.BackwardErrorPropagation();
-                headSetting.ShiftedAddressing.GatedAddressing.ContentVector.BackwardErrorPropagation();
-                foreach (BetaSimilarity similarity in headSetting.ShiftedAddressing.GatedAddressing.ContentVector.BetaSimilarities)
+                headSetting.ShiftedVector.BackwardErrorPropagation();
+                headSetting.ShiftedVector.GatedAddressing.BackwardErrorPropagation();
+                headSetting.ShiftedVector.GatedAddressing.ContentVector.BackwardErrorPropagation();
+                foreach (BetaSimilarity similarity in headSetting.ShiftedVector.GatedAddressing.ContentVector.BetaSimilarities)
                 {
                     similarity.BackwardErrorPropagation();
                     similarity.Similarity.BackwardErrorPropagation();
@@ -58,14 +53,14 @@ namespace NTM2.Memory
             }
         }
 
-        public void BackwardErrorPropagation2()
+        internal void BackwardErrorPropagation2()
         {
-            for (int i = 0; i < _reads.Length; i++)
+            for (int i = 0; i < ReadData.Length; i++)
             {
-                _reads[i].BackwardErrorPropagation();
-                for (int j = 0; j < _reads[i].HeadSetting.Data.Length; j++)
+                ReadData[i].BackwardErrorPropagation();
+                for (int j = 0; j < ReadData[i].HeadSetting.AddressingVector.Length; j++)
                 {
-                    _contentAddressings[i].ContentVector[j].Gradient += _reads[i].HeadSetting.Data[j].Gradient;
+                    _contentAddressings[i].ContentVector[j].Gradient += ReadData[i].HeadSetting.AddressingVector[j].Gradient;
                 }
                 _contentAddressings[i].BackwardErrorPropagation();
             }

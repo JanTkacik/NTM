@@ -29,7 +29,7 @@ namespace NTM2.Memory.Addressing
 
             for (int i = 0; i < _memoryCellCount; i++)
             {
-                GatedVector[i].Value = (_gt * contentVector[i].Value) + (_oneminusgt * _oldHeadSettings.Data[i].Value);
+                GatedVector[i].Value = (_gt * contentVector[i].Value) + (_oneminusgt * _oldHeadSettings.AddressingVector[i].Value);
             }
         }
 
@@ -40,7 +40,7 @@ namespace NTM2.Memory.Addressing
             double gradient = 0;
             for (int i = 0; i < _memoryCellCount; i++)
             {
-                Unit oldHeadSetting = _oldHeadSettings.Data[i];
+                Unit oldHeadSetting = _oldHeadSettings.AddressingVector[i];
                 Unit contentVectorItem = contentVector[i];
                 Unit gatedVectorItem = GatedVector[i];
 

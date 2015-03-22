@@ -18,9 +18,9 @@ namespace NTM2.Memory
             for (int i = 0; i < _data.Length; i++)
             {
                 double temp = 0;
-                for (int j = 0; j < headSettings.Data.Length; j++)
+                for (int j = 0; j < headSettings.AddressingVector.Length; j++)
                 {
-                    temp += headSettings.Data[j].Value * controllerMemory.Data[j][i].Value;
+                    temp += headSettings.AddressingVector[j].Value * controllerMemory.Data[j][i].Value;
                     if (double.IsNaN(temp))
                     {
                         throw new Exception("Memory error");
@@ -53,21 +53,21 @@ namespace NTM2.Memory
 
         public void BackwardErrorPropagation()
         {
-            for (int i = 0; i < _headSettings.Data.Length; i++)
+            for (int i = 0; i < _headSettings.AddressingVector.Length; i++)
             {
                 double gradient = 0;
                 for (int j = 0; j < _data.Length; j++)
                 {
                     gradient += _data[j].Gradient*_controllerMemory.Data[i][j].Value;
                 }
-                _headSettings.Data[i].Gradient += gradient;
+                _headSettings.AddressingVector[i].Gradient += gradient;
             }
 
             for (int i = 0; i < _controllerMemory.Data.Length; i++)
             {
                 for (int j = 0; j < _controllerMemory.Data[i].Length; j++)
                 {
-                    _controllerMemory.Data[i][j].Gradient += _data[j].Gradient * _headSettings.Data[i].Value;
+                    _controllerMemory.Data[i][j].Gradient += _data[j].Gradient * _headSettings.AddressingVector[i].Value;
                 }
             }
         }

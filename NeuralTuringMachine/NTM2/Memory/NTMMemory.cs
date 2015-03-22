@@ -71,8 +71,8 @@ namespace NTM2.Memory
                     for (int k = 0; k < HeadSettings.Length; k++)
                     {
                         HeadSetting headSetting = HeadSettings[k];
-                        erase *= (1 - (headSetting.Data[i].Value*_erase[k][j]));
-                        add += headSetting.Data[i].Value*_add[k][j];
+                        erase *= (1 - (headSetting.AddressingVector[i].Value*_erase[k][j]));
+                        add += headSetting.AddressingVector[i].Value*_add[k][j];
                     }
                     erasure[j] = erase;
                     row[j].Value += (erase*oldCell.Value) + add;
@@ -114,11 +114,11 @@ namespace NTM2.Memory
                                 continue; 
                             }
                             HeadSetting setting = HeadSettings[q];
-                            oldDataValue *= (1 - (setting.Data[j].Value*_erase[q][k]));
+                            oldDataValue *= (1 - (setting.AddressingVector[j].Value*_erase[q][k]));
                         }
                         gradient += ((oldDataValue*(-erase[k])) + add[k])*data.Gradient;
                     }
-                    headSetting.Data[j].Gradient += gradient;
+                    headSetting.AddressingVector[j].Gradient += gradient;
                 }
             }
 
@@ -143,9 +143,9 @@ namespace NTM2.Memory
                             {
                                 continue;
                             }
-                            gradientErase *= 1 - (HeadSettings[q].Data[j].Value * _erase[q][i]);
+                            gradientErase *= 1 - (HeadSettings[q].AddressingVector[j].Value * _erase[q][i]);
                         }
-                        gradient += row[i].Gradient * gradientErase * (-headSetting.Data[j].Value);
+                        gradient += row[i].Gradient * gradientErase * (-headSetting.AddressingVector[j].Value);
                     }
                     double e = erase[i];
                     head.EraseVector[i].Gradient += gradient * e * (1 - e);
@@ -166,7 +166,7 @@ namespace NTM2.Memory
                     for (int j = 0; j < Data.Length; j++)
                     {
                         Unit[] row = Data[j];
-                        gradient += row[i].Gradient*headSetting.Data[j].Value;
+                        gradient += row[i].Gradient*headSetting.AddressingVector[j].Value;
                     }
                     double a = add[i];
                     addVector[i].Gradient += gradient * a * (1 - a);
@@ -181,7 +181,7 @@ namespace NTM2.Memory
                     double gradient = 1;
                     for (int q = 0; q < HeadSettings.Length; q++)
                     {
-                        gradient *= 1 - (HeadSettings[q].Data[i].Value*_erase[q][j]);
+                        gradient *= 1 - (HeadSettings[q].AddressingVector[i].Value*_erase[q][j]);
                     }
                     _oldMemory.Data[i][j].Gradient += gradient*Data[i][j].Gradient;
                 }
