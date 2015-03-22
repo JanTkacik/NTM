@@ -16,13 +16,13 @@ namespace NTM2.Memory.Addressing.ContentAddressing
             _data = UnitFactory.GetVector(units.Length);
 
             //Subtracting max increase numerical stability
-            double max = _units.Max(similarity => similarity.Data.Value);
+            double max = _units.Max(similarity => similarity.BetaSimilarityMeasure.Value);
             double sum = 0;
 
             for (int i = 0; i < _units.Length; i++)
             {
                 BetaSimilarity unit = _units[i];
-                double weight = Math.Exp(unit.Data.Value - max);
+                double weight = Math.Exp(unit.BetaSimilarityMeasure.Value - max);
                 _data[i].Value = weight;
                 sum += weight;
             }
@@ -63,7 +63,7 @@ namespace NTM2.Memory.Addressing.ContentAddressing
 
             for (int i = 0; i < _data.Length; i++)
             {
-                _units[i].Data.Gradient += (_data[i].Gradient - gradient)*_data[i].Value;
+                _units[i].BetaSimilarityMeasure.Gradient += (_data[i].Gradient - gradient)*_data[i].Value;
             }
         }
     }

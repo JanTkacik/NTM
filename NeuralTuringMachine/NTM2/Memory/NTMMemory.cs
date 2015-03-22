@@ -199,7 +199,7 @@ namespace NTM2.Memory
             {
                 foreach (BetaSimilarity betaSimilarity in betaSimilarities)
                 {
-                    weightUpdater.UpdateWeight(betaSimilarity.Data);
+                    weightUpdater.UpdateWeight(betaSimilarity.BetaSimilarityMeasure);
                 }
             }
 

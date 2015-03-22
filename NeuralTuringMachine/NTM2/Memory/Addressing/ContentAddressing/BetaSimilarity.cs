@@ -3,38 +3,39 @@ using NTM2.Controller;
 
 namespace NTM2.Memory.Addressing.ContentAddressing
 {
+    //This class implements equation from page 8 - _b i exped to ensure that it will be positive
     internal class BetaSimilarity
     {
         private readonly Unit _beta;
-        private readonly SimilarityMeasure _similarity;
-        private readonly Unit _data;
+        internal readonly SimilarityMeasure Similarity;
+        internal readonly Unit BetaSimilarityMeasure;
+        //Key strength beta
         private readonly double _b;
 
-        public BetaSimilarity(Unit beta, SimilarityMeasure similarity)
+        internal BetaSimilarity(Unit beta, SimilarityMeasure similarity)
         {
             _beta = beta;
-            _similarity = similarity;
+            Similarity = similarity;
+            //Ensuring that beta will be positive
             _b = Math.Exp(_beta.Value);
-            _data = new Unit(_b * _similarity.Similarity.Value);
+            BetaSimilarityMeasure = new Unit(_b * Similarity.Similarity.Value);
         }
 
-        public BetaSimilarity()
+        internal BetaSimilarity()
         {
             _beta = new Unit();
-            _data = new Unit();
+            BetaSimilarityMeasure = new Unit();
         }
         
-        public Unit Data
+        internal void BackwardErrorPropagation()
         {
-            get { return _data; }
+            _beta.Gradient += Similarity.Similarity.Value * _b * BetaSimilarityMeasure.Gradient;
+            Similarity.Similarity.Gradient += _b * BetaSimilarityMeasure.Gradient;
         }
 
-        public SimilarityMeasure Similarity
-        {
-            get { return _similarity; }
-        }
+        #region Factory methods
 
-        public static BetaSimilarity[][] GetTensor2(int x, int y)
+        internal static BetaSimilarity[][] GetTensor2(int x, int y)
         {
             BetaSimilarity[][] tensor = new BetaSimilarity[x][];
             for (int i = 0; i < x; i++)
@@ -44,7 +45,7 @@ namespace NTM2.Memory.Addressing.ContentAddressing
             return tensor;
         }
 
-        public static BetaSimilarity[] GetVector(int x)
+        internal static BetaSimilarity[] GetVector(int x)
         {
             BetaSimilarity[] vector = new BetaSimilarity[x];
             for (int i = 0; i < x; i++)
@@ -52,12 +53,8 @@ namespace NTM2.Memory.Addressing.ContentAddressing
                 vector[i] = new BetaSimilarity();
             }
             return vector;
-        }
+        } 
 
-        public void BackwardErrorPropagation()
-        {
-            _beta.Gradient += _similarity.Similarity.Value*_b*_data.Gradient;
-            _similarity.Similarity.Gradient += _b*_data.Gradient;
-        }
+        #endregion
     }
 }
