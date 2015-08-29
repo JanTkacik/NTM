@@ -13,6 +13,14 @@
             _gradientResetter = new GradientResetter();
         }
 
+        public double[][] TrainVerbose(double[][] input, double[][] knownOutput, out double[][] headAddressings)
+        {
+            var machines = TrainInternal(input, knownOutput);
+            headAddressings = GetHeadAddressings(machines);
+            return GetMachineOutputs(machines);
+        }
+
+
         public double[][] Train(double[][] input, double[][] knownOutput)
         {
             var machines = TrainInternal(input, knownOutput);
@@ -64,6 +72,17 @@
                 realOutputs[i] = machine.GetOutput();
             }
             return realOutputs;
+        }
+
+        private double[][] GetHeadAddressings(NeuralTuringMachine[] machines)
+        {
+            double[][] headAddressings = new double[machines.Length][];
+            for (int i = 0; i < machines.Length; i++)
+            {
+                NeuralTuringMachine machine = machines[i];
+                headAddressings[i] = machine.GetHeadAdressings();
+            }
+            return headAddressings;
         }
     }
 }

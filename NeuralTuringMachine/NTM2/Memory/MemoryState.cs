@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.Serialization;
 using NTM2.Controller;
 using NTM2.Memory.Addressing;
@@ -102,6 +103,12 @@ namespace NTM2.Memory
             NTMMemory newMemory = new NTMMemory(newHeadSettings, heads, _memory);
 
             return new MemoryState(newMemory, newHeadSettings, newReadDatas);
+        }
+
+        public double[] GetHeadAdressings()
+        {
+            double[] headAddressings = _headSettings[0].AddressingVector.Select(unit => unit.Value).ToArray();
+            return headAddressings;
         }
     }
 }

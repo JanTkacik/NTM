@@ -114,12 +114,18 @@ namespace NTM2
             _newMemoryState.BackwardErrorPropagation2();
         }
 
-        internal void UpdateWeights(IWeightUpdater weightUpdater)
+        public void UpdateWeights(IWeightUpdater weightUpdater)
         {
             _memory.UpdateWeights(weightUpdater);
             _controller.UpdateWeights(weightUpdater);
         } 
 
         #endregion
+
+        public double[] GetHeadAdressings()
+        {
+            return _newMemoryState.GetHeadAdressings();
+        }
+
     }
 }

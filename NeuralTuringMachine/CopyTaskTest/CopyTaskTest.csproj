@@ -42,14 +42,19 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="YoVisionClient">
+    <Reference Include="YoVisionClient, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\3rdPartyLibs\YoVisionClient.dll</HintPath>
     </Reference>
-    <Reference Include="YoVisionCore">
+    <Reference Include="YoVisionCore, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\3rdPartyLibs\YoVisionCore.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AverageMachineWeightUpdater.cs" />
+    <Compile Include="CopyMachine.cs" />
+    <Compile Include="LearningTask.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SequenceGenerator.cs" />

@@ -14,7 +14,7 @@ namespace CopyTaskTest
                 data[i] = new double[vectorSize];
                 for (int j = 0; j < vectorSize; j++)
                 {
-                    data[i][j] = Rand.Next(0, 2);
+                    data[i][j] = (Rand.Next(0, 2) * 2) - 1;
                 }
             }
 
@@ -26,6 +26,11 @@ namespace CopyTaskTest
             for (int i = 0; i < sequenceLength; i++)
             {
                 input[i] = new double[inputVectorSize];
+                for (int j = 0; j < inputVectorSize; j++)
+                {
+                    input[i][j] = -1;
+                }
+
                 if (i == 0)
                 {
                     input[i][vectorSize] = 1;
@@ -51,7 +56,7 @@ namespace CopyTaskTest
                 {
                     for (int j = 0; j < vectorSize; j++)
                     {
-                        output[i][j] = data[i - (length + 2)][j];
+                        output[i][j] = (data[i - (length + 2)][j] + 1) / 2;
                     }
                 }
             }
